@@ -5,15 +5,14 @@ import {getDatabase} from "firebase/database"
 import {getStorage} from "firebase/storage"
 import {getAuth} from '@firebase/auth'
 
-import config from "./config"
 
 const firebaseConfig = {
-  apiKey: config.firebase.apiKey,
-  authDomain: config.firebase.authDomain,
-  projectId: config.firebase.projectId,
-  storageBucket: config.firebase.storageBucket,
-  messagingSenderId: config.firebase.messagingSenderId,
-  appId: config.firebase.appId
+  apiKey:"AIzaSyBUeL6s9MCZ3nH_qnpSJXGw3Z38oiCQe-U",
+  authDomain: "restaurants-db-dee75.firebaseapp.com",
+  projectId:  "restaurants-db-dee75",
+  storageBucket: "restaurants-db-dee75.appspot.com",
+  messagingSenderId: "343568497668",
+  appId:  "1:343568497668:web:f4852a9a39cd7009bd4951"
 };
 
 // Initialize Firebase

@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "Flavr",
-    "slug": "Flavr",
+    "name": "Rate My Food",
+    "slug": "Rate My Food",
     "privacy": "public",
     "description": "Interactive Menu",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/burgerlogo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -28,7 +28,7 @@
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/icon.png"
     }
   }
 }

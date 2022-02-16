@@ -14,11 +14,14 @@ import Icon from 'react-native-vector-icons/Feather'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Link } from '@react-navigation/native';
 
-
+import { useLinkTo } from '@react-navigation/native';
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 
 function FoodScreen({ navigation }) {
+
+
+  const linkTo = useLinkTo();
   const tookPicture = useSelector(state => state.foodImage)
   const [image, setImage] = useState(tookPicture)
   const [loading, setLoading] = useState(false)
@@ -116,7 +119,7 @@ function FoodScreen({ navigation }) {
       [
         {
           text: "Yes",
-          onPress: () => { upvote(upvotes), navigation.navigate("RatingFood") }
+          onPress: () => { upvote(upvotes), linkTo(`/RatingFood/${restaurantId}/${foodItemId}`)  }
         },
         {
           text: "No",
@@ -153,10 +156,10 @@ function FoodScreen({ navigation }) {
         </View>
         <View style={{ margin: 10, flex: 1 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={[styles.headerText, { fontSize: 40, maxWidth: "90%" }]}>{food}</Text>
+            <Text style={[styles.headerText, { fontSize: 35, maxWidth: "85%" }]}>{food}</Text>
             <View style={{ justifyContent: 'center', alignSelf: 'flex-end', right: 10 }}>
               {Platform.OS === 'web' ?
-                <TouchableOpacity style={{ alignSelf: 'center', }} onPress={()=> {upvote(upvotes), navigation.navigate("RatingFood")}}>
+                <TouchableOpacity style={{ alignSelf: 'center', }} onPress={()=> {upvote(upvotes), linkTo(`/RatingFood/${restaurantId}/${foodItemId}`)}}>
                   <Icon color={restaurantColor} size={35} name="triangle" />
                 </TouchableOpacity>
                 :
@@ -175,7 +178,7 @@ function FoodScreen({ navigation }) {
 
           <View style={{ margin: 20, justifyContent: 'center', }}>
             <Text style={{ alignSelf: 'center' }}>{eatagain}%: would eat again</Text>
-            <Button onPress={() => { navigation.navigate("RatingFood") }} buttonStyle={[styles.button, { backgroundColor: restaurantColor, marginHorizontal: 40 }]} titleStyle={styles.buttonTitle} title="Rate my Food" />
+            <Button onPress={() => { linkTo(`/RatingFood/${restaurantId}/${foodItemId}`) }} buttonStyle={[styles.button, { backgroundColor: restaurantColor, marginHorizontal: 40 }]} titleStyle={styles.buttonTitle} title="Rate my Food" />
           </View>
           <Text style={styles.subHeaderText}>Food Ratings: </Text>
           <FlatList

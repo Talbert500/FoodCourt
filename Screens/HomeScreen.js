@@ -15,15 +15,19 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { Link } from '@react-navigation/native';
 import HomeScreenWeb from './web/HomeScreenWeb';
 import LottieView from 'lottie-react-native';
+import { useLinkTo } from '@react-navigation/native';
+
 
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 
 
 function HomeScreen({ navigation }) {
+  const linkTo = useLinkTo();
 
   const dispatch = useDispatch();
   const [refreshing, setRefreshing] = useState(false);
+  const [restaurantsId, setRestaurantsId] = useState("")
   const [text, onChangeText] = useState("")
   const restCollectionRef = collection(db, "restaurants")
 
@@ -42,11 +46,7 @@ function HomeScreen({ navigation }) {
   }
 
   useEffect(() => {
-    const getRest = async () => {
-      const data = await getDocs(restCollectionRef);
-      setRestaurants(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
-      setFiltered(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
-    }
+    console.log(process.env.API_KEY)
     getRest()
     dispatch(setFoodItemImage("null"))
 
@@ -54,12 +54,15 @@ function HomeScreen({ navigation }) {
 
 
   const ItemView = ({ item }) => {
+
     return (
       <TouchableOpacity
         onPress={() => {
+          setRestaurantsId(item.restaurant_id)
           dispatch(setSearchedRestaurant(item.restaurant_name, item.restaurant_desc, item.restaurant_address, item.restaurant_phone, item.restaurant_id, item.restaurant_color)),
             onChangeText(item.restaurant_name),
-            navigation.navigate("RestaurantMenu")
+            linkTo(`/RestaurantMenu/${item.restaurant_id}`)
+            // navigation.navigate("RestaurantMenu")
 
         }
         }>
@@ -118,11 +121,14 @@ function HomeScreen({ navigation }) {
         paddingHorizontal: Platform.OS === 'ios' ? "10%" : "30%",
         paddingTop: "10%"
       }}>
-          {/* <LottieView
+        {/* <LottieView
             style={{ width: 200, height: 200 }}
             source={require("../lf20_05ctr4vr.json")}
             autoPlay
           /> */}
+          <Text>
+            {process.env.API_KEY}
+          </Text>
         <Image
           style={[styles.shadowProp, {
             width: 125, height: 125, shadowColor: '#171717',
@@ -141,8 +147,6 @@ function HomeScreen({ navigation }) {
         </View>
         {/*GET LOCATION OF USER */}
         <Text style={{ fontSize: 15, textAlign: "center", width: windowWidth - 30 }}>Phoenix, AZ</Text>
-
-
         <Text style={{ fontSize: 20, margin: 30, textAlign: "center", width: windowWidth - 20 }} >Enter a restaurant to get started</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <View style={[styles.inputContainer, { marginHorizontal: 2, paddingBottom: Platform.OS === 'ios' ? "0%" : 6 }]}>

@@ -14,9 +14,10 @@ import { uploadBytes, getDownloadURL, ref as tef } from 'firebase/storage';
 import ImagePicker from 'react-native-image-picker';
 import { Link } from '@react-navigation/native';
 import Card from '../Components/Card'
-
+import { useLinkTo } from '@react-navigation/native';
 
 const RestaurantMenu = ({ navigation }) => {
+  const linkTo = useLinkTo();
   const [selectedCategory, setSelectedCategory] = useState([]);
   const [cate, setCate] = useState("");
 
@@ -168,117 +169,114 @@ const RestaurantMenu = ({ navigation }) => {
   }
 
   function onCategoryClick(clicked) {
-    console.log(filtered)
     setFiltered("")
     setFiltered(filtered.filter((item) => item.category === clicked))
     if (filtered == "") {
       setFiltered(menuData)
-      console.log(filtered)
     }
 
   }
 
   return (
+      <KeyboardAwareScrollView enableOnAndroid extraHeight={120} style={{ flex: 1, backgroundColor: "white" }}>
+        <View style={{ backgroundColor: 'white' }}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <View style={{ backgroundColor: '#F2F2F2', borderBottomEndRadius: 50, shadowColor: 'black', shadowOffset: { width: -1, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3 }}>
+              {/* Header */}
+              <View style={{ marginHorizontal: 10 }}>
+                {Platform.OS === 'web' ? <TouchableOpacity
+                  onPress={() => { navigation.goBack() }}
+                  style={[styles.button, { marginRight: "60%", flex: 1, backgroundColor: "transparent" }]}>
+                  <View style={{ flexDirection: 'row' }}>
+                    <Icon style={{}}
+                      color="black" size={20}
+                      name="arrow-left" />
+                    <Text style={[styles.buttonText, { fontWeight: 'bold', alignSelf: 'center', marginHorizontal: 10 }]}>Back</Text>
+                  </View>
+                </TouchableOpacity> :
+                  <Icon style={{ paddingTop: 30, margin: 10 }}
+                    color="black" size={35}
+                    name="arrow-left"
+                    onPress={() => { navigation.goBack() }} />}
 
-    <KeyboardAwareScrollView enableOnAndroid extraHeight={120} style={{ flex: 1, backgroundColor: "white" }}>
-      <View style={{ backgroundColor: 'white' }}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={{ backgroundColor: '#F2F2F2', borderBottomEndRadius: 50, shadowColor: 'black', shadowOffset: { width: -1, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3 }}>
-            {/* Header */}
-            <View style={{ marginHorizontal: 10 }}>
-              {Platform.OS === 'web' ? <TouchableOpacity
-                onPress={() => { navigation.goBack() }}
-                style={[styles.button, { marginRight: "60%", flex: 1, backgroundColor: "transparent" }]}>
-                <View style={{ flexDirection: 'row' }}>
-                  <Icon style={{}}
-                    color="black" size={20}
-                    name="arrow-left" />
-                  <Text style={[styles.buttonText, { fontWeight: 'bold', alignSelf: 'center', marginHorizontal: 10 }]}>Back</Text>
+              </View>
+
+              {/*THIS IS THE HEADER AND SEARCH */}
+
+              <View style={{ marginHorizontal: 20, marginVertical: 5 }}>
+                <Text style={styles.headerText}>
+                  {searchedRestaurant}
+                </Text>
+                <View style={{ flexDirection: 'row', }}>
+                  <Button title="Rate Us" buttonStyle={[styles.button, { padding: 10, backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} onPress={() => { linkTo(`/RatingRestaurant/${restaurantId}`) }} />
                 </View>
-              </TouchableOpacity> :
-                <Icon style={{ paddingTop: 30, margin: 10 }}
-                  color="black" size={35}
-                  name="arrow-left"
-                  onPress={() => { navigation.goBack() }} />}
+              </View>
 
+              {/*THIS IS THE ABOUT US */}
+              <View>
+                <View style={{ marginHorizontal: 20, flexDirection: 'row', margin: 10 }}>
+                  <View style={{ maxWidth: '66%' }}>
+                    <Text style={styles.subHeaderText}>About Us</Text>
+                    <Text>{restaurantDesc} </Text>
+                  </View>
+                  <View style={{ flex: 1, marginHorizontal: 15, marginBottom: 10 }}>
+
+                    <Image
+                      style={{ borderRadius: 20, alignSelf: 'flex-end', marginBottom: 13, width: 100, height: 100, shadowColor: '#171717', shadowOffset: { width: -1, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3, }}
+                      source={{ uri: restaurantImage }}
+                    />
+
+                  </View>
+                </View>
+              </View >
             </View>
 
-            {/*THIS IS THE HEADER AND SEARCH */}
-
-            <View style={{ marginHorizontal: 20, marginVertical: 5 }}>
-              <Text style={styles.headerText} onPress={() => { navigation.navigate("Restaurant") }}>
-                {searchedRestaurant}
+            {/*THIS IS THE CATEGORIES */}
+            <View>
+              <Text style={[styles.headerText, { margin: 10 }]}>
+                Menu
               </Text>
-              <View style={{ flexDirection: 'row', }}>
-                <Button title="Rate Us" buttonStyle={[styles.button, { padding: 10, backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} onPress={() => { navigation.navigate("RatingRestaurant") }} />
+              <View>
+                <Text style={[styles.subHeaderText, { fontSize: 20, margin: 10 }]}>Categories</Text>
+                <FlatList
+                  showsHorizontalScrollIndicator={false}
+                  horizontal
+                  data={selectedCategory}
+                  keyExtractor={item => item.id}
+                  renderItem={renderItem}
+                />
               </View>
             </View>
-
-            {/*THIS IS THE ABOUT US */}
-            <View>
-              <View style={{ marginHorizontal: 20, flexDirection: 'row', margin: 10 }}>
-                <View style={{ maxWidth: '66%' }}>
-                  <Text style={styles.subHeaderText}>About Us</Text>
-                  <Text>{restaurantDesc} </Text>
-                </View>
-                <View style={{ flex: 1, marginHorizontal: 15, marginBottom: 10 }}>
-
-                  <Image
-                    style={{ borderRadius: 20, alignSelf: 'flex-end', marginBottom: 13, width: 100, height: 100, shadowColor: '#171717', shadowOffset: { width: -1, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3, }}
-                    source={{ uri: restaurantImage }}
-                  />
-
-                </View>
-              </View>
-            </View >
-          </View>
-
-          {/*THIS IS THE CATEGORIES */}
-          <View>
-            <Text style={[styles.headerText, { margin: 10 }]}>
-              Menu
-            </Text>
-            <View>
-            <Text style={[styles.subHeaderText, { fontSize: 20, margin: 10 }]}>Categories</Text>
-              <FlatList
-                showsHorizontalScrollIndicator={false}
-                horizontal
-                data={selectedCategory}
-                keyExtractor={item => item.id}
-                renderItem={renderItem}
+            <View style={[styles.menuItemContaner, { marginVertical: 20 }]}>
+              <Input
+                inputContainerStyle={{ borderBottomWidth: 0, marginBottom: Platform.OS === 'web' ? -15 : -20 }}
+                onChangeText={(text) => searchFilter(text)}
+                value={text}
+                placeholder="Chicken Tacos..."
+                leftIcon={{ type: 'material-community', name: "taco" }}
               />
+
             </View>
-          </View>
-          <View style={[styles.menuItemContaner, { marginVertical: 20 }]}>
-            <Input
-              inputContainerStyle={{ borderBottomWidth: 0, marginBottom: Platform.OS === 'web' ? -15 : -20 }}
-              onChangeText={(text) => searchFilter(text)}
-              value={text}
-              placeholder="Chicken Tacos..."
-              leftIcon={{ type: 'material-community', name: "taco" }}
+            <FlatList
+              data={filtered}
+              keyExtractor={(item, index) => index}
+              renderItem={({ item, index }) =>
+                <Card
+                  onPress={() => { dispatch(setFoodItemId(item.food_id, item.food, item.price, item.description, item.upvotes, item.restaurant)), linkTo(`/Food/${restaurantId}/${item.food_id}`)  }}
+                  restaurant={item.restaurant}
+                  ranking={index + item.upvotes}
+                  food={item.food}
+                  percent={item.ratingCount > 0 ? (item.eatagain * 100 / item.ratingCount).toFixed(0) : (item.eatagain)}
+                  upvotes={item.upvotes}
+                  upvoteColor={restaurantColor}
+                />
+              }
             />
 
-          </View>
-          <FlatList
-            data={filtered}
-            keyExtractor={(item, index) => index}
-            renderItem={({ item, index }) =>
-              <Card
-                onPress={() => { dispatch(setFoodItemId(item.food_id, item.food, item.price, item.description, item.upvotes, item.restaurant)), navigation.navigate("Food") }}
-                restaurant={item.restaurant}
-                ranking={index + item.upvotes}
-                food={item.food}
-                percent={item.ratingCount > 0 ? (item.eatagain * 100 / item.ratingCount).toFixed(0) : (item.eatagain)}
-                upvotes={item.upvotes}
-                upvoteColor={restaurantColor}
-              />
-            }
-          />
+          </ScrollView>
 
-        </ScrollView>
-
-      </View>
-    </KeyboardAwareScrollView>
+        </View>
+      </KeyboardAwareScrollView>
   );
 };
 

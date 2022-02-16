@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect,useState } from 'react';
 import { Platform } from 'react-native'
 
 import { Provider } from 'react-redux';
@@ -30,10 +30,6 @@ const Stack = createNativeStackNavigator();
 
 export default function App() {
 
-
-  useEffect(() => {
-    reactToUpdates();
-  }, [])
   const [isLoaded] = useFonts({
     "SourceSans-ExtraLight": require("./assets/fonts/AktivGrotesk-Regular.ttf"),
   });
@@ -47,13 +43,12 @@ export default function App() {
   }
 
   const linking = {
-    prefixes: [
-      "https://flavor,"
-    ],
     config: {
-      screens: {
-        Home: 'Home',
-      }
+      // screens: {
+      //   RestaurantMenu: {
+      //     path: 'restaurant/:restaurant_id',
+      //   },
+      // }
       /* configuration for matching screens with paths */
     },
   };
@@ -84,7 +79,7 @@ export default function App() {
     //   </Provider>
     // </NavigationContainer>
     //:
-    <NavigationContainer linking={linking}>
+    <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>
       <Provider store={store}>
         <Stack.Navigator initialRouteName="Home">
         <Stack.Screen
