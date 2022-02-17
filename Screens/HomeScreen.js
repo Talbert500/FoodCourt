@@ -22,7 +22,7 @@ const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 
 
-function HomeScreen({ navigation }) {
+function HomeScreen({navigation }) {
   const linkTo = useLinkTo();
 
   const dispatch = useDispatch();
@@ -46,7 +46,6 @@ function HomeScreen({ navigation }) {
   }
 
   useEffect(() => {
-    console.log(process.env.API_KEY)
     getRest()
     dispatch(setFoodItemImage("null"))
 
@@ -61,8 +60,10 @@ function HomeScreen({ navigation }) {
           setRestaurantsId(item.restaurant_id)
           dispatch(setSearchedRestaurant(item.restaurant_name, item.restaurant_desc, item.restaurant_address, item.restaurant_phone, item.restaurant_id, item.restaurant_color)),
             onChangeText(item.restaurant_name),
-            linkTo(`/RestaurantMenu/${item.restaurant_id}`)
-            // navigation.navigate("RestaurantMenu")
+            //linkTo(`/RestaurantMenu/${item.restaurant_id}`)
+             navigation.navigate("RestaurantMenu",{
+              restId: item.restaurant_id,
+             })
 
         }
         }>
@@ -126,9 +127,6 @@ function HomeScreen({ navigation }) {
             source={require("../lf20_05ctr4vr.json")}
             autoPlay
           /> */}
-          <Text>
-            {process.env.API_KEY}
-          </Text>
         <Image
           style={[styles.shadowProp, {
             width: 125, height: 125, shadowColor: '#171717',

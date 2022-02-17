@@ -24,15 +24,15 @@ const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 
 
-function RatingFood({ navigation }) {
+function RatingFood({route, navigation }) {
+    const {restId, foodId,restName} = route.params;
     const dispatch = useDispatch();
     const [inputRating, setInputRating] = useState("");
     const [name, setName] = useState()
     const [image,setImage]= useState();
     const [refreshing, setRefreshing] = useState(false);
     const tookPicture = useSelector(state => state.foodImage);
-    const restaurantColor= useSelector(state =>state.restaurantColor)
-
+    const [restaurantColor,setRestaurantColor]= useState("")
     const searchedRestaurant = useSelector(state => state.searchedRestaurant)
     const restaurantId = useSelector(state=> state.restaurantId)
     
@@ -109,11 +109,11 @@ function RatingFood({ navigation }) {
     }
 
     useEffect(() => {
-        console.log(executionvalue)
         executionValueChanger();
         appearanceValueChanger();
         tasteValueChanger();
-
+        setRestaurantColor("#F6AE2D")
+    
     }, [executionvalue, appearancevalue, tastevalue])
 
     const executionValueChanger = () => {

@@ -7,12 +7,11 @@ import Icon from 'react-native-vector-icons/AntDesign'
 
 
 function Card(props) {
-    const restaurantColor = useSelector(state=> state.restaurantColor)
     
     return (
         <TouchableOpacity onPress={props.onPress} style={[styles.cards,{justifyContent: 'space-between',margin:5,padding: 5,backgroundColor:'white',flexDirection:'row', borderRadius:20}]}>
             <View style={{maxWidth:45, justifyContent:'flex-start'}}>
-                <Text style={[styles.subHeaderText,{margin:5,marginHorizontal:10,fontSize:30}]}>
+                <Text style={[styles.subHeaderText,{margin:5,marginHorizontal:5,fontSize:25}]}>
                     {props.ranking}
                 </Text>
             </View>
@@ -28,7 +27,7 @@ function Card(props) {
         
             <View style ={{justifyContent:'center', right:"10%"}}>
                 {/* <TouchableOpacity style={{alignSelf:'center'}} onPress={() => console.log(`upvoted ${props.food} by ${props.restaurant}`)}> */}
-                    <Icon color={restaurantColor}size ={35} name="caretup" />
+                    <Icon color={props.upvoteColor}size ={35} name="caretup" />
                 {/* </TouchableOpacity> */}
                 <Text style={[styles.subHeaderText,{fontSize:20,alignSelf:'center'}]}>
                     {props.upvotes}

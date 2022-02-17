@@ -1,5 +1,5 @@
 import React, { useEffect,useState } from 'react';
-import { Platform } from 'react-native'
+import { Platform,View,Text } from 'react-native'
 
 import { Provider } from 'react-redux';
 import store from './redux/store'
@@ -44,11 +44,52 @@ export default function App() {
 
   const linking = {
     config: {
-      // screens: {
-      //   RestaurantMenu: {
-      //     path: 'restaurant/:restaurant_id',
-      //   },
-      // }
+      screens: {
+      Home: {
+          path: 'home/',
+        },
+        RestaurantMenu: {
+          path: 'restaurant-menu/',
+        },
+        AddRestaurant: {
+          path: 'new-restaurant/',
+        },
+        AddToMenu: {
+          path: 'add-to-item/',
+        },
+        Restaurant: {
+          path: 'restaurant-admin/',
+        },
+        Food: {
+          path: 'food/',
+        },
+        Upload: {
+          path: 'upload/',
+        },
+        Camera: {
+          path: 'camera/',
+        },
+        RatingFood: {
+          path: 'rate-my-food/',
+        },
+        WelcomeScreen: {
+          path: 'welcome/',
+        },
+        RatingRestaurant: {
+          path: 'rate-my-restaurant/',
+        },
+        Settings: {
+          path: 'settings/',
+        },
+        SignUp: {
+          path:'sign-up'
+        },
+        CreateMenu:{
+          path:'create-menu'
+        }
+  
+
+      }
       /* configuration for matching screens with paths */
     },
   };
@@ -80,6 +121,7 @@ export default function App() {
     // </NavigationContainer>
     //:
     <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>
+      <View><Text style={{color:'red', fontSize:10}}> Unstable Indev v1.2 \\ fixed routing paths on refresh for all pages....</Text></View>
       <Provider store={store}>
         <Stack.Navigator initialRouteName="Home">
         <Stack.Screen
@@ -177,7 +219,9 @@ export default function App() {
             component={RestaurantMenu}
             options={{
               headerShown: false,
-
+            }}
+            initialParams={{
+                restId:null
             }}
           />
           <Stack.Screen
