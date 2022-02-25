@@ -70,6 +70,7 @@ const MenuWeb = ({ route, navigation }) => {
     const [loggedin, setloggedin] = useState(false);
     const [isRestaurant, setIsRestaurant] = useState(false)
     const [userPhoto, setUserPhoto] = useState('')
+    const [setCate, setSetCate]= useState('');
 
     function googleSignOut(){
         signOut(auth).then(()=>{
@@ -216,11 +217,11 @@ const MenuWeb = ({ route, navigation }) => {
 
     }, [])
 
-
+//(item.name==selectedCategory)?"white":"black"
     const renderItem = (item) => {
         return (
             <TouchableOpacity onPress={() => (setFiltered(menuData), onCategoryClick(selectedCategory[`${item.index}`]))}>
-                <View style={[styles.shadowProp, { margin: 15, borderRadius: 10, borderWidth: 1, backgroundColor: "white", borderColor: 'white' }]}>
+                <View style={[styles.shadowProp, { margin: 15, borderRadius: 10, borderWidth: 1, backgroundColor: (item.item === setCate) ? "grey":"whtie", borderColor: 'white' }]}>
                     <Text style={{ padding: 20 }}>{selectedCategory[`${item.index}`]} </Text>
                 </View>
             </TouchableOpacity>
@@ -239,17 +240,34 @@ const MenuWeb = ({ route, navigation }) => {
             });
             setFiltered(newData);
             onChangeText(text);
+            setSetCate(null)
         } else {
             setFiltered(menuData);
             onChangeText(text);
+
         }
     }
 
     function onCategoryClick(clicked) {
-        console.log(clicked)  
-        setCatFilter(filtered.filter((item) => item.category === clicked))
+        // setSetCate(clicked)
         
-    }
+        if(setCate != clicked){
+            setSetCate(clicked)
+            const newData = menuData.filter((item)=>{
+                const cateDate = item.category ?
+                item.category.toUpperCase() : ''.toUpperCase()
+                const cate = clicked.toUpperCase();
+
+                return cateDate.indexOf(cate) >  -1;
+            });
+            setFiltered(newData);
+        }else {
+            setSetCate("")
+            setFiltered(menuData)
+        }
+
+
+      }
 
     return (
         <KeyboardAwareScrollView enableOnAndroid extraHeight={120} style={{ flex: 1, backgroundColor: "white" }}>
@@ -389,6 +407,7 @@ const MenuWeb = ({ route, navigation }) => {
                         </Text>
                         <View>
                             <Text style={[styles.subHeaderText, { fontSize: 20 }]}>Categories</Text>
+                          
                             <FlatList
                                 showsHorizontalScrollIndicator={false}
                                 horizontal
@@ -396,6 +415,7 @@ const MenuWeb = ({ route, navigation }) => {
                                 keyExtractor={item => item.id}
                                 renderItem={renderItem}
                             />
+
                         </View>
                     </View>
                     <View style={[styles.menuItemContaner, { marginVertical: 20 }]}>
