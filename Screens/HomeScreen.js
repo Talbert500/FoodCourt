@@ -3,12 +3,11 @@ import React from 'react';
 import { TextInput, RefreshControl, Dimensions, TouchableWithoutFeedback, Keyboard, Platform, KeyboardAvoidingView, StyleSheet, Text, View, SafeAreaView, FlatList, TouchableOpacity, Image } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Button, Input } from 'react-native-elements'
-
-import { useDispatch } from 'react-redux';
-
-import { db } from '../firebase-config'
-import { collection, getDocs } from 'firebase/firestore'
-import { setSearchedRestaurant, setFoodItemImage, } from '../redux/action'
+import { useDispatch,useSelector } from 'react-redux';
+import { db, provider, auth } from '../firebase-config'
+import { collection, getDocs, setDoc, doc, updateDoc } from 'firebase/firestore'
+import { ref, set, update, onValue} from 'firebase/database'
+import { setSearchedRestaurant, setFoodItemImage, setUserProps} from '../redux/action'
 import { useFonts } from "@use-expo/font";
 import { ScrollView } from 'react-native-gesture-handler';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -16,29 +15,104 @@ import { Link } from '@react-navigation/native';
 import HomeScreenWeb from './web/HomeScreenWeb';
 import LottieView from 'lottie-react-native';
 import { useLinkTo } from '@react-navigation/native';
+import AppLoading from 'expo-app-loading';
+import { styles } from '../styles'
+import Footer from '../Components/Footer';
+import {signOut,onAuthStateChanged} from 'firebase/auth'
+import { database } from '../firebase-config'
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
 
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 
+function HomeScreen({ navigation }) {
 
-function HomeScreen({navigation }) {
-  const linkTo = useLinkTo();
+  let [fontsLoaded] = useFonts({
+    'Primary': require('../assets/fonts/proxima_nova_reg.ttf'),
+    'Bold': require('../assets/fonts/proxima_nova_bold.ttf'),
+    'Black': require('../assets/fonts/proxima_nova_black.otf')
+  });
+
 
   const dispatch = useDispatch();
   const [refreshing, setRefreshing] = useState(false);
   const [restaurantsId, setRestaurantsId] = useState("")
   const [text, onChangeText] = useState("")
   const restCollectionRef = collection(db, "restaurants")
+  const [isRestaurant, setIsRestaurant] = useState(false)
 
   const [restaurants, setRestaurants] = useState([])
   const [filtered, setFiltered] = useState([]);
   const [searching, setSearching] = useState(false);
   const [clicked, setClicked] = useState(false);
+  const [userPhoto, setUserPhoto] = useState('')
+  const [loggedIn, setLoggedIn] = useState(false)
+  const [userEmail,setUserEmail]= useState('')
+  const [userName,setUserName]= useState('')
+  const [userId,setUserId]= useState('')
+  const [user_date_add,setUserDate]= useState('')
+  const [last_seen,setLastSeen]= useState('')
+  const [userPhone,setUserPhone]= useState('')
+  
+  //const userPhoto = useSelector(state=>state.userPhoto)
 
   // const [selectedRestaurants, setSelectedRestaurants] = useState("")
+
+function googleSignOut(){
+  signOut(auth).then(()=>{
+    setLoggedIn(false);
+  }).catch(error => {
+    console.log(error)
+  })
+
+}
+
+  function googleSignIn() {
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        const token = credential.accessToken;
+        const user = result.user;
+        setUserPhoto(user.photoURL)
+        console.log(user)
+        setLoggedIn(true);
+        //Storing user data
+        dispatch(setUserProps(user.email,user.displayName,user.photoURL))
+        setDoc(doc(db, "users", user.email), {
+          userEmail: user.email,
+          userName: user.displayName,
+          userId: user.uid,
+          user_date_add: user.metadata.creationTime,
+          last_seen: user.metadata.lastSignInTime,
+          userPhone: user.phoneNumber,
+        }).catch((error)=>{
+          const errorCode = error.code;
+          console.log("ERROR", errorCode)
+        })
+        //Also storing but tracked user data in realtime
+        set(ref(database, "user/" + user.uid), {
+          userEmail: user.email,
+          userName: user.displayName,
+          userId: user.uid,
+          user_date_add: user.metadata.creationTime,
+          last_seen: user.metadata.lastSignInTime,
+          userPhone: user.phoneNumber,
+          hasRestaurant:"false",
+          userPhoto:user.photoURL 
+        })
+
+
+      }).catch((error) => {
+        const errorCode = error.code;
+        const email = error.email;
+        const credential = GoogleAuthProvider.credentialFromResult(error);
+        console.log(credential, errorCode)
+      })
+  }
+
+
   const getRest = async () => {
-    setRefreshing(true);
     const data = await getDocs(restCollectionRef);
     setRestaurants(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
     setFiltered(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
@@ -46,8 +120,29 @@ function HomeScreen({navigation }) {
   }
 
   useEffect(() => {
+    dispatch(setSearchedRestaurant(null, null, null, null, null, null))
+    setRefreshing(true);
     getRest()
     dispatch(setFoodItemImage("null"))
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+          setLoggedIn(true)
+          console.log(user.accessToken)
+          const userRef = ref(database, "user/" + user.uid)
+          onValue(userRef, (snapshot) => {
+              const data = snapshot.val();
+              if (data !== null) {
+                  console.log(data)
+                  setIsRestaurant(data.hasRestaurant)
+              }
+
+          });
+      } else {
+        setLoggedIn(false)
+      }
+  })
+
 
   }, [])
 
@@ -55,25 +150,47 @@ function HomeScreen({navigation }) {
   const ItemView = ({ item }) => {
 
     return (
-      <TouchableOpacity
-        onPress={() => {
-          setRestaurantsId(item.restaurant_id)
-          dispatch(setSearchedRestaurant(item.restaurant_name, item.restaurant_desc, item.restaurant_address, item.restaurant_phone, item.restaurant_id, item.restaurant_color)),
-            onChangeText(item.restaurant_name),
-            //linkTo(`/RestaurantMenu/${item.restaurant_id}`)
-             navigation.navigate("RestaurantMenu",{
-              restId: item.restaurant_id,
-             })
+      <View>
+        {Platform.OS === 'web' ?
+          <TouchableOpacity
+            onPress={() => {
+              setRestaurantsId(item.restaurant_id)
+              dispatch(setSearchedRestaurant(item.restaurant_name, item.restaurant_desc, item.restaurant_address, item.restaurant_phone, item.restaurant_id, item.restaurant_color)),
+                onChangeText(item.restaurant_name),
+                //linkTo(`/RestaurantMenu/${item.restaurant_id}`)
+                navigation.navigate("RestaurantWeb", {
+                  restId: item.restaurant_id,
+                })
 
+            }
+            }>
+            <View style={{ backgroundColor: 'white' }}>
+              <Text style={{ fontSize: 16, padding: 5, fontWeight: '500' }}>
+                {item.restaurant_name.toUpperCase()}
+              </Text>
+            </View>
+          </TouchableOpacity> :
+          <TouchableOpacity
+            onPress={() => {
+              setRestaurantsId(item.restaurant_id)
+              dispatch(setSearchedRestaurant(item.restaurant_name, item.restaurant_desc, item.restaurant_address, item.restaurant_phone, item.restaurant_id, item.restaurant_color)),
+                onChangeText(item.restaurant_name),
+                //linkTo(`/RestaurantMenu/${item.restaurant_id}`)
+                navigation.navigate("RestaurantMenuApp", {
+                  restId: item.restaurant_id,
+                })
+
+            }
+            }>
+            <View style={{ backgroundColor: 'white' }}>
+              <Text style={{ fontSize: 16, padding: 5, fontWeight: '500' }}>
+                {item.restaurant_name.toUpperCase()}
+              </Text>
+            </View>
+          </TouchableOpacity>
         }
-        }>
-        <View style={{ backgroundColor: 'white' }}>
-          <Text style={{ fontSize: 16, padding: 5, fontWeight: '500' }}>
-            {item.restaurant_name.toUpperCase()}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    );
+      </View>
+    )
   }
 
   const ItemSeparatorView = () => {
@@ -109,122 +226,172 @@ function HomeScreen({navigation }) {
     onChangeText("")
     setSearching(false);
   }
+  if (!fontsLoaded) {
+    return (<AppLoading />)
+  }
 
   return (
-    <KeyboardAwareScrollView refreshControl={
-      <RefreshControl refreshing={refreshing} onRefresh={getRest} />} enableOnAndroid extraHeight={120} style={{ flex: 1, backgroundColor: "white" }}>
-      <View style={{
-        alignContent: 'flex-start',
-        flex: 1,
-        justifyContent: "center",
-        padding: 20,
-        alignItems: 'center',
-        paddingHorizontal: Platform.OS === 'ios' ? "10%" : "30%",
-        paddingTop: "10%"
-      }}>
-        {/* <LottieView
-            style={{ width: 200, height: 200 }}
-            source={require("../lf20_05ctr4vr.json")}
-            autoPlay
-          /> */}
-        <Image
-          style={[styles.shadowProp, {
-            width: 125, height: 125, shadowColor: '#171717',
-            marginTop: Platform.OS === 'ios' ? "30%" : "10%",
-            shadowOffset: { width: -1, height: 2 },
-            shadowOpacity: 0.5,
-            shadowRadius: 3,
-          }]}
-          source={require('../assets/logos/white_taco.png')}
-        />
+    <View>
+      <KeyboardAwareScrollView refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={getRest} />} enableOnAndroid extraHeight={120} style={{ flex: 1, backgroundColor: "white", }}>
 
-        <View style={{ alignContent: 'center' }}>
-          <Text style={{ fontSize: 30, fontWeight: "bold", margin: 10, textAlign: 'center' }}>Rate My Food</Text>
+        {Platform.OS === 'web' ? (
+          <View style={[styles.shadowProp, { flexDirection: "row", backgroundColor: "white", zIndex: 1 }]}>
+            <TouchableOpacity onPress={() => { navigation.navigate("Home") }}>
+              <Image
+                style={{
+                  justifyContent: 'flex-start',
+                  width: 125,
+                  height: 70,
+                  resizeMode: "contain",
+                }}
+                source={require('../assets/logo_name_simple.png')} />
+            </TouchableOpacity>
+            <View style={{ flexDirection: "row", marginLeft: 'auto', paddingHorizontal: 12 }}>
+              {loggedIn ? (
+                <View style={{ flex: 1, flexDirection:'row',alignItems:'center'}}>
+                  <Image
+                    style={{ height: 50, width: 50, borderRadius: 40,marginHorizontal:10}}
+                    source={{ uri: userPhoto }}
+                  />
+                  <TouchableOpacity
+                  style={[styles.buttonOutline,styles.shadowProp,{borderRadius:5}]}
+                  onPress={googleSignOut}
+                >
+                  <Text style={[styles.buttonOutlineText,{padding:10 }]}>Sign Out</Text>
+                </TouchableOpacity>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={googleSignIn}
+                >
+                  <Text style={[styles.buttonTitle, { paddingHorizontal: 10 }]}>Google Sign In</Text>
+                </TouchableOpacity>
+              )}
+            </View>
 
-          <Text style={{ fontSize: 15, textAlign: "center", width: windowWidth - 30 }}>get rankings of the best mexican foods in your area:</Text>
-        </View>
-        {/*GET LOCATION OF USER */}
-        <Text style={{ fontSize: 15, textAlign: "center", width: windowWidth - 30 }}>Phoenix, AZ</Text>
-        <Text style={{ fontSize: 20, margin: 30, textAlign: "center", width: windowWidth - 20 }} >Enter a restaurant to get started</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <View style={[styles.inputContainer, { marginHorizontal: 2, paddingBottom: Platform.OS === 'ios' ? "0%" : 6 }]}>
-            <Input
-              inputContainerStyle={styles.input}
-              onChangeText={(text) => searchFilter(text)}
-              value={text}
-              placeholder="Taco Bell..."
-              onSubmitEditing={pullout}
-              onPressOut={pullup}
-              leftIcon={{ type: 'material-community', name: "taco" }}
-            />
+
+
           </View>
-          <TouchableOpacity onPress={() => (onChangeText(""), setSearching(false))}>
-            <Text style={{ fontSize: 16, fontWeight: '400', color: 'grey', marginHorizontal: 10 }}>
-              x
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.container}>
-          {searching ?
-            <View style={styles.search}>
-              <FlatList
-                data={filtered}
-                keyExtractor={(item, index) => index}
-                ItemSeparatorComponent={ItemSeparatorView}
-                renderItem={ItemView}
-                refreshing={false}
-                onRefresh={getRest}
+        ) : <></>}
+
+        <View style={{
+          alignContent: 'flex-start',
+          flex: 1,
+          justifyContent: "center",
+          padding: 20,
+          alignItems: 'center',
+          paddingHorizontal: Platform.OS === 'ios' ? "10%" : "30%",
+        }}>
+
+          <Image
+            style={[styles.shadowProp, {
+              width: 125, height: 125, shadowColor: '#171717',
+              marginTop: Platform.OS === 'ios' ? "30%" : 0,
+              shadowOffset: { width: -1, height: 2 },
+              shadowOpacity: 0.5,
+              shadowRadius: 3,
+            }]}
+            source={require('../assets/logos/white_taco.png')}
+          />
+
+          <View style={{ alignContent: 'center' }}>
+            <Text style={{ fontSize: 30, fontWeight: "bold", margin: 10, textAlign: 'center' }}>Rate My Food</Text>
+
+            <Text style={{ fontSize: 15, textAlign: "center", width: windowWidth - 30 }}>get rankings of the best mexican foods in your area:</Text>
+          </View>
+          {/*GET LOCATION OF USER */}
+          <Text style={{ fontSize: 15, textAlign: "center", width: windowWidth - 30 }}>Phoenix, AZ</Text>
+          <Text style={{ fontSize: 20, margin: 30, textAlign: "center", width: windowWidth - 20 }} >Enter a restaurant to get started</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View style={[styles.inputContainer, { marginHorizontal: 2, paddingBottom: Platform.OS === 'ios' ? "0%" : 6 }]}>
+              <Input
+                inputContainerStyle={styles.input}
+                onChangeText={(text) => searchFilter(text)}
+                value={text}
+                placeholder="Taco Bell..."
+                onSubmitEditing={pullout}
+                onPressOut={pullup}
+                leftIcon={{ type: 'material-community', name: "taco" }}
               />
             </View>
-            : <View />}
+            <TouchableOpacity onPress={() => (onChangeText(""), setSearching(false))}>
+              <Text style={{ fontSize: 16, fontWeight: '400', color: 'grey', marginHorizontal: 10 }}>
+                x
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.container}>
+            {searching ?
+              <View style={[styles.search, { marginBottom: 10 }]}>
+                <FlatList
+                  data={filtered}
+                  keyExtractor={(item, index) => index}
+                  ItemSeparatorComponent={ItemSeparatorView}
+                  renderItem={ItemView}
+                  refreshing={false}
+                  onRefresh={getRest}
+                />
+              </View>
+              : <View />}
 
-          <Text
-            onPress={() => { navigation.navigate("SignUp") }}
-            style={{ fontSize: 15, marginTop: 20, textAlign: "center", fontWeight: 'bold' }}
-          >
-            Restaurant Login
-          </Text>
+
+            {Platform.OS === 'web' ? (
+              <View style={{ backgroundColor: 'white', alignContent: 'center', justifyContent: 'center', paddingTop: "2%" }}>
+                <View style={{ backgroundColor: 'white', flexDirection: 'row', alignContent: 'center', justifyContent: 'center' }}>
+                  <TouchableOpacity onPress={() => { console.log("GO TO APP STORE") }}>
+                    <Image
+                      style={{
+                        width: 150,
+                        height: 75,
+                        resizeMode: "contain",
+                      }}
+                      source={require('../assets/apple.png')} />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => { console.log("GO TO GOGOLE PLAY STORE") }}>
+                    <Image
+                      style={{
+                        width: 150,
+                        height: 75,
+                        resizeMode: "contain",
+                      }}
+                      source={require('../assets/googleplay.png')} />
+                  </TouchableOpacity>
+
+                </View>
+                <Text style={{ alignSelf: "center", fontFamily: 'Bold', fontSize: 20 }}>
+                  Available on the app store
+                </Text>
+              </View>)
+              : (<View></View>)}
+            {Platform.OS === 'web' ? (
+              <Text
+                onPress={() => { navigation.navigate("RestaurantHome") }}
+                style={{ fontSize: 15, marginTop: 20, textAlign: "center", fontWeight: 'bold' }}
+              >
+                Feiri for Restaurant Owners
+              </Text>) : (
+              <Text
+                onPress={() => { navigation.navigate("Login") }}
+                style={{ fontSize: 15, marginTop: 20, textAlign: "center", fontWeight: 'bold' }}
+              >
+                Feiri for Restaurant Owners
+              </Text>
+
+            )}
+
+
+          </View>
+
         </View>
-      </View>
-    </KeyboardAwareScrollView>
+        <View style={{ marginTop: "20%" }}>
+          <Footer />
+        </View>
+      </KeyboardAwareScrollView>
+    </View>
   );
 }
-
-
-const styles = StyleSheet.create({
-  search: {
-    margin: -10,
-    maxHeight: 150,
-    width: windowWidth,
-    alignItems: 'center'
-
-  },
-  inputContainer: {
-    borderRadius: 20,
-    marginHorizontal: 45,
-    borderWidth: 1,
-    borderColor: "white",
-    width: '100%',
-    backgroundColor: "white",
-    shadowRadius: 2,
-    shadowOpacity: 0.4,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 2,
-    marginVertical: 15,
-    justifyContent: 'center'
-
-  },
-  input: {
-    borderBottomWidth: 0,
-    marginBottom: -20,
-
-  },
-  container: {
-    flex: 1,
-    backgroundColor: 'white'
-  },
-
-});
 
 
 

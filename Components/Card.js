@@ -11,9 +11,9 @@ function Card(props) {
     return (
         <TouchableOpacity onPress={props.onPress} style={[styles.cards,{justifyContent: 'space-between',margin:5,padding: 5,backgroundColor:'white',flexDirection:'row', borderRadius:20}]}>
             <View style={{maxWidth:45, justifyContent:'flex-start'}}>
-                <Text style={[styles.subHeaderText,{margin:5,marginHorizontal:5,fontSize:25}]}>
+                {/* <Text style={[styles.subHeaderText,{margin:5,marginHorizontal:5,fontSize:25}]}>
                     {props.ranking}
-                </Text>
+                </Text> */}
             </View>
             <View style={{flex:1,maxWidth:"70%", alignContent:'flex-start'}}>
                 <Text style={[styles.subHeaderText, { fontSize: 35, fontWeight: '100' }]} >

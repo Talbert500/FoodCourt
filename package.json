@@ -10,6 +10,9 @@
     "eject": "expo eject"
   },
   "dependencies": {
+    "@expo-google-fonts/archivo": "^0.2.2",
+    "@expo-google-fonts/archivo-black": "^0.2.2",
+    "@expo-google-fonts/inter": "^0.2.2",
     "@react-native-community/slider": "^4.2.0",
     "@react-native-firebase/app": "^14.3.0",
     "@react-native-firebase/storage": "^14.3.0",
@@ -26,6 +29,7 @@
     "expo-camera": "^12.1.2",
     "expo-font": "^10.0.5",
     "expo-image-picker": "^12.0.2",
+    "expo-linear-gradient": "^11.0.3",
     "expo-status-bar": "~1.2.0",
     "expo-updates": "^0.11.6",
     "firebase": "^9.6.6",
@@ -37,6 +41,7 @@
     "react-native-elements": "^3.4.2",
     "react-native-image-picker": "^4.7.3",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
+    "react-native-qrcode": "^0.2.7",
     "react-native-vector-icons": "^9.0.0",
     "react-native-web": "^0.17.1",
     "react-redux": "^7.2.6",

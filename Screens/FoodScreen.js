@@ -1,26 +1,30 @@
 
-import { Alert, RefreshControl, ScrollView, Dimensions, TouchableWithoutFeedback, Keyboard, Platform, KeyboardAvoidingView, ActivityIndicator, Text, View, SafeAreaView, FlatList, TouchableOpacity, Image } from 'react-native';
+import { ImageBackground, Alert, RefreshControl, ScrollView, Dimensions, TouchableWithoutFeedback, Keyboard, Platform, KeyboardAvoidingView, ActivityIndicator, Text, View, SafeAreaView, FlatList, TouchableOpacity, Image } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Button, Input } from 'react-native-elements'
 import { database } from '../firebase-config'
 import { useDispatch, useSelector } from 'react-redux';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../firebase-config';
 import { ref, update, onValue, increment } from 'firebase/database'
 import { db } from '../firebase-config'
-import { collection, getDoc, doc  } from 'firebase/firestore'
+import { collection, getDoc, doc } from 'firebase/firestore'
 import { styles } from '../styles'
 import { ref as tef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../firebase-config';
 import Icon from 'react-native-vector-icons/Feather'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Link } from '@react-navigation/native';
-import {setSearchedRestaurant} from '../redux/action'
+import { setSearchedRestaurant, setFoodItemId, setUserProps } from '../redux/action'
 import { useLinkTo } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Divider } from 'react-native-elements/dist/divider/Divider';
 
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 
 function FoodScreen({ route, navigation }) {
-  const {restId, foodId,restName} = route.params;
+  const { restId, foodId, restName } = route.params;
 
   const dispatch = useDispatch();
   const linkTo = useLinkTo();
@@ -36,12 +40,6 @@ function FoodScreen({ route, navigation }) {
   const [restaurantAddress, setRestaurantAddress] = useState([]);
   const [restaurantPhone, setRestaurantPhone] = useState([]);
 
-  //const foodItemId = useSelector(state => state.foodItemId)
-  
-  // const food = useSelector(state => state.food)
-  // const price = useSelector(state => state.foodPrice)
-  // const description = useSelector(state => state.foodDesc)
-  // const upvotes = useSelector(state => state.upvotes)
   const [food, setFood] = useState([]);
   const [price, setPrice] = useState([]);
   const [description, setDescription] = useState([]);
@@ -55,16 +53,34 @@ function FoodScreen({ route, navigation }) {
   const [eatagain, setEatagain] = useState();
   const [upvoteset, setUpvoteSet] = useState(false);
 
+
+  const [userPhoto, setUserPhoto] = useState('')
+  const [loggedIn, setloggedin] = useState(false)
+  const [isRestaurant, setIsRestaurant] = useState('')
+  const [userName, setUserName] = useState('')
+  const [userId, setUserId] = useState('')
+
+
   // const [selectedRestaurants, setSelectedRestaurants] = useState("")
+  const setFoodProps = () => {
+    console.log("USER VOTING", userId)
+    dispatch(setUserProps(userId, userName, userPhoto))
+
+  }
   const getImage = async () => {
-    const imageRef = tef(storage, 'foodImages/' + restName +"/"+ foodId);
+    const imageRestRef = tef(storage, 'imagesRestaurant/' + restId);
+    await getDownloadURL(imageRestRef).then((url) => {
+      setRestaurantImage(url)
+    })
+
+    const imageRef = tef(storage, 'foodImages/' + restName + "/" + foodId);
     await getDownloadURL(imageRef).then((url) => {
       setImage(url)
       setLoading(false);
     })
     const imageRatingRaf = tef(storage, 'foodRatingImage/' + foodId);
     if (imageRatingRaf !== null) {
-      await getDownloadURL(imageRef).then((rateurl) => {
+      await getDownloadURL(imageRatingRaf).then((rateurl) => {
         console.log("Rating imaged:", rateurl)
 
       })
@@ -87,27 +103,26 @@ function FoodScreen({ route, navigation }) {
       }
     })
   }
-  const getFood = async () =>{
-    const food = ref(database, 'restaurants/' + restId + '/menus/'+ foodId);
+  const getFood = async () => {
+    const food = ref(database, 'restaurants/' + restId + '/menus/' + foodId);
     onValue(food, (snapshot) => {
-        const data = snapshot.val();
-        if (data !== null) {
-            console.log(data)
-            setFood(data.food)
-            setPrice(data.price)
-            setUpvotes(data.price)
-            setDescription(data.description)
+      const data = snapshot.val();
+      if (data !== null) {
+        console.log(data)
+        setFood(data.food)
+        setPrice(data.price)
+        setUpvotes(data.upvotes)
+        setDescription(data.description)
+        dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurantAddress, restaurantPhone, restaurantId, restaurantColor))
 
-        } 
+        dispatch(setFoodItemId(foodId, data.food, data.price, data.description, data.upvotes, data.restaurant, data.eatagain))
+      }
     })
   }
 
   useEffect(() => {
+
     setLoading(true);
-    getImage();
-    getRating();
-    getUpVotesUpdate();
-    getFood();
     const getRestaurant = async () => {
       const docRef = doc(db, "restaurants", restId);
       const snapshot = await getDoc(docRef)
@@ -118,12 +133,38 @@ function FoodScreen({ route, navigation }) {
         setRestaurantDesc(snapshot.data().restaurant_desc)
         setRestaurantName(snapshot.data().restaurant_name)
         setRestaurantColor(snapshot.data().restaurant_color)
-        dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurantAddress, restaurantPhone, restaurantId, restaurantColor))
       } else {
         console.log("No souch document!")
       }
     }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("confirm", user)
+        setloggedin(true)
+        const userRef = ref(database, "user/" + user.uid)
+        onValue(userRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data !== null) {
+            console.log(data)
+            setIsRestaurant(data.hasRestaurant)
+            setUserId(data.userId)
+            setUserName(data.userName)
+            setUserPhoto(data.userPhoto);
+            console.log(data.userName)
+          }
+        });
+      } else {
+        setloggedin(false);
+      }
+    })
     getRestaurant();
+    getImage();
+    getRating();
+    getUpVotesUpdate();
+    getFood();
+
+
 
   }, [])
 
@@ -134,6 +175,7 @@ function FoodScreen({ route, navigation }) {
     });
     getUpVotesUpdate();
     setUpvoteSet(true);
+
   }
 
   const getUpVotesUpdate = async () => {
@@ -161,11 +203,12 @@ function FoodScreen({ route, navigation }) {
       [
         {
           text: "Yes",
-          onPress: () => { upvote(upvotes), navigation.navigate("RatingFood",{
-            restId: restId,
-            foodId: foodId,
-            restName: restName
-           })  
+          onPress: () => {
+            upvote(upvotes), navigation.navigate("RatingFood", {
+              restId: restId,
+              foodId: foodId,
+              restName: restName
+            })
           }
         },
         {
@@ -176,36 +219,100 @@ function FoodScreen({ route, navigation }) {
       ]
     )
   }
+  const personaleatagainhandler = ({ item }) => {
+    if (item.personaleatagain === 1) {
+      return (
+        <Text style={{ fontWeight: '500' }}> Yes</Text>
+      )
+    } else {
+      return (
+        <Text style={{ fontWeight: '500' }}> No</Text>
+      )
+    }
+
+  }
 
   return (
     <KeyboardAwareScrollView enableOnAndroid extraHeight={120} style={{ flex: 1, backgroundColor: "white" }} refreshControl={
       <RefreshControl refreshing={refreshing} onRefresh={getRating} />
     }>
-      <View style={{ flex: 1, paddingTop: 20, margin: 10 }}>
+      {Platform.OS === 'web' ? (
+        <View>
+          <View style={[styles.shadowProp, { flexDirection: "row", backgroundColor: "white", zIndex: 1 }]}>
+            <TouchableOpacity onPress={() => { navigation.navigate("Home") }}>
+              <Image
+                style={{
+                  justifyContent: 'flex-start',
+                  width: 125,
+                  height: 70,
+                  resizeMode: "contain",
+                }}
+                source={require('../assets/logo_name_simple.png')} />
+            </TouchableOpacity>
+            <View style={[styles.shadowProp, { maxWidth: 700, alignSelf: Platform.OS === 'web' ? 'center' : '', width: '100%' }]}>
+              <Input
+                inputContainerStyle={{ borderBottomWidth: 0, marginBottom: Platform.OS === 'web' ? -15 : -20 }}
+                // onChangeText={(text) => searchFilter(text)}
+                // value={}
+                placeholder="Chicken Tacos..."
+                leftIcon={{ type: 'material-community', name: "taco" }}
+              />
+            </View>
 
-        <Icon
-          color="black" size={35} name="arrow-left" onPress={()=>navigation.navigate("RestaurantMenu",{restId: restId,}) }
-        />
-        <View style={{ borderRadius: 10, overflow: 'hidden', margin: 10 }}>{!loading ?
-          (<Image source={{ uri: image }} style={{ height: 300, borderRadius: 10, }} />) : (
+            <View style={{ flexDirection: "row", marginLeft: 'auto' }}>
+              <TouchableOpacity
+                style={styles.button}
+              >
+                <Text style={[styles.buttonText, { paddingHorizontal: 10 }]}>Food Search</Text>
+              </TouchableOpacity>
+
+            </View>
+          </View>
+          <ImageBackground style={{ justifyContent: 'center', height: Platform.OS === "web" ? 200 : 100 }} resizeMode="cover" source={{ uri: restaurantImage }}>
+            <LinearGradient
+              colors={['#00000000', '#000000']}
+              style={{ height: '100%', width: '100%', }}>
+              <View style={{ width: "100%", maxWidth: 700, flex: 1, alignSelf: 'center' }}>
+                <View style={{
+                  margin: 10,
+                  alignSelf: Platform.OS === "web" ? 'center' : '',
+                  flex: 1,
+                  justifyContent: "flex-end",
+                  marginRight: 'auto',
+
+                }}>
+                </View>
+              </View>
+            </LinearGradient>
+          </ImageBackground >
+        </View>
+      ) : <Icon style={{ padding: 10 }}
+        color="black" size={35} name="arrow-left" onPress={() => navigation.goBack()}
+      />}
+
+      <View style={{ paddingTop: 20, margin: 10, flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap' }}>
+        <View style={{ borderRadius: 10, overflow: 'hidden', margin: 10, }}>{!loading ?
+          (<Image source={{ uri: image }} style={{ width: 400, height: 400, borderRadius: 10, }} />) : (
             <ActivityIndicator size="large" style={{ height: 300 }} color="#F6AE2D" />
           )
         }
         </View>
-        <View style={{ margin: 10, flex: 1 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={[styles.headerText, { fontSize: 35, maxWidth: "85%" }]}>{food}</Text>
-            <View style={{ justifyContent: 'center', alignSelf: 'flex-end', right: 10 }}>
+        <View style={{ margin: 10, flex: 1, maxWidth: 600, minWidth: 300, }}>
+          <View style={{ flexDirection: 'row' }}>
+            <Text style={[styles.headerText, { fontSize: 35, maxWidth: 600 }]}>{food}</Text>
+            <View style={{ justifyContent: 'center', alignSelf: 'flex-end', right: 10, marginLeft: 'auto' }}>
               {Platform.OS === 'web' ?
-                <TouchableOpacity style={{ alignSelf: 'center', }} onPress={()=> {upvote(upvotes),navigation.navigate("RatingFood",{
-                  restId: restId,
-                  foodId: foodId,
-                  restName: restName
-                 }) }}>
+                <TouchableOpacity style={{ alignSelf: 'center', }} onPress={() => {
+                  setFoodProps(), upvote(upvotes), navigation.navigate("RatingFood", {
+                    restId: restId,
+                    foodId: foodId,
+                    restName: restName
+                  })
+                }}>
                   <Icon color={restaurantColor} size={35} name="triangle" />
                 </TouchableOpacity>
                 :
-                <TouchableOpacity style={{ alignSelf: 'center', }} onPress={leaveAPositiveReview}>
+                <TouchableOpacity style={{ alignSelf: 'center', }} onPress={setFoodProps(), leaveAPositiveReview}>
                   <Icon color={restaurantColor} size={35} name="triangle" />
                 </TouchableOpacity>
               }
@@ -218,22 +325,27 @@ function FoodScreen({ route, navigation }) {
           <Text>{description}</Text>
 
 
-          <View style={{ margin: 20, justifyContent: 'center', }}>
-            <Text style={{ alignSelf: 'center' }}>{eatagain}%: would eat again</Text>
-            <Button onPress={() => { navigation.navigate("RatingFood",{ restId: restId, foodId: foodId, restName: restName})}} buttonStyle={[styles.button, { backgroundColor: restaurantColor, marginHorizontal: 40 }]} titleStyle={styles.buttonTitle} title="Rate my Food" />
+          <View style={{}}>
+            <Text style={{}}>{eatagain} %: would eat again</Text>
+            <Button onPress={() => { navigation.navigate("RatingFood", { restId: restId, foodId: foodId, restName: restName }) }} buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 300 }]} titleStyle={styles.buttonTitle} title="Rate my Food" />
           </View>
           <Text style={styles.subHeaderText}>Food Ratings: </Text>
           <FlatList
             data={rating}
             keyExtractor={(item, index) => index}
             renderItem={({ item }) => (
-              <View style={{ backgroundColor: '#F2F2F2', borderRadius: 20, padding: 10, margin: 5, shadowRadius: 2, shadowOpacity: 0.4, shadowOffset: { width: 0, height: 1 }, elevation: 2, }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <Text style={{ fontWeight: 'bold', fontSize: 15, marginVertical: 10 }}>{item.raters_name}</Text>
-                  <Text style={{ alignSelf: 'flex-end', marginVertical: 10 }}>{item.rating_date}</Text>
+              <View style={{ backgroundColor: '#F2F2F2', borderRadius: 5, padding: 10, margin: 5, shadowRadius: 2, shadowOpacity: 0.4, shadowOffset: { width: 0, height: 1 }, elevation: 2, }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' , margin: 5,marginBottom:10}}>
+                  <Image style={{ height: 50, width: 50, borderRadius: 50 }} source={{ uri: item.userPhoto }} />
+                  <Text style={{ fontWeight: 'bold', fontSize: 15, marginVertical: 10, marginRight: 'auto', marginHorizontal:10 }}> {item.raters_name} </Text>
+                  <Text style={{marginLeft:"auto", marginVertical: 10 }}>{item.rating_date}</Text>
                 </View>
-                <Text>{item.rating}</Text>
+                <View style={{margin:10}}>
+                <Text style={{ fontWeight: '400' }}>Would you eat again:{personaleatagainhandler({ item })} </Text>
+                <Divider style={{ marginTop:10, width:"40%"}}/>
+                <Text style={{ marginVertical: 10 }}>{item.rating}</Text>
                 <Text style={{ marginTop: 10, fontWeight: "400" }}>{item.restaurant}</Text>
+                </View>
               </View>
 
             )}

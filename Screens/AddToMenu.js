@@ -19,8 +19,10 @@ const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 
 
-function AddToMenu({ navigation }) {
+function AddToMenu({ route, navigation }) {
+  const { userId } = route.params;
   const dispatch = useDispatch();
+
   const restaurant = useSelector(state => state.searchedRestaurant)
   const tookPicture = useSelector(state => state.foodImage);
   const restaurantId = useSelector(state => state.restaurantId)
@@ -34,63 +36,10 @@ function AddToMenu({ navigation }) {
   const [inputItemPrice, setInputItemPrice] = useState("")
   const [inputItemDesc, setInputItemDesc] = useState("")
 
-  const [selectedRestSectionName, setRestSectionName] = useState([
-    {
-      "id": `1`,
-      "section_name": "Breakfast",
-      "icon": require("../assets/catergories/salad.png")
-    },
-    {
-      "id": "2",
-      "section_name": "Burritos",
-      "icon": require("../assets/catergories/burrito.png")
-    },
-    {
-      "id": "3",
-      "section_name": "Tacos",
-      "icon": require("../assets/catergories/taco.png")
-    },
-    {
-      "id": "4",
-      "section_name": "Salads",
-      "icon": require("../assets/catergories/salad.png")
-    },
-    {
-      "id": "5",
-      "section_name": "Enchiladas",
-      "icon": require("../assets/catergories/burrito.png")
 
-    },
-    {
-      "id": "6",
-      "section_name": "Tortas",
-      "icon": require("../assets/catergories/nacho.png")
-    },
-    {
-      "id": "7",
-      "section_name": "Quesadillas",
-      "icon": require("../assets/catergories/burrito.png")
-
-    },
-    {
-      "id": "8",
-      "section_name": "Tostadas",
-      "icon": require("../assets/catergories/nacho.png")
-    },
-    {
-      "id": "9",
-      "section_name": "Kids",
-      "icon": require("../assets/catergories/taco.png")
-    },
-    {
-      "id": '10',
-      "section_name": "Other",
-      "icon": require("../assets/catergories/salad.png")
-    }
-
-  ])
-  const [selectedSectionName, setSelectedSectionName] = useState("")
   useEffect(() => {
+    console.log(userId)
+    console.log("restId", restaurant)
     getCategories();
   }, [])
 
@@ -98,7 +47,7 @@ function AddToMenu({ navigation }) {
 
 
   const getCategories = async () => {
-    const categories = ref(database, "restaurants/" + restaurantId + "/categories")
+    const categories = ref(database, "restaurants/" + userId + "/categories")
     onValue(categories, (snapshot) => {
       const data = snapshot.val();
       if (data !== null) {
@@ -114,7 +63,7 @@ function AddToMenu({ navigation }) {
   // const [selectedRestaurants, setSelectedRestaurants] = useState("")
   const AddFood = async (item, itemdesc, itemprice, tookPicture) => {
     const uuid = uid();
-    set(ref(database, "restaurants/" + restaurantId + "/menus" + `/${uuid}`), {
+    set(ref(database, "restaurants/" + userId + "/menus" + `/${uuid}`), {
       food: item,
       food_id: uuid,
       description: itemdesc,
@@ -166,7 +115,7 @@ function AddToMenu({ navigation }) {
 
     return (
       <TouchableOpacity onPress={() => setCate(selectedCategory[`${item.index}`])}>
-        <View style={[styles.shadowProp, { margin: 20, borderRadius: 10, borderWidth: 1, backgroundColor: "grey" }]}>
+        <View style={[styles.shadowProp, { margin: 20, borderRadius: 10, borderWidth: 1 }]}>
           <Text style={{ padding: 20 }}>{selectedCategory[`${item.index}`]}</Text>
         </View>
 
@@ -190,79 +139,106 @@ function AddToMenu({ navigation }) {
 
 
   return (
-    <KeyboardAwareScrollView enableOnAndroid extraHeight={120} style={{ flex: 1, backgroundColor: "white" }}>
-      <View style={{ margin: 10, paddingTop: 30 }}>
+    <KeyboardAwareScrollView enableOnAndroid extraHeight={120} style={{ flex: 1, backgroundColor: "orange" }}>
+      <View style={{ margin: Platform.OS === 'web' ? 0 : 10, paddingTop: Platform.OS === 'web' ? 0 : 30 }}>
+        <View style={{ padding: 5, flexDirection: "row", backgroundColor: "white" }}>
+          <TouchableOpacity style={{ justifyContent: 'center', }} onPress={() => { navigation.navigate("Home") }}>
+            <Image
+              style={{
+                justifyContent: 'flex-start',
+                width: 125,
+                height: 50,
+                resizeMode: "contain",
+                justifyContent: 'center'
+              }}
+              source={require('../assets/logo_name_simple.png')} />
+          </TouchableOpacity>
+          <Text style={{ fontFamily: 'Primary', alignSelf: "center", fontSize: Platform.OS === 'web' ? 17 : 14, fontWeight: "600" }}>
+            for mexican restaurants
+          </Text>
+        </View>
+        {Platform.OS === 'web' ? <></> :
 
-        <Icon
-          color="black" size={35} name="arrow-left" onPress={() => { navigation.goBack() }}
-        />
-        <Text style={styles.headerText}>{restaurant}</Text>
-        <Text style={styles.subHeaderText}>New Food Item</Text>
-        <Divider style={{ margin: 10 }} />
-        <Text style={styles.subHeaderText}> Pick a Category</Text>
-
-        <FlatList
-          horizontal
-          style={{ maxHeight: windowHeight / 5 }}
-          data={selectedCategory}
-          keyExtractor={item => item.id}
-          renderItem={renderItem} />
-        {/* <Text>{selectedCategory[1]}</Text> */}
-        <View style={{ padding: 10 }}>
-          <Text style={styles.subHeaderText}>Add Photo</Text>
-          {Platform.OS === 'web' ?
-            <View>
-              <Button title="Add Photo" buttonStyle={[styles.button, { marginHorizontal: 60, backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} onPress={openImagePickerAsync} />
-              <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />
-            </View>
-
-            :
-            <View>
-              <Button title="Add Photo" buttonStyle={[styles.button, { marginHorizontal: 60, backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} onPress={() => navigation.navigate("Camera")} />
-              <Image source={{ uri: tookPicture }} style={{ width: 200, height: 200 }} />
-            </View>
-
-          }
-
-
-          <Text style={styles.subHeaderText}>Food Name: </Text>
-          <TextInput
-            style={[styles.inputContainer, { padding: 10, alignSelf: 'center', }]}
-            onChangeText={setInputItem}
-            value={inputItem}
-            placeholder="Tacos"
-            autoCapitalize='words'
-
+          <Icon
+            color="white" size={35} name="arrow-left" onPress={() => { navigation.goBack() }}
           />
-          <Text style={styles.subHeaderText}>Food Item Price:</Text>
-          <TextInput
-            style={[styles.inputContainer, { padding: 10, alignSelf: 'center' }]}
-            onChangeText={setInputItemPrice}
-            value={inputItemPrice}
-            placeholder="2.34"
-            keyboardType="decimal-pad"
-          />
-          <Text style={styles.subHeaderText}>Food Item Description:</Text>
-          <TextInput
-            style={[styles.inputContainer, { padding: 14, paddingBottom: 50, alignSelf: 'center' }]}
-            onChangeText={setInputItemDesc}
-            value={inputItemDesc}
-            placeholder="This is a meal"
-            numberOfLines={10}
-            multiline="true"
-            maxlength="70"
-
-          />
+        }
+        <View style={{ margin: 20 }}>
+          <Text style={{ color: 'white', fontFamily: 'Bold', fontSize: 40, maxWidth: 500, textAlign: 'center', alignSelf: "center" }}>
+            {restaurant}
+          </Text>
+          <Text style={{ color: 'white', fontFamily: 'Bold', fontSize: 30, maxWidth: 500, textAlign: 'center', alignSelf: "center" }}>Please input all fields for best results</Text>
         </View>
 
-        <Button onPress={() => AddFood(
-          inputItem,
-          inputItemDesc,
-          inputItemPrice,
-          tookPicture
-        )} buttonStyle={[styles.button, { marginHorizontal: 40, marginBottom: 10, backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} title="Add Food" />
+        <View style={[styles.shadowProp, { backgroundColor: 'white', alignSelf: 'center', margin: 20, borderRadius: 20, width: '90%', maxWidth: 650 }]}>
+          <View style={{ padding: 25 }}>
+            <Text style={[{ marginTop: 10 }, styles.subHeaderText]}>New Food Item :</Text>
+            <TextInput
+              style={[styles.inputContainer, { padding: 10, maxWidth: 400 }]}
+              onChangeText={setInputItem}
+              value={inputItem}
+              placeholder="Tacos"
+              autoCapitalize='words'
+            />
+            <Text style={styles.subHeaderText}>Food Item Price:</Text>
+            <TextInput
+              style={[styles.inputContainer, { padding: 10, maxWidth: 200, marginRight: 'auto' }]}
+              onChangeText={setInputItemPrice}
+              value={inputItemPrice}
+              placeholder="2.34"
+              keyboardType="decimal-pad"
+            />
+          </View>
+
+          <Divider style={{ margin: 10 }} />
+          <Text style={styles.subHeaderText}> Pick a Category</Text>
+
+          <FlatList
+            horizontal
+            style={{ maxHeight: windowHeight / 5 }}
+            data={selectedCategory}
+            keyExtractor={item => item.id}
+            renderItem={renderItem} />
+          {/* <Text>{selectedCategory[1]}</Text> */}
+          <View style={{ padding: 25 }}>
+            <Text style={styles.subHeaderText}>Add Photo</Text>
+            {Platform.OS === 'web' ?
+              <View>
+                <Button title="Add Photo" buttonStyle={[styles.button, { marginHorizontal: "10%",maxWidth:400, backgroundColor: restaurantColor, alignSelf:'center' }]} titleStyle={styles.buttonTitle} onPress={openImagePickerAsync} />
+                <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />
+              </View>
+
+              :
+              <View>
+                <Button title="Add Photo" buttonStyle={[styles.button, { marginHorizontal: 60,width:"40%", backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} onPress={() => navigation.navigate("Camera")} />
+                <Image source={{ uri: tookPicture }} style={{ width: 200, height: 200 }} />
+              </View>
+
+            }
+
+            <Text style={styles.subHeaderText}>Food Item Description:</Text>
+            <TextInput
+              style={[styles.inputContainer, { padding: 14, paddingBottom: 50 }]}
+              onChangeText={setInputItemDesc}
+              value={inputItemDesc}
+              placeholder="This is a meal"
+              numberOfLines={10}
+              multiline="true"
+              maxlength="70"
+
+            />
+            <Button onPress={() => AddFood(
+              inputItem,
+              inputItemDesc,
+              inputItemPrice,
+              tookPicture
+            )} buttonStyle={[styles.button, {maxWidth:400,width:"20%",minWidth:100 ,marginBottom: 10, backgroundColor: restaurantColor, alignSelf:'center'  }]} titleStyle={styles.buttonTitle} title="Add Food" />
+
+          </View>
 
 
+
+        </View>
       </View>
     </KeyboardAwareScrollView>
 

@@ -28,14 +28,16 @@ function RatingFood({route, navigation }) {
     const {restId, foodId,restName} = route.params;
     const dispatch = useDispatch();
     const [inputRating, setInputRating] = useState("");
-    const [name, setName] = useState()
+    const [name, setName] = useState("")
     const [image,setImage]= useState();
     const [refreshing, setRefreshing] = useState(false);
     const tookPicture = useSelector(state => state.foodImage);
     const [restaurantColor,setRestaurantColor]= useState("")
     const searchedRestaurant = useSelector(state => state.searchedRestaurant)
     const restaurantId = useSelector(state=> state.restaurantId)
-    
+    const username = useSelector(state =>state.username)
+    const userPhoto = useSelector(state => state.userPhoto)
+    const userId = useSelector(state =>state.userId)
     const foodItemId = useSelector(state => state.foodItemId)
     const food = useSelector(state => state.food)
     const foodImage = useSelector(state => state.foodImage)
@@ -55,30 +57,32 @@ function RatingFood({route, navigation }) {
 
     const [eatagain, setEatAgain] = useState(0);
     const AddFoodRating = async () => {
-        update(ref(database, "restaurants/" + restaurantId + "/menus" + "/"+ foodItemId ), {
+        update(ref(database, "restaurants/" + restId + "/menus" + "/"+ foodId ), {
             ratingCount: increment(1),
           });
         if(eatagain === 1) {
             console.log("EATING AGAIN")
-            update(ref(database, "restaurants/" + restaurantId + "/menus" + "/"+ foodItemId ), {
+            update(ref(database, "restaurants/" + restId + "/menus" + "/"+ foodId ), {
                 eatagain: increment(1),
               });
         }
 
         const date = new Date().toDateString();
         const uuid = uid();
-        set(ref(database, "restaurants/" + restaurantId + "/ratings" + "/" + foodItemId + `/${uuid}`), {
-            food_id: foodItemId,
+        set(ref(database, "restaurants/" + restId + "/ratings" + "/" + foodId + `/${uuid}`), {
+            food_id: foodId,
             food_name: food,
             rating: inputRating,
             restaurant: searchedRestaurant,
-            raters_name: name,
+            raters_name: username,
             upvotes: 0,
             rating_date: date,
             taste: tastevalue,
             appearance: appearancevalue,
             execution: executionvalue,
             personaleatagain: eatagain,
+            user_Id:userId,
+            userPhoto:userPhoto
 
         });
         setInputRating("");
@@ -87,7 +91,7 @@ function RatingFood({route, navigation }) {
             user: `${name}`
         }
         if (Platform.OS === 'web'){
-            const getImage = tef(storage, 'foodRatingImage/' + foodItemId + "/" + uuid); //how the image will be addressed inside the storage
+            const getImage = tef(storage, 'foodRatingImage/' + foodId + "/" + uuid); //how the image will be addressed inside the storage
             //convert image to array of bytes
             const img = await fetch(image);
             const bytes = await img.blob();
@@ -95,7 +99,7 @@ function RatingFood({route, navigation }) {
 
         }else {
             console.log(tookPicture)
-            const getImage = tef(storage, 'foodRatingImage/' + foodItemId + "/" + uuid); //how the image will be addressed inside the storage
+            const getImage = tef(storage, 'foodRatingImage/' + foodId + "/" + uuid); //how the image will be addressed inside the storage
             //convert image to array of bytes
             const img = await fetch(tookPicture);
             const bytes = await img.blob();
@@ -109,6 +113,7 @@ function RatingFood({route, navigation }) {
     }
 
     useEffect(() => {
+        console.log(userId)
         executionValueChanger();
         appearanceValueChanger();
         tasteValueChanger();
@@ -325,7 +330,7 @@ function RatingFood({route, navigation }) {
                         <TextInput
                             style={[styles.inputContainer, { padding: 10, alignSelf: 'center', }]}
                             onChangeText={setName}
-                            value={name}
+                            value={username}
                             placeholder="Name"
                             autoCapitalize='words'
 

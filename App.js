@@ -1,5 +1,5 @@
-import React, { useEffect,useState } from 'react';
-import { Platform,View,Text } from 'react-native'
+import React, { useEffect, useState } from 'react';
+import { Platform, View, Text } from 'react-native'
 
 import { Provider } from 'react-redux';
 import store from './redux/store'
@@ -14,25 +14,22 @@ import CameraScreen from './Screens/CameraScreen';
 import AddRestaurant from './Screens/Restaurants/AddRestaurant';
 import CreateMenu from './Screens/Restaurants/CreateMenu';
 import RatingFood from './Screens/RatingFood';
-import Welcome from './Screens/Restaurants/Welcome';
+import Login from './Screens/Restaurants/Login';
 import SignUp from './Screens/Restaurants/Signup';
 import { useSelector } from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as Updates from 'expo-updates';
-import HomeScreenWeb from './Screens/web/HomeScreenWeb';
+import MenuWeb from './Screens/web/MenuWeb';
 import Settings from './Screens/Restaurants/Settings'
-
-
-import { useFonts } from "@use-expo/font";
+import RestaurantHome from './Screens/Restaurants/RestaurantHome';
+import AddAddress from './Screens/Restaurants/AddAddress';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
 
-  const [isLoaded] = useFonts({
-    "SourceSans-ExtraLight": require("./assets/fonts/AktivGrotesk-Regular.ttf"),
-  });
+
 
   const reactToUpdates = async () => {
     Updates.addListener((event) => {
@@ -45,19 +42,28 @@ export default function App() {
   const linking = {
     config: {
       screens: {
-      Home: {
+        RestaurantWeb: {
+          path: 'restaurant-menu-web/'
+        },
+        AddAddress: {
+          path: 'restaurant-address/'
+        },
+        RestaurantHome: {
+          path: 'restaurant-home/'
+        },
+        Home: {
           path: 'home/',
         },
-        RestaurantMenu: {
-          path: 'restaurant-menu/',
+        RestaurantMenuApp: {
+          path: 'restaurant-menu-app/',
         },
         AddRestaurant: {
           path: 'new-restaurant/',
         },
-        AddToMenu: {
-          path: 'add-to-item/',
-        },
-        Restaurant: {
+        // EditMenu: {
+        //   path: 'edit-menu/',
+        // },
+        RestaurantAdmin: {
           path: 'restaurant-admin/',
         },
         Food: {
@@ -72,8 +78,8 @@ export default function App() {
         RatingFood: {
           path: 'rate-my-food/',
         },
-        WelcomeScreen: {
-          path: 'welcome/',
+        Login: {
+          path: 'login/',
         },
         RatingRestaurant: {
           path: 'rate-my-restaurant/',
@@ -82,13 +88,11 @@ export default function App() {
           path: 'settings/',
         },
         SignUp: {
-          path:'sign-up'
+          path: 'sign-up'
         },
-        CreateMenu:{
-          path:'create-menu'
+        CreateMenu: {
+          path: 'create-menu'
         }
-  
-
       }
       /* configuration for matching screens with paths */
     },
@@ -96,35 +100,35 @@ export default function App() {
 
 
   return (
-    //Platform.OS === 'ios' ?
-    // <NavigationContainer>
-    //   <Provider store={store}>
-    //     <Stack.Navigator initialRouteName='HomeScreenWeb'>
-    //       <Stack.Screen
-    //         name="HomeScreenWeb"
-    //         component={HomeScreenWeb}
-    //         options={{
-    //           headerShown: false,
-
-    //         }}
-    //       />
-    //       <Stack.Screen
-    //         name="RestaurantMenu"
-    //         component={RestaurantMenu}
-    //         options={{
-    //           headerShown: false,
-
-    //         }}
-    //       />
-    //     </Stack.Navigator>
-    //   </Provider>
-    // </NavigationContainer>
-    //:
     <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>
-      <View><Text style={{color:'red', fontSize:10}}> Unstable Indev v1.2 \\ fixed routing paths on refresh for all pages....</Text></View>
+      <View><Text style={{ color: 'red', fontSize: 10 }}> Unstable Indev v2.2\\ Login with google added trying to fix categories</Text></View>
       <Provider store={store}>
         <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen
+          <Stack.Screen
+            name="RestaurantWeb"
+            component={MenuWeb}
+            options={{
+              headerShown: false,
+
+            }}
+          />
+          <Stack.Screen
+            name="AddAddress"
+            component={AddAddress}
+            options={{
+              headerShown: false,
+
+            }}
+          />
+          <Stack.Screen
+            name="RestaurantHome"
+            component={RestaurantHome}
+            options={{
+              headerShown: false,
+
+            }}
+          />
+          <Stack.Screen
             name="Settings"
             component={Settings}
             options={{
@@ -132,7 +136,7 @@ export default function App() {
 
             }}
           />
-        <Stack.Screen
+          <Stack.Screen
             name="RatingRestaurant"
             component={RatingRestaurant}
             options={{
@@ -157,8 +161,8 @@ export default function App() {
             }}
           />
           <Stack.Screen
-            name="WelcomeScreen"
-            component={Welcome}
+            name="Login"
+            component={Login}
             options={{
               headerShown: false,
 
@@ -199,7 +203,7 @@ export default function App() {
             }}
           />
           <Stack.Screen
-            name="Restaurant"
+            name="RestaurantAdmin"
             component={RestaurantScreen}
             options={{
               headerShown: false,
@@ -207,7 +211,7 @@ export default function App() {
             }}
           />
           <Stack.Screen
-            name="AddToMenu"
+            name="EditMenu"
             component={AddToMenu}
             options={{
               headerShown: false,
@@ -215,13 +219,13 @@ export default function App() {
             }}
           />
           <Stack.Screen
-            name="RestaurantMenu"
+            name="RestaurantMenuApp"
             component={RestaurantMenu}
             options={{
               headerShown: false,
             }}
             initialParams={{
-                restId:null
+              restId: null
             }}
           />
           <Stack.Screen

@@ -20,9 +20,12 @@ import { useLinkTo } from '@react-navigation/native';
 
 const RestaurantMenu = ({ route, navigation }) => {
   const linkTo = useLinkTo();
+
   const { restId } = route.params;
+
   const [selectedCategory, setSelectedCategory] = useState([]);
   const [cate, setCate] = useState("");
+
   const [searchedRestaurant, setRestaurantName] = useState([])
   const [restaurantDesc, setRestaurantDesc] = useState([]);
   const [restaurantId, setRestaurantId] = useState([]);
@@ -30,61 +33,7 @@ const RestaurantMenu = ({ route, navigation }) => {
   const [restaurantColor, setRestaurantColor] = useState([]);
   const [restaurantAddress, setRestaurantAddress] = useState([]);
   const [restaurantPhone, setRestaurantPhone] = useState([]);
-  const [selectedRestSectionName, setRestSectionName] = useState([
-    {
-      "id": `1`,
-      "section_name": "Breakfast",
-      "icon": require("../assets/catergories/salad.png")
-    },
-    {
-      "id": "2",
-      "section_name": "Burritos",
-      "icon": require("../assets/catergories/burrito.png")
-    },
-    {
-      "id": "3",
-      "section_name": "Tacos",
-      "icon": require("../assets/catergories/taco.png")
-    },
-    {
-      "id": "4",
-      "section_name": "Salads",
-      "icon": require("../assets/catergories/salad.png")
-    },
-    {
-      "id": "5",
-      "section_name": "Enchiladas",
-      "icon": require("../assets/catergories/burrito.png")
 
-    },
-    {
-      "id": "6",
-      "section_name": "Tortas",
-      "icon": require("../assets/catergories/nacho.png")
-    },
-    {
-      "id": "7",
-      "section_name": "Quesadillas",
-      "icon": require("../assets/catergories/burrito.png")
-
-    },
-    {
-      "id": "8",
-      "section_name": "Tostadas",
-      "icon": require("../assets/catergories/nacho.png")
-    },
-    {
-      "id": "9",
-      "section_name": "Kids",
-      "icon": require("../assets/catergories/taco.png")
-    },
-    {
-      "id": '10',
-      "section_name": "Other",
-      "icon": require("../assets/catergories/salad.png")
-    }
-
-  ])
 
   const windowWidth = Dimensions.get("window").width;
   const windowHeight = Dimensions.get("window").height;
@@ -94,7 +43,7 @@ const RestaurantMenu = ({ route, navigation }) => {
   // const restaurantPhone = useSelector(state => state.restaurantPhone)
   // const restaurantAddress = useSelector(state => state.restaurantAddress)
   // const restaurantId = useSelector(state => state.restaurantId)
-  //const restaurantImage = useSelector(state => state.restaurantImage)
+  // const restaurantImage = useSelector(state => state.restaurantImage)
   // const restaurantColor = useSelector(state => state.restaurantColor)
 
   const dispatch = useDispatch();
@@ -147,7 +96,7 @@ const RestaurantMenu = ({ route, navigation }) => {
 
   useEffect(() => {
     const getRestaurant = async () => {
-      //const restId = auth.currentUser.uid;
+      // const restId = auth.currentUser.uid;
       const docRef = doc(db, "restaurants", restId);
       const snapshot = await getDoc(docRef)
       if (snapshot.exists()) {
@@ -157,7 +106,9 @@ const RestaurantMenu = ({ route, navigation }) => {
         setRestaurantDesc(snapshot.data().restaurant_desc)
         setRestaurantName(snapshot.data().restaurant_name)
         setRestaurantColor(snapshot.data().restaurant_color)
+
         dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurantAddress, restaurantPhone, restaurantId, restaurantColor))
+        
         getCategories();
         getImage();
       } else {
@@ -215,17 +166,12 @@ const RestaurantMenu = ({ route, navigation }) => {
             {/* Header */}
             <View style={{ marginHorizontal: 10 }}>
               {Platform.OS === 'web' ?
-                <Icon 
-                style={{ paddingTop: 10, margin: 10 }}
-                  color="black" size={35}
-                  name="home"
-                  onPress={() => { navigation.navigate("Home") }}
-                      />
+              <></>
                 :
                 <Icon style={{ paddingTop: 30, margin: 10 }}
                   color="black" size={35}
                   name="arrow-left"
-                  onPress={() => { navigation.navigate("Home") }} />
+                  onPress={() => { navigation.goBack()}} />
                 }
 
             </View>
