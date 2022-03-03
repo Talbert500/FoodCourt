@@ -45,7 +45,7 @@ function SignUp({ navigation }) {
         const emails = userCredential.user.email;
         console.log(userCredential_id)
         dispatch(setNewRestaurant(userCredential_id, emails, first, last, name))
-
+        
         navigation.navigate("AddRestaurant")
       }).catch((error) => {
         const errorCode = error.code;
@@ -255,13 +255,13 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'white',
-    fontWeight: '700',
+    fontWeight: "700",
     fontSize: 16,
     fontFamily: 'Primary'
   },
   buttonOutlineText: {
     color: '#f6ae2d',
-    fontWeight: '700',
+    fontWeight:"700",
     fontSize: 16,
     fontFamily: 'Primary'
   },

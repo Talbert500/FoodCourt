@@ -5,14 +5,14 @@ import { Provider } from 'react-redux';
 import store from './redux/store'
 import HomeScreen from './Screens/HomeScreen';
 import RestaurantScreen from './Screens/RestaurantScreen';
-import AddToMenu from './Screens/AddToMenu';
+import FoodAdd from './Screens/FoodAdd';
 import RestaurantMenu from './Screens/RestaurantMenu';
 import RatingRestaurant from './Screens/RatingRestaurant';
 import FoodScreen from './Screens/FoodScreen';
 import UploadPicture from './Screens/UploadPicture';
 import CameraScreen from './Screens/CameraScreen';
 import AddRestaurant from './Screens/Restaurants/AddRestaurant';
-import CreateMenu from './Screens/Restaurants/CreateMenu';
+import AddCategories from './Screens/Restaurants/AddCategories';
 import RatingFood from './Screens/RatingFood';
 import Login from './Screens/Restaurants/Login';
 import SignUp from './Screens/Restaurants/Signup';
@@ -24,6 +24,9 @@ import MenuWeb from './Screens/web/MenuWeb';
 import Settings from './Screens/Restaurants/Settings'
 import RestaurantHome from './Screens/Restaurants/RestaurantHome';
 import AddAddress from './Screens/Restaurants/AddAddress';
+import AddMenus from './Screens/Restaurants/AddMenus';
+import MenuEdit from './Screens/Restaurants/MenuEdit';
+import QRMenus from './Screens/QRMenus'
 
 const Stack = createNativeStackNavigator();
 
@@ -42,6 +45,9 @@ export default function App() {
   const linking = {
     config: {
       screens: {
+        QRMenus:{
+          path:'QR-Menus-Activation'
+        },
         RestaurantWeb: {
           path: 'restaurant-menu-web/'
         },
@@ -60,9 +66,6 @@ export default function App() {
         AddRestaurant: {
           path: 'new-restaurant/',
         },
-        // EditMenu: {
-        //   path: 'edit-menu/',
-        // },
         RestaurantAdmin: {
           path: 'restaurant-admin/',
         },
@@ -92,6 +95,12 @@ export default function App() {
         },
         CreateMenu: {
           path: 'create-menu'
+        },
+        AddMenus: {
+          path: 'add-menu/'
+        },
+        MenuEdit:{
+          path: 'menu-edit'
         }
       }
       /* configuration for matching screens with paths */
@@ -101,9 +110,33 @@ export default function App() {
 
   return (
     <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>
-      <View><Text style={{ color: 'red', fontSize: 10 }}> Unstable Indev v2.2\\ Login with google added trying to fix categories</Text></View>
+      <View><Text style={{ color: 'red', fontSize: 10 }}> Unstable Alpha v2.7\\ ADDED DOWNLOADABLE QR CODE WORKFLOW</Text></View>
       <Provider store={store}>
         <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen
+            name="QRMenus"
+            component={QRMenus}
+            options={{
+              headerShown: false,
+
+            }}
+          />
+          <Stack.Screen
+            name="AddMenus"
+            component={AddMenus}
+            options={{
+              headerShown: false,
+
+            }}
+          />
+          <Stack.Screen
+            name="MenuEdit"
+            component={MenuEdit}
+            options={{
+              headerShown: false,
+
+            }}
+          />
           <Stack.Screen
             name="RestaurantWeb"
             component={MenuWeb}
@@ -153,8 +186,8 @@ export default function App() {
             }}
           />
           <Stack.Screen
-            name="CreateMenu"
-            component={CreateMenu}
+            name="AddCategories"
+            component={AddCategories}
             options={{
               headerShown: false,
 
@@ -211,8 +244,8 @@ export default function App() {
             }}
           />
           <Stack.Screen
-            name="EditMenu"
-            component={AddToMenu}
+            name="FoodAdd"
+            component={FoodAdd}
             options={{
               headerShown: false,
 

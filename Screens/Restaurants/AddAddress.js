@@ -74,7 +74,7 @@ function AddRestaurant({ navigation }) {
             console.log("ERROR" + errorCode)
         })
         //just added 
-        navigation.navigate("CreateMenu")
+        navigation.navigate("AddMenus")
     }
 
 

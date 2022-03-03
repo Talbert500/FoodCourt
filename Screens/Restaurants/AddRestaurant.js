@@ -1,7 +1,7 @@
 import { Image, ScrollView, Dimensions, TouchableWithoutFeedback, Keyboard, Platform, KeyboardAvoidingView, StyleSheet, TextInput, Text, View, SafeAreaView, FlatList, TouchableOpacity, Linking } from 'react-native';
 import { Button } from 'react-native-elements'
 import React, { useState, useEffect } from 'react';
-import { db } from '../../firebase-config'
+import { db,database} from '../../firebase-config'
 import { ref, set, update, push } from 'firebase/database'
 import { useSelector, useDispatch } from 'react-redux';
 import { styles } from '../../styles'
@@ -18,6 +18,7 @@ import { Link } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather'
 import * as ImagePicker from 'expo-image-picker';
 import { useFonts } from "@use-expo/font";
+import axios from 'axios';
 
 function AddRestaurant({ navigation }) {
     // I need to go to reducer state to get this object because the camera is called in the component to set a  new image and I want to see it
@@ -49,16 +50,68 @@ function AddRestaurant({ navigation }) {
 
 
 
-    const [address, setAddress] = useState("")
-    const [addressCity, setAddressCity] = useState("")
-    const [addressState, setAddressState] = useState("")
-    const [addressZip, setAddressZip] = useState("")
-    const [addressCountry, setAddressCountry] = useState("")
     const [phone, setPhone] = useState("")
     const [desc, setDesc] = useState("")
     const [color, setColor] = useState("")
     const [image, setImage] = useState("")
     const [website, setWebsite] = useState('')
+    const [QRMenuId, setQRMenuId] = useState("359885")
+    const APIKEY = "d37bdf656af0540a07b000834391f02f70e453f6"
+
+
+    const createQRMenu = async => {
+
+        const data = JSON.stringify({
+            "name": `${restaurantName}'s Menu`,
+            "organization": 105513,
+            "qr_type": 2,
+            "campaign": {
+                "content_type": 1,
+                "custom_url": `https://www.ratemyfood.app/restaurant-menu-web?restId=${userCredential_id}`
+            },
+            "location_enabled": false,
+            "attributes": {
+                "color": `${color}`,
+                "colorDark": "#000000",
+                "margin": 40,
+                "isVCard": false,
+                "frameText": `${restaurantName}'s Menu`,
+                "logoImage": "https://www.ratemyfood.app/static/media/splash.8cba55b7.png",
+                "logoScale": 0.1992,
+                "frameColor": `${color}`,
+                "frameStyle": "banner-bottom",
+                "logoMargin": 5,
+                "dataPattern": "square",
+                "eyeBallShape": "circle",
+                "gradientType": "none",
+                "eyeFrameColor": `${color}`,
+                "eyeFrameShape": "rounded"
+            }
+        });
+        const config = {
+            method: "post",
+            url: "https://api.beaconstac.com/api/2.0/qrcodes/",
+            headers: {
+                "Authorization": `Token ${APIKEY}`,
+                "Content-Type": "application/json"
+            },
+            data: data
+        }
+        axios.request(config)
+            .then(response => {
+                console.log(response.data)
+                setQRMenuId(response.data.id)
+                set(ref(database, "restaurants/" + userCredential_id + "/data"), {
+                    qrid: response.data.id
+
+                });
+            })
+            .then(result => {
+                console.log(result)
+            })
+            .catch(error => console.log('error', error));
+
+    }
 
     const AddNewRestaurant = async () => {
         console.log(userCredential_id)
@@ -79,6 +132,8 @@ function AddRestaurant({ navigation }) {
             const errorCode = error;
             console.log("ERROR" + errorCode)
         })
+        createQRMenu();
+        
         dispatch(setSearchedRestaurant(restaurantName, desc, null, phone, userCredential_id, color))
         dispatch(setRestaurantInfo(website))
         //just added 
@@ -153,7 +208,7 @@ function AddRestaurant({ navigation }) {
                         }}
                         source={require('../../assets/logo_name_simple.png')} />
                 </TouchableOpacity>
-                <Text style={{ alignSelf: "center", fontSize:Platform.OS ==="web"? 17: 14, fontWeight: '600' }}>
+                <Text style={{ alignSelf: "center", fontSize:Platform.OS ==="web"? 17: 14, fontWeight: "600" }}>
                     for mexican restaurants
                 </Text>
             </View>

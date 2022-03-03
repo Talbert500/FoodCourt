@@ -5,20 +5,20 @@ import { Button, Input } from 'react-native-elements'
 import { database } from '../firebase-config'
 import { useDispatch, useSelector } from 'react-redux';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../firebase-config';
-import { ref, update, onValue, increment } from 'firebase/database'
-import { db } from '../firebase-config'
-import { collection, getDoc, doc } from 'firebase/firestore'
+import { ref, update, onValue, increment, push } from 'firebase/database'
 import { styles } from '../styles'
 import { ref as tef, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '../firebase-config';
-import Icon from 'react-native-vector-icons/Feather'
+import { storage, provider, db, auth } from '../firebase-config';
+//import Icon from 'react-native-vector-icons/Feather'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Link } from '@react-navigation/native';
 import { setSearchedRestaurant, setFoodItemId, setUserProps } from '../redux/action'
 import { useLinkTo } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Divider } from 'react-native-elements/dist/divider/Divider';
+import { Icon } from 'react-native-elements'
+import { setDoc, getDoc, doc } from 'firebase/firestore'
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
@@ -57,8 +57,17 @@ function FoodScreen({ route, navigation }) {
   const [userPhoto, setUserPhoto] = useState('')
   const [loggedIn, setloggedin] = useState(false)
   const [isRestaurant, setIsRestaurant] = useState('')
-  const [userName, setUserName] = useState('')
-  const [userId, setUserId] = useState('')
+  const [userName, setName] = useState('')
+  const [userId, setUserId] = useState("")
+  const [reviewResponse, setReviewResponse] = useState([])
+
+  const [like, setLiked] = useState(false);
+  const [dislike, setDisliked] = useState(false)
+  const [current, setCurrent] = useState("");
+  const [ratingid, setRatingId] = useState('')
+  const [ratingHistory, setRatingHistory] = useState([])
+
+  const [restaurantLiked, setRestaurantLiked] = useState(false)
 
 
   // const [selectedRestaurants, setSelectedRestaurants] = useState("")
@@ -93,18 +102,19 @@ function FoodScreen({ route, navigation }) {
     const getRatings = ref(database, "restaurants/" + restId + "/ratings/" + foodId);
     onValue(getRatings, (snapshot) => {
       const data = snapshot.val();
-
       if (data !== null) {
+        console.log(data)
         setRating("")
         Object.values(data).map((ratingData) => {
-          setRating((food) => [...food, ratingData]);
+          setRating((rate) => [...rate, ratingData]);
+          setRatingHistory((rate) => [...rate, ratingData.reviewResponse]);
           setRefreshing(false);
         })
       }
     })
   }
   const getFood = async () => {
-    const food = ref(database, 'restaurants/' + restId + '/menus/' + foodId);
+    const food = ref(database, 'restaurants/' + restId + '/foods/' + foodId);
     onValue(food, (snapshot) => {
       const data = snapshot.val();
       if (data !== null) {
@@ -121,7 +131,6 @@ function FoodScreen({ route, navigation }) {
   }
 
   useEffect(() => {
-
     setLoading(true);
     const getRestaurant = async () => {
       const docRef = doc(db, "restaurants", restId);
@@ -139,21 +148,13 @@ function FoodScreen({ route, navigation }) {
     }
 
     onAuthStateChanged(auth, (user) => {
+      console.log(user)
       if (user) {
-        console.log("confirm", user)
         setloggedin(true)
-        const userRef = ref(database, "user/" + user.uid)
-        onValue(userRef, (snapshot) => {
-          const data = snapshot.val();
-          if (data !== null) {
-            console.log(data)
-            setIsRestaurant(data.hasRestaurant)
-            setUserId(data.userId)
-            setUserName(data.userName)
-            setUserPhoto(data.userPhoto);
-            console.log(data.userName)
-          }
-        });
+        setName(user.displayName)
+        setUserId(user.uid)
+        setUserPhoto(user.photoURL)
+        
       } else {
         setloggedin(false);
       }
@@ -163,23 +164,82 @@ function FoodScreen({ route, navigation }) {
     getRating();
     getUpVotesUpdate();
     getFood();
-
-
-
   }, [])
 
+// const setUserData = async (userid)=> {
+//   console.log(userid)
+
+//   const userRef = ref(database, "user/" + userid)
+//   onValue(userRef, (snapshot) => {
+//     const data = snapshot.val();
+//     console.log("HERE USER PRPS",snapshot.val())
+//     if (data !== null) {
+//       setIsRestaurant(data.hasRestaurant)
+//       setUserId(data.userId)
+//       setUserName(data.userName)
+//       setUserPhoto(data.userPhoto);
+//     }else {
+//       console.log("error")
+//     }
+//   });
+
+// }
   const upvote = async () => {
+
     // int currentUpVotes;
-    update(ref(database, "restaurants/" + restId + "/menus" + "/" + foodId), {
-      upvotes: increment(1),
-    });
-    getUpVotesUpdate();
-    setUpvoteSet(true);
+    if (loggedIn == true) {
+      update(ref(database, "restaurants/" + restId + "/foods" + "/" + foodId), {
+        upvotes: increment(1),
+      });
+      getUpVotesUpdate();
+      setUpvoteSet(true);
+    }
+    if (loggedIn !== true) {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          const credential = GoogleAuthProvider.credentialFromResult(result);
+          const token = credential.accessToken;
+          const user = result.user;
+          console.log(user)
+          setloggedin(true);
+          setUserId(user.uid)
+          setUserPhoto(user.photoURL)
+          dispatch(setUserProps(user.email, user.displayName, user.photoURL))
+          //Storing user data
+          setDoc(doc(db, "users", user.email), {
+            userEmail: user.email,
+            userName: user.displayName,
+            userId: user.uid,
+            user_date_add: user.metadata.creationTime,
+            last_seen: user.metadata.lastSignInTime,
+            userPhone: user.phoneNumber,
+          }).catch((error) => {
+            const errorCode = error.code;
+            console.log("ERROR", errorCode)
+          })
+          //Also storing but tracked user data in realtime
+          set(ref(database, "user/" + user.uid), {
+            userEmail: user.email,
+            userName: user.displayName,
+            userId: user.uid,
+            user_date_add: user.metadata.creationTime,
+            last_seen: user.metadata.lastSignInTime,
+            userPhone: user.phoneNumber,
+            hasRestaurant: "false",
+            userPhoto: user.photoURL
+          });
 
+        }).catch((error) => {
+          const errorCode = error.code;
+          const email = error.email;
+          const credential = GoogleAuthProvider.credentialFromResult(error);
+          console.log(credential, errorCode)
+        })
+
+    }
   }
-
   const getUpVotesUpdate = async () => {
-    const getUpvotes = ref(database, "restaurants/" + restId + "/menus" + "/" + foodId);
+    const getUpvotes = ref(database, "restaurants/" + restId + "/foods" + "/" + foodId);
     onValue(getUpvotes, (snapshot) => {
       const data = snapshot.val();
       if (data !== null) {
@@ -222,13 +282,206 @@ function FoodScreen({ route, navigation }) {
   const personaleatagainhandler = ({ item }) => {
     if (item.personaleatagain === 1) {
       return (
-        <Text style={{ fontWeight: '500' }}> Yes</Text>
+        <Text style={{ fontWeight: "500" }}> Yes</Text>
       )
     } else {
       return (
-        <Text style={{ fontWeight: '500' }}> No</Text>
+        <Text style={{ fontWeight: "500" }}> No</Text>
       )
     }
+
+  }
+  const joinUserLikes = (item) => {
+    setReviewResponse([...reviewResponse, { userId: userId, response: item }])
+
+  }
+
+  const liked = (item) => {
+    console.log("rating history", ratingHistory)
+    setCurrent("liked");
+    const id = item.review_id
+
+    if (loggedIn == true) {
+      console.log(id)
+      if (like == true) {
+        joinUserLikes("liked");
+        update(ref(database, "restaurants/" + restId + "/ratings" + "/" + foodId + "/" + id), {
+          likes: increment(-1),
+        });
+
+
+
+        setDisliked(false);
+        setLiked(false);
+        console.log(like)
+
+      } else {
+        update(ref(database, "restaurants/" + restId + "/ratings" + "/" + foodId + "/" + id), {
+          likes: increment(1),
+        });
+        setLiked(true);
+        setDisliked(false)
+
+      }
+    }
+    if (loggedIn !== true) {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          const credential = GoogleAuthProvider.credentialFromResult(result);
+          const token = credential.accessToken;
+          const user = result.user;
+          console.log(user)
+          setloggedin(true);
+          setUserId(user.uid)
+          setUserPhoto(user.photoURL)
+          dispatch(setUserProps(user.email, user.displayName, user.photoURL))
+          //Storing user data
+          setDoc(doc(db, "users", user.email), {
+            userEmail: user.email,
+            userName: user.displayName,
+            userId: user.uid,
+            user_date_add: user.metadata.creationTime,
+            last_seen: user.metadata.lastSignInTime,
+            userPhone: user.phoneNumber,
+          }).catch((error) => {
+            const errorCode = error.code;
+            console.log("ERROR", errorCode)
+          })
+          //Also storing but tracked user data in realtime
+          set(ref(database, "user/" + user.uid), {
+            userEmail: user.email,
+            userName: user.displayName,
+            userId: user.uid,
+            user_date_add: user.metadata.creationTime,
+            last_seen: user.metadata.lastSignInTime,
+            userPhone: user.phoneNumber,
+            hasRestaurant: "false",
+            userPhoto: user.photoURL
+          });
+
+
+        }).catch((error) => {
+          const errorCode = error.code;
+          const email = error.email;
+          const credential = GoogleAuthProvider.credentialFromResult(error);
+          console.log(credential, errorCode)
+        })
+
+    }
+
+  }
+
+  const disliked = (item) => {
+    setCurrent("disliked");
+    const id = item.review_id
+    joinUserLikes("disliked");
+    if (loggedIn == true) {
+      if (dislike == true) {
+        update(ref(database, "restaurants/" + restId + "/ratings" + "/" + foodId + "/" + id), {
+          dislikes: increment(-1),
+        });
+
+        setLiked(false);
+        setDisliked(false);
+
+      } else {
+        update(ref(database, "restaurants/" + restId + "/ratings" + "/" + foodId + "/" + id), {
+          dislikes: increment(1),
+        });
+        setDisliked(true)
+        setLiked(false)
+
+      }
+    }
+
+    if (loggedIn !== true) {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          const credential = GoogleAuthProvider.credentialFromResult(result);
+          const token = credential.accessToken;
+          const user = result.user;
+          console.log(user)
+          setloggedin(true);
+          setUserId(user.uid)
+          setUserPhoto(user.photoURL)
+          dispatch(setUserProps(user.email, user.displayName, user.photoURL))
+          //Storing user data
+          setDoc(doc(db, "users", user.email), {
+            userEmail: user.email,
+            userName: user.displayName,
+            userId: user.uid,
+            user_date_add: user.metadata.creationTime,
+            last_seen: user.metadata.lastSignInTime,
+            userPhone: user.phoneNumber,
+          }).catch((error) => {
+            const errorCode = error.code;
+            console.log("ERROR", errorCode)
+          })
+          //Also storing but tracked user data in realtime
+          set(ref(database, "user/" + user.uid), {
+            userEmail: user.email,
+            userName: user.displayName,
+            userId: user.uid,
+            user_date_add: user.metadata.creationTime,
+            last_seen: user.metadata.lastSignInTime,
+            userPhone: user.phoneNumber,
+            hasRestaurant: "false",
+            userPhoto: user.photoURL
+          });
+
+
+        }).catch((error) => {
+          const errorCode = error.code;
+          const email = error.email;
+          const credential = GoogleAuthProvider.credentialFromResult(error);
+          console.log(credential, errorCode)
+        })
+
+    }
+
+  }
+  const googleLogin = () => {
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        const token = credential.accessToken;
+        const user = result.user;
+        console.log(user)
+        setloggedin(true);
+        setUserId(user.uid)
+        setUserPhoto(user.photoURL)
+        dispatch(setUserProps(user.email, user.displayName, user.photoURL))
+        //Storing user data
+        setDoc(doc(db, "users", user.email), {
+          userEmail: user.email,
+          userName: user.displayName,
+          userId: user.uid,
+          user_date_add: user.metadata.creationTime,
+          last_seen: user.metadata.lastSignInTime,
+          userPhone: user.phoneNumber,
+        }).catch((error) => {
+          const errorCode = error.code;
+          console.log("ERROR", errorCode)
+        })
+        //Also storing but tracked user data in realtime
+        set(ref(database, "user/" + user.uid), {
+          userEmail: user.email,
+          userName: user.displayName,
+          userId: user.uid,
+          user_date_add: user.metadata.creationTime,
+          last_seen: user.metadata.lastSignInTime,
+          userPhone: user.phoneNumber,
+          hasRestaurant: "false",
+          userPhoto: user.photoURL
+        });
+
+
+      }).catch((error) => {
+        const errorCode = error.code;
+        const email = error.email;
+        const credential = GoogleAuthProvider.credentialFromResult(error);
+        console.log(credential, errorCode)
+      })
 
   }
 
@@ -249,24 +502,15 @@ function FoodScreen({ route, navigation }) {
                 }}
                 source={require('../assets/logo_name_simple.png')} />
             </TouchableOpacity>
-            <View style={[styles.shadowProp, { maxWidth: 700, alignSelf: Platform.OS === 'web' ? 'center' : '', width: '100%' }]}>
-              <Input
-                inputContainerStyle={{ borderBottomWidth: 0, marginBottom: Platform.OS === 'web' ? -15 : -20 }}
-                // onChangeText={(text) => searchFilter(text)}
-                // value={}
-                placeholder="Chicken Tacos..."
-                leftIcon={{ type: 'material-community', name: "taco" }}
-              />
-            </View>
 
-            <View style={{ flexDirection: "row", marginLeft: 'auto' }}>
+            {/* <View style={{ flexDirection: "row", marginLeft: 'auto' }}>
               <TouchableOpacity
                 style={styles.button}
               >
                 <Text style={[styles.buttonText, { paddingHorizontal: 10 }]}>Food Search</Text>
               </TouchableOpacity>
 
-            </View>
+            </View> */}
           </View>
           <ImageBackground style={{ justifyContent: 'center', height: Platform.OS === "web" ? 200 : 100 }} resizeMode="cover" source={{ uri: restaurantImage }}>
             <LinearGradient
@@ -281,39 +525,74 @@ function FoodScreen({ route, navigation }) {
                   marginRight: 'auto',
 
                 }}>
+
+                  <TouchableOpacity onPress={() => navigation.navigate("RestaurantWeb", {
+                    restId: restId
+                  })}>
+                    <Text style={{ color: 'white', fontSize: 20 }}>
+                      Back To Menu
+                    </Text>
+                  </TouchableOpacity>
+
                 </View>
               </View>
             </LinearGradient>
           </ImageBackground >
         </View>
       ) : <Icon style={{ padding: 10 }}
-        color="black" size={35} name="arrow-left" onPress={() => navigation.goBack()}
+        color="black" size={35} type="feather" name="arrow-left" onPress={() => navigation.goBack()}
       />}
 
       <View style={{ paddingTop: 20, margin: 10, flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap' }}>
-        <View style={{ borderRadius: 10, overflow: 'hidden', margin: 10, }}>{!loading ?
-          (<Image source={{ uri: image }} style={{ width: 400, height: 400, borderRadius: 10, }} />) : (
-            <ActivityIndicator size="large" style={{ height: 300 }} color="#F6AE2D" />
-          )
-        }
+        <View style={{ borderRadius: 5, overflow: 'hidden', margin: 10, }}>
+          {!loading ?
+            (
+              <View style={styles.shadowProp}>
+                <Image resizeMode='cover' defaultSource={{ uri: restaurantImage }} source={{ uri: image }} style={{ width: 375, height: 375, borderRadius: 5, }} />
+
+              </View>
+            ) : (
+              <ActivityIndicator size="large" style={{ height: 300 }} color="#F6AE2D" />
+            )
+          }
         </View>
-        <View style={{ margin: 10, flex: 1, maxWidth: 600, minWidth: 300, }}>
+        <View style={{ margin: 10, flex: 1, maxWidth: 600, minWidth: 300 }}>
           <View style={{ flexDirection: 'row' }}>
             <Text style={[styles.headerText, { fontSize: 35, maxWidth: 600 }]}>{food}</Text>
             <View style={{ justifyContent: 'center', alignSelf: 'flex-end', right: 10, marginLeft: 'auto' }}>
               {Platform.OS === 'web' ?
-                <TouchableOpacity style={{ alignSelf: 'center', }} onPress={() => {
-                  setFoodProps(), upvote(upvotes), navigation.navigate("RatingFood", {
-                    restId: restId,
-                    foodId: foodId,
-                    restName: restName
-                  })
-                }}>
-                  <Icon color={restaurantColor} size={35} name="triangle" />
-                </TouchableOpacity>
+                <View>
+                  {(loggedIn) ?
+                    <View>
+                      {(restId === userId) ?
+                        <TouchableOpacity style={{ alignSelf: 'center', }} onPress={() => { console.log("you cannot vote for your own restaurant") }}>
+                          <Icon color={restaurantColor} size={35} type="ant-design" name={restaurantLiked == false ? "hearto" : "heart"} />
+                        </TouchableOpacity>
+                        :
+                        <TouchableOpacity style={{ alignSelf: 'center', }} onPress={() => {
+                          setFoodProps(), setRestaurantLiked(true), upvote(upvotes)
+                        }}>
+                          <Icon color={restaurantColor} size={35} type="ant-design" name={restaurantLiked == false ? "hearto" : "heart"} />
+                        </TouchableOpacity>
+
+                      }
+                    </View>
+                    :
+                    <View>
+                      {(restId === userId) ?
+                        <TouchableOpacity onPress={googleLogin} style={{ alignSelf: 'center', }}>
+                          <Icon color={restaurantColor} size={35} type="ant-design" name="heart" />
+                        </TouchableOpacity> :
+                        <TouchableOpacity onPress={googleLogin} style={{ alignSelf: 'center', }}>
+                          <Icon color={restaurantColor} size={35} type="ant-design" name="heart" />
+                        </TouchableOpacity>
+                      }
+                    </View>
+                  }
+                </View>
                 :
                 <TouchableOpacity style={{ alignSelf: 'center', }} onPress={setFoodProps(), leaveAPositiveReview}>
-                  <Icon color={restaurantColor} size={35} name="triangle" />
+                  <Icon color={restaurantColor} size={35} name="heart" />
                 </TouchableOpacity>
               }
 
@@ -321,30 +600,61 @@ function FoodScreen({ route, navigation }) {
 
             </View>
           </View>
-          <Text style={{ fontSize: 19, fontWeight: '600' }}>Price: ${price}</Text>
+          <Text style={{ fontSize: 20, fontWeight: "600" }}>Price: ${price}</Text>
           <Text>{description}</Text>
 
 
-          <View style={{}}>
-            <Text style={{}}>{eatagain} %: would eat again</Text>
-            <Button onPress={() => { navigation.navigate("RatingFood", { restId: restId, foodId: foodId, restName: restName }) }} buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 300 }]} titleStyle={styles.buttonTitle} title="Rate my Food" />
+          <View>
+            <Text style={{ marginVertical: 10, fontSize: 18 }}>{eatagain} % would eat again</Text>
+
+            {(loggedIn) ?
+              <View>
+                {(restId !== userId) ?
+                  <Button onPress={() => { navigation.navigate("RatingFood", { restId: restId, foodId: foodId, restName: restName }) }} buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 300 }]} titleStyle={styles.buttonTitle} title="Rate my Food" />
+                  :
+                  <Button buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 300, opacity: 0.5 }]} titleStyle={styles.buttonTitle} title="Rate my Food" />
+                }
+              </View>
+              :
+              <View>
+                {(restId !== userId) ?
+                  <Button onPress={googleLogin} buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 300 }]} titleStyle={styles.buttonTitle} title="Rate my Food" />
+                  :
+                  <Button onPress={googleLogin} buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 300 }]} titleStyle={styles.buttonTitle} title="Rate my Food" />
+                }
+              </View>
+            }
           </View>
-          <Text style={styles.subHeaderText}>Food Ratings: </Text>
+          <Text style={styles.subHeaderText}>Food Ratings:</Text>
           <FlatList
             data={rating}
             keyExtractor={(item, index) => index}
-            renderItem={({ item }) => (
+            renderItem={({ item, index }) => (
               <View style={{ backgroundColor: '#F2F2F2', borderRadius: 5, padding: 10, margin: 5, shadowRadius: 2, shadowOpacity: 0.4, shadowOffset: { width: 0, height: 1 }, elevation: 2, }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' , margin: 5,marginBottom:10}}>
-                  <Image style={{ height: 50, width: 50, borderRadius: 50 }} source={{ uri: item.userPhoto }} />
-                  <Text style={{ fontWeight: 'bold', fontSize: 15, marginVertical: 10, marginRight: 'auto', marginHorizontal:10 }}> {item.raters_name} </Text>
-                  <Text style={{marginLeft:"auto", marginVertical: 10 }}>{item.rating_date}</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', margin: 5, marginBottom: 10 }}>
+                  {item.userPhoto === "" ?
+                    <Image style={{ height: 50, width: 50, borderRadius: 50 }} source={require("../assets/guestphoto.jpg")} />
+                    :
+                    <Image style={{ height: 50, width: 50, borderRadius: 50 }} source={{ uri: item.userPhoto }} />
+                  }
+                  <Text style={{ fontWeight: "bold", fontSize: 15, marginVertical: 10, marginRight: 'auto', marginHorizontal: 10 }}> {item.raters_name} </Text>
+                  <Text style={{ marginLeft: "auto", marginVertical: 10 }}>{item.rating_date}</Text>
                 </View>
-                <View style={{margin:10}}>
-                <Text style={{ fontWeight: '400' }}>Would you eat again:{personaleatagainhandler({ item })} </Text>
-                <Divider style={{ marginTop:10, width:"40%"}}/>
-                <Text style={{ marginVertical: 10 }}>{item.rating}</Text>
-                <Text style={{ marginTop: 10, fontWeight: "400" }}>{item.restaurant}</Text>
+                <View style={{ margin: 10 }}>
+                  <Text style={{ fontWeight: "400" }}>Would you eat again: {personaleatagainhandler({ item })} </Text>
+                  <Divider style={{ marginTop: 10, width: "40%" }} />
+                  <Text style={{ marginVertical: 10 }}>{item.rating}</Text>
+                  <View style={{ flexDirection: 'row' }}>
+                    <Text>{item.likes}</Text>
+                    <TouchableOpacity style={{ marginHorizontal: 5 }} onPress={() => (setRatingId(item.review_id), console.log(index), liked(item))}>
+                      <Icon color="black" size={15} type="ant-design" name={ratingid == item.review_id && like ? "like1" : "like2"} />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={{ marginHorizontal: 5 }} onPress={() => (disliked(item), setRatingId(item.review_id))}>
+                      <Icon color="black" size={15} type="ant-design" name={ratingid == item.review_id && dislike ? "dislike1" : "dislike2"} />
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={{ marginTop: 10, fontWeight: "400" }}>{item.restaurant}</Text>
                 </View>
               </View>
 

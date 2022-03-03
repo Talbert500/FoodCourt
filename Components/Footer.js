@@ -14,25 +14,25 @@ function Footer() {
     return (
         <View style={{ backgroundColor: "#f6ae2d", maxHeight: 300, flex: 1, height: 200, padding: 20,justifyContent:'center' }}>
             <View style={{maxWidth:800,width:800, alignSelf:'center', alignItems:"center"}}>
-                <Text style={[styles.footerText, { fontWeight: 700, marginVertical: 20, marginRight:'auto', fontFamily:"Primary"}]}>
+                <Text style={[styles.footerText, { fontWeight: "700", marginVertical: 20, marginRight:'auto', fontFamily:"Primary"}]}>
                     2022 Feiri All rights reserved.
                 </Text>
                 <View style={{ flexDirection: 'row' }}>
                     <View style={{ margin: 10, marginHorizontal:10  }}>
-                        <Text style={[styles.footerText, { fontWeight: 700, marginVertical: 5 , fontFamily:"Primary"}]}>Get to know us</Text>
+                        <Text style={[styles.footerText, { fontWeight: "700", marginVertical: 5 , fontFamily:"Primary"}]}>Get to know us</Text>
                         <Text style={styles.footerText}>About Feiri</Text>
                         <Text style={styles.footerText}>Investor relations</Text>
                     </View>
 
                     <View style={{ margin: 10,marginHorizontal:10 }}>
-                        <Text style={[styles.footerText, { fontWeight: 700, marginVertical: 5, fontFamily:"Primary" }]}>Connect with us</Text>
+                        <Text style={[styles.footerText, { fontWeight: "700", marginVertical: 5, fontFamily:"Primary" }]}>Connect with us</Text>
                         <Text style={styles.footerText}>Instagram</Text>
                         <Text style={styles.footerText}>Youtube</Text>
                         <Text style={styles.footerText}>Facebook</Text>
                         <Text style={styles.footerText}>Tiktok</Text>
                     </View>
                     <View style={{ margin: 10,marginHorizontal:10}}>
-                        <Text style={[styles.footerText, { fontWeight: 700, marginVertical: 5, fontFamily:"Primary" }]}>Partner with us</Text>
+                        <Text style={[styles.footerText, { fontWeight: "700", marginVertical: 5, fontFamily:"Primary" }]}>Partner with us</Text>
                         <Text style={styles.footerText}>Get Sponsored</Text>
                         <Text style={styles.footerText}>Verified Food Critics</Text>
                         <Text style={styles.footerText}>Local Food Bank</Text>

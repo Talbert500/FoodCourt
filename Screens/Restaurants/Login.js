@@ -15,6 +15,7 @@ import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { db, provider, auth, database } from '../../firebase-config'
 import { setDoc, getDoc, doc } from 'firebase/firestore'
 import { ref, set, update, onValue } from 'firebase/database'
+import * as GoogleSignIn from 'expo-google-sign-in';
 
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
@@ -236,7 +237,6 @@ const styles = StyleSheet.create({
   buttonContainer: {
     width: '60%',
     justifyContent: 'center',
-    alignItems: 'left',
     marginTop: 40,
   },
   button: {
@@ -257,12 +257,12 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'white',
-    fontWeight: '700',
+    fontWeight: "700",
     fontSize: 16,
   },
   buttonOutlineText: {
     color: '#f6ae2d',
-    fontWeight: '700',
+    fontWeight: "700",
     fontSize: 16,
   },
 })

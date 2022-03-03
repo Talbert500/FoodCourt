@@ -50,17 +50,17 @@ categories: {
       shadowRadius: 3,
     },
     buttonTitle: {
-      fontWeight: 'bold',
+      fontWeight: "bold",
       fontSize: 14,
       color: "white"
     },
     headerText: {
-      fontWeight: 'bold',
+      fontWeight: "bold",
       fontSize: 50,
 
     },
     subHeaderText: {
-      fontWeight: 'bold',
+      fontWeight: "bold",
       fontSize: 30,
     },
     bottomContainer: {
@@ -171,7 +171,7 @@ categories: {
     },
     buttonOutlineText: {
       color: '#f6ae2d',
-      fontWeight: '700',
+      fontWeight: "700",
       fontSize: 16,
     },
 

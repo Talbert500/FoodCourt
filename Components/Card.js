@@ -19,6 +19,7 @@ function Card(props) {
                 <Text style={[styles.subHeaderText, { fontSize: 35, fontWeight: '100' }]} >
                     {props.food}
                 </Text>
+                <Text>{props.menu}</Text>
                 <Text style={[styles.subHeaderText, { fontSize: 20 }]} >{props.restaurant}</Text>
                 <Text style={[styles.subHeaderText,{fontSize:13,alignSelf:'flex-end' }]}>
                     {props.percent}% would eat again
@@ -27,7 +28,7 @@ function Card(props) {
         
             <View style ={{justifyContent:'center', right:"10%"}}>
                 {/* <TouchableOpacity style={{alignSelf:'center'}} onPress={() => console.log(`upvoted ${props.food} by ${props.restaurant}`)}> */}
-                    <Icon color={props.upvoteColor}size ={35} name="caretup" />
+                    <Icon color={props.upvoteColor}size ={30} name="caretup" />
                 {/* </TouchableOpacity> */}
                 <Text style={[styles.subHeaderText,{fontSize:20,alignSelf:'center'}]}>
                     {props.upvotes}

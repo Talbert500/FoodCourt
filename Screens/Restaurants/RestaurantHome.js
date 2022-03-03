@@ -224,8 +224,9 @@ function RestaurantHome({ navigation }) {
             </View>
             <View style={{ backgroundColor: 'white', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', padding: "5%", alignItems: 'center' }}>
                 <View style={{ maxWidth: 600, width: 600 }}>
-                    <Text style={{ fontSize: 50, fontFamily: 'Bold', textAlign: 'left', maxWidth: 500 }}>It's alway been about just the food! </Text>
-                    <Text style={{ fontWeight: '550', fontSize: 20, fontFamily: 'Primary', maxWidth: 500, textAlign: 'left', marginVertical: 20 }}>
+                    {/*removed text align left*/}
+                    <Text style={{ fontSize: 50, fontFamily: 'Bold', maxWidth: 500 }}>It's alway been about just the food! </Text>
+                    <Text style={{ fontWeight: "550", fontSize: 20, fontFamily: 'Primary', maxWidth: 500, textAlign: 'left', marginVertical: 20 }}>
                         For centuries we have missed the opportunity to receive ratings and reviews on all your food options. Not to mention the overdue experience with your menu that makes your customers more confident in your food. </Text>
                     <TouchableOpacity onPress={() => { navigation.navigate("SignUp") }} style={[styles.button, { flexDirection: 'row', alignItems: 'center', maxWidth: 200, width: 200 }]}>
                         <Icon
@@ -272,7 +273,7 @@ function RestaurantHome({ navigation }) {
                         }}
                         source={require('../../assets/introslides/slide4.png')} />
                     <Text ellipsizeMode="middle" numberOfLines={3} style={styles.stepText} >
-                        Gain access to your virtural interactive QR Menu.
+                        Gain access to your virtual interactive QR Menu.
                     </Text>
                     <Text style={{ fontSize: 16, fontWeight: "475", marginBottom: 5, maxWidth: 450, textAlign: 'center' }}>
                         The QR Menus is how your customers will access your virtual menu. We will send you QR menus for your restaurant, you will also have an option to create them your own.
@@ -322,8 +323,8 @@ function RestaurantHome({ navigation }) {
                             maxWidth: 500
                         }}
                         source={require('../../assets/menu_example.png')} />
-
-                    <Text style={{ marginTop: 20, fontSize: 50, fontWeight: "600", maxWidth: 600, minWidth: 400, textAlign: 'left', flex: 1, fontFamily: 'Bold' }}>
+                        {/* removed text align left*/}
+                    <Text style={{ marginTop: 20, fontSize: 50, fontWeight: "600", maxWidth: 600, minWidth: 400, flex: 1, fontFamily: 'Bold' }}>
                         An interactive menu that allows your food items to
                         recieve ratings. Giving your customers the confidence they need.
                     </Text>
@@ -417,14 +418,14 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: 'white',
-        fontWeight: '600',
+        fontWeight: "600",
         fontSize: 15,
         justifyContent: "center"
 
     },
     buttonOutlineText: {
         color: '#f6ae2d',
-        fontWeight: '600',
+        fontWeight: "600",
         fontSize: 15,
         justifyContent: "center"
     },

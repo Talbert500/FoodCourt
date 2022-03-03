@@ -34,10 +34,10 @@ function RestaurantScreen({ route, navigation }) {
     const dispatch = useDispatch();
     const [rawMenuData, setRawMenuData] = useState([]);
     const [menuData, setMenuItem] = useState([]);
-
+    const [rating, setRating] = useState([]);
 
     const [loading, setLoading] = useState(false)
-
+    const [ratingRefreshing, setRatingRefreshing] = useState(false)
     const [restaurant_city, setrestaurant_city] = useState("");
     const [restaurant_state, setrestaurant_state] = useState("");
     const [restaurant_zip, setrestaurant_zip] = useState("");
@@ -49,7 +49,7 @@ function RestaurantScreen({ route, navigation }) {
     const [restaurantPhone, setRestaurantPhone] = useState("");
     const [restaurantColor, setRestaurantColor] = useState("");
     const [restaurantImage, setRestaurantImage] = useState("");
-
+    const [reviewNum, setReviewNum] = useState("");
 
     function setLocalData() {
         console.log(restaurantDesc)
@@ -60,14 +60,10 @@ function RestaurantScreen({ route, navigation }) {
     }
 
     const setRestaurant = async () => {
-        console.log("userid passed", loginSession)
-
         //const restId = auth.currentUser.uid;
         const docRef = doc(db, "restaurants", loginSession);
         const snapshot = await getDoc(docRef)
         if (snapshot.exists()) {
-            console.log(snapshot.data())
-
             setWebsite(snapshot.data().restaurant_website)
             setRestaurantId(snapshot.data().restaurant_id)
             setRestaurantPhone(snapshot.data().restaurant_phone)
@@ -79,9 +75,8 @@ function RestaurantScreen({ route, navigation }) {
             setrestaurant_city(snapshot.data().restaurant_city)
             setrestaurant_state(snapshot.data().restaurant_state)
             setrestaurant_zip(snapshot.data().restaurant_zip)
-
+            getRating();
             const imageRef = tef(storage, 'imagesRestaurant/' + snapshot.data().restaurant_id);
-            console.log("getting image-----------")
             await getDownloadURL(imageRef).then((url) => {
                 setRestaurantImage(url)
                 console.log(url)
@@ -90,12 +85,14 @@ function RestaurantScreen({ route, navigation }) {
                 dispatch(setSearchedRestaurantImage(url))
 
             })
+            
         } else {
             console.log("No souch document!")
         }
     }
     const getMenu = async () => {
-        const menu = query(ref(database, 'restaurants/' + restaurantId + '/menus/'));
+        const menu = query(ref(database, 'restaurants/' + loginSession + '/foods/'));
+       console.log(menu)
         onValue(menu, (snapshot) => {
             const data = snapshot.val();
             if (data !== null) {
@@ -109,13 +106,20 @@ function RestaurantScreen({ route, navigation }) {
     useEffect(() => {
         dispatch(setSearchedRestaurant(null, null, null, null, null, null))
         setLoading(true);
+        setRatingRefreshing(true);
         setRestaurant();
         getMenu();
-
+        
+       
+        
 
     }, [])
 
     function getQRCode() {
+        navigation.navigate("QRMenus",{
+            userId:loginSession
+
+        })
         console.log("Order QR Codes")
     };
 
@@ -144,7 +148,34 @@ function RestaurantScreen({ route, navigation }) {
             console.log(error)
         })
     }
+    const getRating = async () => {
+        setRatingRefreshing(false);
+        const getRestRatings = ref(database, "restaurants/" + loginSession + "/restaurantRatings");
+        onValue(getRestRatings, (snapshot) => {
+            const data = snapshot.val();
 
+            if (data !== null) {
+                setRating("")
+                Object.values(data).map((ratingData) => {
+                    setRating((food) => [...food, ratingData]);
+                    setRatingRefreshing(false);
+                })
+            }
+        })
+    
+    }
+    const personaleatagainhandler = ({ item }) => {
+        if (item.personaleatagain === 1) {
+            return (
+                <Text style={{ fontWeight: "500" }}> Yes</Text>
+            )
+        } else {
+            return (
+                <Text style={{ fontWeight: "500" }}> No</Text>
+            )
+        }
+
+    }
     return (
         <View style={{ backgroundColor: 'white', flex: 1 }}>
             {Platform.OS === 'web' ? (
@@ -182,7 +213,7 @@ function RestaurantScreen({ route, navigation }) {
                                         <Text style={{ color: "white", fontWeight: "bold" }}>Viewing as Admin</Text>
 
                                         <Text ellipsizeMode='tail' numberOfLines={2} style={[styles.headerText, { color: "white", }]}>{searchedRestaurant} </Text>
-                                        <Text style={{ color: "white", fontWeight: "bold" }}>2304 Overall Ratings</Text>
+                                        <Text style={{ color: "white", fontWeight: "bold" }}>{rating.length } Overall Ratings</Text>
 
 
                                     </View>
@@ -197,8 +228,8 @@ function RestaurantScreen({ route, navigation }) {
                     <View style={{ margin: 10 }}>
                         <View style={{ flexDirection: 'row', margin: 5, flexWrap: 'wrap', justifyContent: 'center' }}>
                             <Button onPress={() => {
-                                navigation.navigate("EditMenu", {
-                                    userId: loginSession
+                                navigation.navigate("MenuEdit", {
+                                    restId: loginSession
 
                                 }), setLocalData()
                             }} buttonStyle={[styles.button, { backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} title="Edit Menu"></Button>
@@ -211,7 +242,7 @@ function RestaurantScreen({ route, navigation }) {
                                 buttonStyle={[styles.button, { backgroundColor: "white", borderColor: restaurantColor, borderWidth: 1 }]} titleStyle={[styles.buttonTitle, { color: restaurantColor }]} title="View Menu">
                             </Button>
                             <Button onPress={getQRCode}
-                                buttonStyle={[styles.button, { backgroundColor: "white", borderColor: restaurantColor, borderWidth: 1 }]} titleStyle={[styles.buttonTitle, { color: restaurantColor }]} title="Order QR Menu">
+                                buttonStyle={[styles.button, { backgroundColor: "white", borderColor: restaurantColor, borderWidth: 1 }]} titleStyle={[styles.buttonTitle, { color: restaurantColor }]} title="Download QRMenu">
                             </Button>
                         </View>
                         <Image
@@ -236,16 +267,16 @@ function RestaurantScreen({ route, navigation }) {
                         <View style={{ backgroundColor: 'white', borderColor: 'black', padding: 20, borderRadius: 15 }}>
                             <View style={{ flexDirection: "row", alignContent: "center", alignItems: 'center', margin: 5 }}>
                                 <Icon name="call" color="black" size="35" />
-                                <Text style={{ fontSize: 17, fontWeight: '500', marginHorizontal: 10 }}>{restaurantPhone}</Text>
+                                <Text style={{ fontSize: 17, fontWeight: "500", marginHorizontal: 10 }}>{restaurantPhone}</Text>
                             </View>
                             <View style={{ flexDirection: "row", alignContent: "center", margin: 5, alignItems: 'center' }}>
                                 <Icon name="web" color="black" size="35" />
-                                <Text style={{ fontSize: 17, fontWeight: '500', marginHorizontal: 10, maxWidth: 300 }} >{restaurant_website}</Text>
+                                <Text style={{ fontSize: 17, fontWeight: "500", marginHorizontal: 10, maxWidth: 300 }} >{restaurant_website}</Text>
                             </View>
 
                         </View>
                         <TouchableOpacity onPress={() => { navigation.navigate("Settings") }}>
-                            <Text style={{ marginLeft: 'auto', fontWeight: '500' }}> Edit Profile</Text>
+                            <Text style={{ marginLeft: 'auto', fontWeight: "500" }}> Edit Profile</Text>
                         </TouchableOpacity>
                         <Divider style={{ margin: 10 }} />
 
@@ -254,6 +285,7 @@ function RestaurantScreen({ route, navigation }) {
 
                     <View style={[styles.cards, { margin: 10, flex: 1, overflow: 'hidden', padding: 5, marginTop: 10, backgroundColor: '#FAFAFA' }]}>
                         <View style={{ maxHeight: 100 }}>
+                            
                             <Text style={[styles.subHeaderText, { margin: 13, fontSize: 25 }]}>Top Menu Items</Text>
                             <FlatList
                                 data={menuData}
@@ -274,15 +306,34 @@ function RestaurantScreen({ route, navigation }) {
 
                     <View style={{ margin: 10, flexDirection: 'row' }}>
                         <Button onPress={userSignOut} buttonStyle={[styles.button, { backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} title="Sign Out"></Button>
-                        <Button onPress={topMenuItems} buttonStyle={[styles.button, { backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} title="Dashboard"></Button>
+                        <Button onPress={topMenuItems} buttonStyle={[styles.button, { backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} title="Coming Soon"></Button>
                     </View>
                     <View>
-                        <Text style={[styles.headerText, { marginVertical: 10 }]}>
+                        <Text style={[styles.headerText, { marginVertical: 10,margin: 10 }]}>
                             Restaurant Ratings
                         </Text>
-                        <View style={{ height: 200, borderRadius: 20, padding: 20, margin: 10 }}>
-                            <Text>No Ratings for this Menu</Text>
+                        <View style={{flex:1, borderRadius: 20, padding: 20, maxHeight:600}}>
+         
+                            <FlatList
+                                data={rating}
+                                keyExtractor={(item, index) => index}
+                                renderItem={({ item }) => (
+                                    <View style={{ backgroundColor: '#F2F2F2', borderRadius: 5, padding: 10, margin: 5, shadowRadius: 2, shadowOpacity: 0.4, shadowOffset: { width: 0, height: 1 }, elevation: 2, }}>
+                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', margin: 5, marginBottom: 10 }}>
+                                            <Image style={{ height: 50, width: 50, borderRadius: 50 }} source={{ uri: item.userPhoto }} />
+                                            <Text style={{ fontWeight: "bold", fontSize: 15, marginVertical: 10, marginRight: 'auto', marginHorizontal: 10 }}> {item.raters_name} </Text>
+                                            <Text style={{ marginLeft: "auto", marginVertical: 10 }}>{item.rating_date}</Text>
+                                        </View>
+                                        <View style={{ margin: 10 }}>
+                                            <Text style={{ fontWeight: "400" }}>Would you eat again:{personaleatagainhandler({ item })} </Text>
+                                            <Divider style={{ marginTop: 10, width: "40%" }} />
+                                            <Text style={{ marginVertical: 10 }}>{item.rating}</Text>
+                                            <Text style={{ marginTop: 10, fontWeight: "400" }}>{item.restaurant}</Text>
+                                        </View>
+                                    </View>
 
+                                )}
+                            />
                         </View>
                     </View>
                 </View>
