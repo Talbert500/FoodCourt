@@ -110,7 +110,7 @@ export default function App() {
 
   return (
     <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>
-      <View><Text style={{ color: 'red', fontSize: 10 }}> Unstable Alpha v2.7\\ ADDED DOWNLOADABLE QR CODE WORKFLOW</Text></View>
+      <View><Text style={{ color: 'red', fontSize: 10 }}> Unstable Alpha v2.9\\ BIG UI/UX UPDATE ! lookin good!</Text></View>
       <Provider store={store}>
         <Stack.Navigator initialRouteName="Home">
         <Stack.Screen

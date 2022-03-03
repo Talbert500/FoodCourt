@@ -385,6 +385,7 @@ function HomeScreen({ navigation }) {
             </View>
           </View>
           <View style={[styles.shadowProp,{ alignItems: 'center', borderRadius:10, overflow:'hidden'}]}>
+            {(windowWidth >= 500) ?
             <Image
               style={{
                 width: 600,
@@ -393,6 +394,9 @@ function HomeScreen({ navigation }) {
                
               }}
               source={require('../assets/web-examples/medium-shot-women-scanning-qr-code.jpg')} />
+              : <></>
+
+            }
           </View>
         </View>
         {Platform.OS === 'web' ?
