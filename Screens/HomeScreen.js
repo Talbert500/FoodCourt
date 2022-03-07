@@ -130,6 +130,8 @@ function HomeScreen({ navigation }) {
           if (data !== null) {
             console.log(data)
             setIsRestaurant(data.hasRestaurant)
+            setUserPhoto(data.userPhot)
+            
           }
 
         });
@@ -301,7 +303,7 @@ function HomeScreen({ navigation }) {
             <View style={{ alignContent: 'center' }}>
               <Text style={{ fontSize: 30, fontWeight: "bold", margin: 10, textAlign: 'center' }}>Rate My Food</Text>
 
-              <Text style={{ fontSize: 15, textAlign: "center", width: windowWidth - 30 }}>get rankings of the best mexican foods in your area:</Text>
+              <Text style={{ fontSize: 15, textAlign: "center", width: windowWidth - 30 }}>get rankings of the best Latin cuisine in your area:</Text>
             </View>
 
             <Text style={{ fontSize: 15, textAlign: "center", width: windowWidth - 30 }}>Phoenix, AZ</Text>
@@ -385,18 +387,6 @@ function HomeScreen({ navigation }) {
             </View>
           </View>
           <View style={[styles.shadowProp,{ alignItems: 'center', borderRadius:10, overflow:'hidden'}]}>
-            {(windowWidth >= 500) ?
-            <Image
-              style={{
-                width: 600,
-                height: 600,
-                resizeMode: "cover",
-               
-              }}
-              source={require('../assets/web-examples/medium-shot-women-scanning-qr-code.jpg')} />
-              : <></>
-
-            }
           </View>
         </View>
         {Platform.OS === 'web' ?

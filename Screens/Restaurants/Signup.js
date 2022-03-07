@@ -4,7 +4,7 @@ import { ImageBackground, Modal, Alert, TextInput, RefreshControl, Dimensions, T
 import { useState, useEffect } from 'react';
 import { Button, Input } from 'react-native-elements'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword,onAuthStateChanged } from 'firebase/auth';
 import { setNewRestaurant } from '../../redux/action'
 import { auth } from '../../firebase-config'
 import Icon from 'react-native-vector-icons/Feather'
@@ -32,9 +32,17 @@ function SignUp({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, seterror] = useState('');
-
+  const [loggedin,setloggedin] = useState('');
 
   useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+          setloggedin(true)
+          navigation.navigate("Home")
+      } else {
+          setloggedin(false)
+      }
+  })
 
   }, [])
 
@@ -98,7 +106,7 @@ function SignUp({ navigation }) {
 
 
           <Text style={{ fontFamily: 'Primary', alignSelf: "center", fontSize:  Platform.OS === 'web' ? 17 : 14, fontWeight: "600" }}>
-            for mexican restaurants
+            for restaurants
           </Text>
         </View>
         {/* END OF HEADER*/}

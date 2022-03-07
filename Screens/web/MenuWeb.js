@@ -2,7 +2,7 @@ import React from 'react';
 import { Animated, ImageBackground, KeyboardAvoidingView, Dimensions, FlatList, ScrollView, View, TouchableOpacity, Image, StyleSheet, Text, Platform, Linking, Keyboard, BackHandler } from 'react-native';
 import { Button, Input } from 'react-native-elements'
 import { database } from '../../firebase-config'
-import { ref, onValue, orderByValue, equalTo, query, limitToLast } from 'firebase/database'
+import { ref, onValue, orderByValue, equalTo, push, update, set, off } from 'firebase/database'
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { styles } from '../../styles'
@@ -24,6 +24,7 @@ import LottieView from 'lottie-react-native';
 import Footer from '../../Components/Footer';
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { Icon } from 'react-native-elements'
+import { SET_USER_PROPS } from '../../redux/reducer';
 
 
 const MenuWeb = ({ route, navigation }) => {
@@ -50,6 +51,10 @@ const MenuWeb = ({ route, navigation }) => {
     const [restaurant_website, setWebsite] = useState('')
     const [rating, setRating] = useState([]);
     const [menuIndex, setMenuIndex] = useState(0);
+
+
+    const [userSaves, setUserSaves] = useState([]);
+
 
     const [loginSession, setLoginSession] = useState('')
     const [accessToken, setAccessToken] = useState('')
@@ -80,6 +85,13 @@ const MenuWeb = ({ route, navigation }) => {
     const [selectedMenus, setSelectedMenus] = useState([]);
     const [menusDesc, setmenusDesc] = useState('')
     const [filterCatgory, setFilteredCategory] = useState('')
+    const [userName, setUserName] = useState('')
+    const [hoverside, setHoverSide] = useState(false)
+    const [hoverside1, setHoverSide1] = useState(false)
+    const [hoverside2, setHoverSide2] = useState(false)
+    const [hoversid3, setHoverSide3] = useState(false)
+    const [regulars, setRegulars] = useState([])
+    const [bookmarked, setBookmarked] = useState(false)
     const spring = new Animated.Value(0.3)
 
 
@@ -141,29 +153,54 @@ const MenuWeb = ({ route, navigation }) => {
             const data = snapshot.val();
             if (data !== null) {
 
-                console.log(data)
+                console.log(data["0"])
                 setSelectedMenus("")
                 Object.values(data).map((foodData) => {
                     setSelectedMenus((food) => [...food, foodData]);
                 })
                 console.log("Menus COLLECTED")
-                getCategories();
+                data.map((item) => {
+                    if (item.isDefault === "true") {
+                        console.log("ITEMSSS", item)
+                        //onMenuClick(0, item.desc, item.time)
+                        console.log("DEFAULT:", item.desc)
+                        getCategories(item.categories["0"])
+                        //setSelectedCategory(data)
+                    } else {
+                        console.log("NO DEFAULT")
+                    }
+                })
+                //getCategories(data);
             }
 
         })
+
+        const userSaves = ref(database, "restaurants/" + restId + "/data/userSaves")
+        onValue(userSaves, (snapshot) => {
+            const data = snapshot.val();
+            if (data !== null) {
+                console.log("USER SAVES", data)
+                setRegulars(data)
+
+            } else {
+                console.log("nothing")
+                console.log(restaurantId)
+            }
+
+        });
     };
 
-    const getCategories = async () => {
+    const getCategories = async (menudata) => {
         console.log("Getting Category")
         const categories = ref(database, "restaurants/" + restId + "/menus/" + menuIndex + "/categories/")
         onValue(categories, (snapshot) => {
             const data = snapshot.val();
-            console.log(data)
+            console.log("category", data)
             if (data !== null) {
                 setSelectedCategory("")
                 setSelectedCategory(data)
                 setFilteredCategory(data)
-                getFullMenu();
+                getFullMenu(menudata);
 
 
             }
@@ -184,28 +221,33 @@ const MenuWeb = ({ route, navigation }) => {
         })
     };
 
-    function getFullMenu() {
+    function getFullMenu(menudata) {
         const getMenu = ref(database, 'restaurants/' + restId + '/foods/')
         onValue(getMenu, (snapshot) => {
-
+            console.log("MENUS", menudata)
             const data = snapshot.val();
             if (data !== null) {
                 console.log(data)
                 setFoodItem("")
                 setFiltered("")
                 setMenuItem("")
+                console.log("THE FOOD ARRAY", data)
                 Object.values(data).map((foodData) => {
                     setFoodItem((oldArray) => [...oldArray, foodData]);
                     setMenuItem((oldArray) => [...oldArray, foodData]);
-                    //setFiltered((oldArray) => [...oldArray, foodData]);
                 })
+                Object.values(data).map((foodData) => {
+                    if (foodData.category == menudata) {
+                        setFiltered((oldArray) => [...oldArray, foodData])
+                    }
+                })
+
                 //setSetMenu("Breakfast")
 
             }
         })
 
     }
-
 
 
 
@@ -217,6 +259,7 @@ const MenuWeb = ({ route, navigation }) => {
         })
     }
     const getRestaurant = async () => {
+
         console.log("Getting Restaurant")
         const docRef = doc(db, "restaurants", restId);
         const snapshot = await getDoc(docRef)
@@ -239,32 +282,8 @@ const MenuWeb = ({ route, navigation }) => {
         }
     }
 
-    const startAnmiationa = () => {
-        spring.setValue(0.3)
-        Animated.spring(
-            spring, {
-            toValue: 1.1,
-            bounciness: 30,
-            speed: 10
 
-        }
-        ).start();
-    }
-
-    const onHover = () => {
-        spring.setValue(0.3)
-        Animated.spring(
-            spring, {
-            toValue: 1,
-            bounciness: 30,
-            speed: 10
-
-        }
-        ).start();
-    }
     useEffect(() => {
-        startAnmiationa();
-
         console.log("Mounting")
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -272,6 +291,7 @@ const MenuWeb = ({ route, navigation }) => {
                 setLoginSession(user.uid)
                 setAccessToken(user.accessToken)
                 console.log(user)
+                saveHandler(user.uid)
 
                 const userRef = ref(database, "user/" + user.uid)
                 onValue(userRef, (snapshot) => {
@@ -279,6 +299,8 @@ const MenuWeb = ({ route, navigation }) => {
                     if (data !== null) {
                         console.log(data)
                         setIsRestaurant(data.hasRestaurant)
+                        setUserPhoto(data.userPhoto)
+                        setUserName(data.userName)
                     }
 
                 });
@@ -288,12 +310,26 @@ const MenuWeb = ({ route, navigation }) => {
                 setloggedin(false)
             }
         })
-
-
         getRestaurant();
 
 
     }, [])
+
+    function saveHandler(user) {
+
+        const getSaves = ref(database, 'user/' + user + '/userSaves')
+        onValue(getSaves, (snapshot) => {
+            const data = snapshot.val();
+            if (data !== null) {
+                console.log(data)
+                setUserSaves(data)
+            } else {
+                setBookmarked(false);
+            }
+        })
+    }
+
+
     const [hover, setHover] = useState(false)
     const [tempSelect, setTempSelect] = useState("")
     //(item.name==selectedCategory)?"white":"black"
@@ -303,7 +339,6 @@ const MenuWeb = ({ route, navigation }) => {
                 <View style={[styles.shadowProp, { top: (item === tempSelect) && (hover === true) ? 0 : 3, margin: 15, borderRadius: 10, borderWidth: 1, backgroundColor: (item === setCate) ? "#F2F2F2" : "whtie", borderColor: 'transparent' }]}>
                     <Text style={{ padding: 20, fontWeight: 600 }}>{item} </Text>
                 </View>
-
             </TouchableOpacity>
         )
 
@@ -347,7 +382,7 @@ const MenuWeb = ({ route, navigation }) => {
             setSelectedCategory(selectedMenus[index].categories)
             // Object.values(foodItem.categories).map((food) => {
             //     setSelectedMenus((food) => [...food, foodData]);
-            // })
+            // })setSetMenu
 
             //setting food
             setSetMenu(clicked)
@@ -393,6 +428,72 @@ const MenuWeb = ({ route, navigation }) => {
 
 
     }
+    function rateHandler() {
+        if (loginSession !== restaurantId) {
+            if (loggedin) {
+                dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurant_address, restaurantPhone, restaurantId, restaurantColor))
+                navigation.navigate("RatingRestaurant", { restaurantId: restaurantId })
+            } else {
+                googleSignIn();
+            }
+        }
+
+        return;
+
+    }
+
+    const [lock, setLock] = useState(false)
+    const [canSave, setCanSave] = useState(false);
+    function joinSaved(userSaves) {
+        setCanSave(false)
+        setLock(true)
+        console.log("FIREBASE", userSaves)
+        update(ref(database, "user/" + loginSession + "/"), {
+            userSaves
+        });
+        update(ref(database, "restaurants/" + restaurantId + "/data"), {
+            userSaves
+        });
+
+
+    }
+    function newRegularSave() {
+        console.log(userSaves.length)
+        console.log(restaurantId)
+        console.log(lock)
+        if (userSaves.length == 0) {
+            joinSaved([restaurantId])
+        }
+        userSaves.map((item, index) => {
+            console.log(lock)
+            console.log(index)
+            if (item == restaurantId) {
+                setCanSave(false)
+                setLock(true)
+                console.log(lock)
+                console.log("LOCKEDDDDDDDDD")
+                console.log(item)
+            }
+            if (index == userSaves.length - 1) {
+                console.log(lock)
+                console.log("end")
+                if (lock === true) {
+                    console.log(lock)
+                    setCanSave(false)
+                    setLock(true)
+                    console.log("user cannot save")
+                }
+                if (lock === false) {
+                    console.log(lock)
+                    console.log(canSave)
+                    setCanSave(true)
+                    console.log("user can save")
+                    joinSaved([...userSaves, restaurantId])
+                }
+            }
+        })
+    }
+
 
     return (
         <KeyboardAwareScrollView enableOnAndroid extraHeight={120} style={{ flex: 1, backgroundColor: "white" }}>
@@ -429,49 +530,115 @@ const MenuWeb = ({ route, navigation }) => {
                                     onPress={() => {
                                         navigation.navigate("MenuEdit", {
                                             restId: loginSession
-        
+
                                         })
                                     }}
                                     style={styles.button}
                                 >
                                     <Text style={[styles.buttonTitle, { paddingHorizontal: 10 }]}>Menu Dashboard</Text>
-                                </TouchableOpacity> :
+                                </TouchableOpacity> 
+                                :
                                 <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-                                    <Image
-                                        style={{ height: 50, width: 50, borderRadius: 40, marginHorizontal: 10 }}
-                                        source={{ uri: userPhoto }}
-                                    />
-                                    <TouchableOpacity
-                                        style={[styles.buttonOutline, styles.shadowProp, { borderRadius: 5 }]}
-                                        onPress={googleSignOut}
-                                    >
-                                        <Text style={[styles.buttonOutlineText, { padding: 10 }]}>Sign Out</Text>
+                                    <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
+                                        <Image
+                                            style={{ height: 50, width: 50, borderRadius: 40, marginHorizontal: 10 }}
+                                            source={{ uri: userPhoto }}
+                                        />
                                     </TouchableOpacity>
-                                </View>}
+                                    <Text style={{ fontFamily: 'Bold' }}>{userName}</Text>
+                                </View>
+                            }
                         </View>
 
                     )}
                 </View>
             ) : (<></>)
             }
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap-reverses', margin: 5 }}>
+            <View style={{ flexDirection: windowWidth >= 500 ? 'row' : 'column', flexWrap: 'wrap-reverses', margin: 5 }}>
                 {(windowWidth >= 500) ?
-                    <View style={{ marginTop: 10 }}>
-                        <View style={{ marginBottom: 10 }}>
-                            <Icon onPress={()=>{navigation.navigate("Home")}} type="entypo" name="home" color="#F6AE2D" size={35} />
+                    <View style={{ marginTop: 10, }}>
+                        <View style={{ marginBottom: 10, padding: 10, top: (hoverside === true) ? 0 : 3 }}>
+                            <View style={{ flexDirection: 'row', flex: 1 }}>
+                                <Icon onMouseOver={() => (setHoverSide(true))} onMouseLeave={() => { setHoverSide(false) }}
+                                    onPress={() => { navigation.navigate("Home") }} type="entypo" name="home" color="#F6AE2D" size={35} />
+                                {hoverside ?
+                                    <View style={{ backgroundColor: 'grey', width: "7%", height: "100%", left: 5 }} />
+                                    :
+                                    <></>
+                                }
+
+                            </View>
                         </View>
-                        <View style={{ marginBottom: 10 }}>
-                            <Icon type="material-community" name="message-draw" color="#F6AE2D" size={35} />
+                        <View style={{ padding: 10, marginBottom: 10, top: (hoverside1 === true) ? 0 : 3 }}>
+                            <View style={{ flexDirection: 'row' }}>
+                                <Icon onMouseOver={() => (setHoverSide1(true))} onMouseLeave={() => { setHoverSide1(false) }}
+                                    onPress={rateHandler} type="material-community" name="message-draw" color="#F6AE2D" size={35} />
+                                {hoverside1 ?
+                                    <View style={{ backgroundColor: 'grey', width: "7%", height: "100%", left: 5 }} /> :
+                                    <> </>
+                                }
+
+                            </View>
                         </View>
-                        <View style={{ marginBottom: 10 }}>
-                            <Icon type="font-awesome5" name="bookmark" color="#F6AE2D" size={35} />
+                        <View style={{ marginBottom: 10, padding: 10, top: (hoverside2 === true) ? 0 : 3 }}>
+                            <View style={{ flexDirection: 'row', justifyContent: "center" }}>
+                                {(bookmarked == false) ?
+                                    <Icon onPress={newRegularSave} onMouseOver={() => (setHoverSide2(true))} onMouseLeave={() => { setHoverSide2(false) }} type="font-awesome" name="bookmark" color="#F6AE2D" size={35} />
+                                    :
+                                    <Icon onPress={newRegularSave} onMouseOver={() => (setHoverSide2(true))} onMouseLeave={() => { setHoverSide2(false) }} type="font-awesome" name="bookmark-o" color="#F6AE2D" size={35} />
+
+                                }
+                                {hoverside2 ?
+                                    <View style={{ backgroundColor: 'grey', width: "7%", height: "100%", left: 5 }} /> :
+                                    <></>
+                                }
+
+                            </View>
                         </View>
-                        <View style={{ marginBottom: 10 }}>
-                            <Icon type="fontisto" name="player-settings" color="#F6AE2D" size={35} />
+                        <View onMouseOver={() => (setHoverSide3(true))} onMouseLeave={() => { setHoverSide3(false) }} style={{ marginBottom: 10, padding: 10, top: (hoversid3 === true) ? 0 : 3 }}>
+                            <View style={{ flexDirection: 'row' }}>
+                                <Icon type="fontisto" name="player-settings" color="#F6AE2D" size={35} />
+                                {hoversid3 ?
+                                    <View style={{ backgroundColor: 'grey', width: "7%", height: "100%", left: 5 }} /> :
+                                    <> </>
+                                }
+                            </View>
                         </View>
                     </View>
                     :
-                    <View></View>
+                    <View style={{ marginTop: -15, flexDirection: 'row', justifyContent: 'space-around' }}>
+                        <View style={{ marginBottom: 10, padding: 10, top: (hoverside === true) ? 0 : 3 }}>
+                            <View style={{ flexDirection: '', flex: 1 }}>
+                                <Icon onMouseOver={() => (setHoverSide(true))} onMouseLeave={() => { setHoverSide(false) }}
+                                    onPress={() => { navigation.navigate("Home") }} type="entypo" name="home" color="#F6AE2D" size={35} />
+
+                            </View>
+                        </View>
+                        <View style={{ padding: 10, marginBottom: 10, top: (hoverside1 === true) ? 0 : 3 }}>
+                            <View style={{ flexDirection: 'column' }}>
+                                <Icon onMouseOver={() => (setHoverSide1(true))} onMouseLeave={() => { setHoverSide1(false) }}
+                                    onPress={rateHandler} type="material-community" name="message-draw" color="#F6AE2D" size={35} />
+
+                            </View>
+                        </View>
+                        <View style={{ marginBottom: 10, padding: 10, top: (hoverside2 === true) ? 0 : 3 }}>
+                            <View style={{ flexDirection: 'column', justifyContent: "center" }}>
+                                {(bookmarked == false) ?
+                                    <Icon onPress={newRegularSave} onMouseOver={() => (setHoverSide2(true))} onMouseLeave={() => { setHoverSide2(false) }} type="font-awesome" name="bookmark" color="#F6AE2D" size={35} />
+                                    :
+                                    <Icon onPress={newRegularSave} onMouseOver={() => (setHoverSide2(true))} onMouseLeave={() => { setHoverSide2(false) }} type="font-awesome" name="bookmark-o" color="#F6AE2D" size={35} />
+
+                                }
+
+                            </View>
+                        </View>
+                        <View onMouseOver={() => (setHoverSide3(true))} onMouseLeave={() => { setHoverSide3(false) }} style={{ marginBottom: 10, padding: 10, top: (hoversid3 === true) ? 0 : 3 }}>
+                            <View style={{ flexDirection: 'column' }}>
+                                <Icon type="fontisto" name="player-settings" color="#F6AE2D" size={35} />
+
+                            </View>
+                        </View>
+                    </View>
                 }
                 <View style={[styles.shadowProp, { backgroundColor: 'white', marginHorizontal: 10, borderRadius: 13, overflow: 'hidden', flex: 1 }]}>
                     <ImageBackground style={{ margin: 5, borderTopLeftRadius: 13, borderTopRightRadius: 13, overflow: 'hidden', height: Platform.OS === "web" ? 250 : 75 }} resizeMode="cover" source={{ uri: restaurantImage }}>
@@ -480,17 +647,12 @@ const MenuWeb = ({ route, navigation }) => {
                             style={{ height: '100%', width: '100%' }}>
                             <View style={{ width: "100%", maxWidth: 600, flex: 1, alignSelf: 'center', flexDirection: 'row-reverse' }}>
                                 <View style={{ justifyContent: 'flex-end', margin: 10 }}>
-                                    {(windowWidth >= 500) ?
-                                        <TouchableOpacity onPress={startAnmiationa}>
-                                            <Animated.Image style={{ height: 80, width: 80, borderRadius: 100, transform: [{ scale: spring }] }} source={require("../../assets/guestphoto.jpg")} />
-                                        </TouchableOpacity> :
-                                        <></>}
                                 </View>
                                 <View style={{
                                     flex: 1,
                                     justifyContent: "flex-end",
                                 }}>
-                                    <Text ellipsizeMode='tail' numberOfLines={2} style={[styles.subHeaderText, { color: "white", fontSize: 16, textAlign: 'left', marginLeft: 10 }]}>100 Regulars</Text>
+                                    <Text ellipsizeMode='tail' numberOfLines={2} style={[styles.subHeaderText, { color: "white", fontSize: 16, textAlign: 'left', marginLeft: 10 }]}>{regulars.length} Regulars</Text>
                                     <Text ellipsizeMode='tail' numberOfLines={2} style={[styles.headerText, { color: "white", fontSize: 50, textAlign: 'left', marginLeft: 10 }]}>{searchedRestaurant} </Text>
                                 </View>
                             </View>
@@ -523,7 +685,7 @@ const MenuWeb = ({ route, navigation }) => {
                                         :
                                         <View>
                                             <Button title="Rate Us" buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 240, width: 240, opacity: 0.5 }]} titleStyle={styles.buttonTitle} />
-                                            <Text onPress={() => navigation.navigate("MenuEdit", {restId: loginSession})} style={{ color: "black", textDecorationLine: 'underline' }}>Menu Dashboard</Text>
+                                            <Text onPress={() => navigation.navigate("MenuEdit", { restId: loginSession })} style={{ color: "black", textDecorationLine: 'underline', marginHorizontal:5 }}>Admin View</Text>
                                         </View>
                                     }
                                 </View>
@@ -639,6 +801,7 @@ const MenuWeb = ({ route, navigation }) => {
                     </View>
                 </View>
             </View>
+
             <View style={{ marginTop: "20%" }}>
                 <Footer />
             </View>

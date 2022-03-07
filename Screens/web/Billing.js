@@ -20,15 +20,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { Divider } from 'react-native-elements/dist/divider/Divider';
 import { useFonts } from '@use-expo/font';
-import axios from 'axios';
 import { Icon } from 'react-native-elements'
 import LottieView from 'lottie-react-native';
 import Footer from '../../Components/Footer';
-import { QRapiKey } from '../../config.js'
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
 
-const MenuEdit = ({ route, navigation }) => {
+const Billing = ({ route, navigation }) => {
 
     let [fontsLoaded] = useFonts({
         'Primary': require('../../assets/fonts/proxima_nova_reg.ttf'),
@@ -55,7 +53,7 @@ const MenuEdit = ({ route, navigation }) => {
 
     const [loginSession, setLoginSession] = useState('')
     const [accessToken, setAccessToken] = useState('')
-    const [scanTotal, setScanTotal] = useState("")
+
     const windowWidth = Dimensions.get("window").width;
     const windowHeight = Dimensions.get("window").height;
 
@@ -173,7 +171,6 @@ const MenuEdit = ({ route, navigation }) => {
                 setSelectedCategory(data)
                 setFilteredCategory(data)
                 getFullMenu();
-                getQrId();
 
 
             }
@@ -210,54 +207,6 @@ const MenuEdit = ({ route, navigation }) => {
                     //setFiltered((oldArray) => [...oldArray, foodData]);
                 })
                 //setSetMenu("Breakfast")
-
-            }
-        })
-
-    }
-
-    function QRMenuData(id, to, from) {
-        console.log("QR DAYA", id)
-        console.log("TO", to)
-        console.log("FROM", from)
-
-        const data = JSON.stringify({
-            "product_id": `${id}`,
-            "from": `${from}`,
-            "to": `${to}`,
-            "product_type": "qr",
-            "interval": "1d"
-        });
-
-        const config = {
-            method: 'post',
-            url: 'https://api.beaconstac.com/reporting/2.0/?organization=105513&method=Products.getVisitorDistribution',
-            headers: {
-                'Authorization': `Token ${QRapiKey}`,
-                'Content-Type': 'application/json'
-            },
-            data: data
-        };
-
-        axios.request(config)
-            .then(function (response) {
-                console.log(response.data);
-                setScanTotal(JSON.stringify(response.data.points["0"]["0"]["1"]))
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
-
-    }
-
-    function getQrId() {
-        const getData = ref(database, 'restaurants/' + restId + '/data/')
-        onValue(getData, (snapshot) => {
-            const dataqr = snapshot.val();
-            if (dataqr !== null) {
-                console.log(dataqr.qrid)
-                QRMenuData(dataqr.qrid, new Date((new Date()).valueOf() - 1000 * 60 * 60 * 24).valueOf(), new Date().valueOf())
-
 
             }
         })
@@ -318,12 +267,19 @@ const MenuEdit = ({ route, navigation }) => {
                         setUserPhoto(data.userPhoto)
                         setUserName(data.userName)
                     }
+
                 });
+
+
             } else {
                 setloggedin(false)
             }
         })
+
+
         getRestaurant();
+
+
     }, [])
     const [hover, setHover] = useState(false)
     const [tempSelect, setTempSelect] = useState("")
@@ -392,6 +348,7 @@ const MenuEdit = ({ route, navigation }) => {
                 return cateDate.indexOf(cate) > -1;
             });
             setFiltered(newData);
+
         } else {
             setSetMenu("")
             setMenuItem(foodItem)
@@ -420,8 +377,8 @@ const MenuEdit = ({ route, navigation }) => {
 
     function onCategoryClick(clicked) {
         // setSetCate(clicked)
+
         if (setCate != clicked) {
-           
             setSetCate(clicked)
             const newData = menuData.filter((item) => {
                 const cateDate = item.category ?
@@ -431,7 +388,6 @@ const MenuEdit = ({ route, navigation }) => {
                 return cateDate.indexOf(cate) > -1;
             });
             setFiltered(newData);
-            
         } else {
             setSetCate("")
             setFiltered(menuData)
@@ -449,7 +405,7 @@ const MenuEdit = ({ route, navigation }) => {
         <KeyboardAwareScrollView enableOnAndroid extraHeight={120} style={{ flex: 1, backgroundColor: "white" }}>
             {Platform.OS === 'web' ? (
                 <View style={{ width: '100%', padding: 5, flexDirection: "row", backgroundColor: Platform.OS === "web" ? "white" : "transparent", zIndex: 1 }}>
-                    <TouchableOpacity onPress={() => navigation.navigate("RestaurantHome")}>
+                    <TouchableOpacity onPress={() => navigation.navigate("Login")}>
                         <Image
                             style={{
                                 justifyContent: 'flex-start',
@@ -495,8 +451,7 @@ const MenuEdit = ({ route, navigation }) => {
                                         />
                                     </TouchableOpacity>
                                     <Text style={{ fontFamily: 'Bold' }}>{userName}</Text>
-                                </View>
-                                }
+                                </View>}
                         </View>
 
                     )}
@@ -506,11 +461,11 @@ const MenuEdit = ({ route, navigation }) => {
             <View style={{ flexDirection: 'row', flexWrap: 'wrap-reverses', margin: 5 }}>
                 {(windowWidth >= 500) ?
                     <View style={{ marginTop: 10, padding: 10 }}>
-                        <TouchableOpacity onMouseOver={() => (setHoverSide(true))} onMouseLeave={() => { setHoverSide(false) }} style={{ marginBottom: 12 }}>
-                            <Icon style={{ top: (hoverside === true) ? 0 : 3 }} type="entypo" name="home" color="grey" size={35} />
+                        <TouchableOpacity onPress={() => navigation.navigate("MenuEdit", { restId: loginSession })} onMouseOver={() => (setHoverSide(true))} onMouseLeave={() => { setHoverSide(false) }} style={{ marginBottom: 12 }}>
+                            <Icon style={{ top: (hoverside === true) ? 0 : 3 }} type="entypo" name="home" color="#F6AE2D" size={35} />
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => navigation.navigate("Billing", { restId: loginSession })} onMouseOver={() => (setHoverSide2(true))} onMouseLeave={() => { setHoverSide2(false) }} style={{ marginBottom: 12 }}>
-                            <Icon style={{ top: (hoverside2 === true) ? 0 : 3 }} type="material" name="analytics" color="#F6AE2D" size={35} />
+                        <TouchableOpacity onMouseOver={() => (setHoverSide2(true))} onMouseLeave={() => { setHoverSide2(false) }} style={{ marginBottom: 12 }}>
+                            <Icon style={{ top: (hoverside2 === true) ? 0 : 3 }} type="material" name="analytics" color="grey" size={35} />
                         </TouchableOpacity>
                         <TouchableOpacity onMouseOver={() => (setHoverSide3(true))} onMouseLeave={() => { setHoverSide3(false) }} onPress={() => navigation.navigate("QRMenus", { userId: loginSession })} style={{ marginBottom: 12 }}>
                             <Icon style={{ top: (hoverside3 === true) ? 0 : 3 }} type="material-community" name="qrcode-edit" color="#F6AE2D" size={35} />
@@ -533,88 +488,13 @@ const MenuEdit = ({ route, navigation }) => {
                         {/*ON PHONE*/}
                     </View>
                 }
-                {(windowWidth >= 500) ?
-                    <View style={{ flex: 1, maxWidth: 325, margin: 8 }}>
-
-                        {/* SNAPSHOT */}
-                        <View style={[styles.shadowProp, { backgroundColor: 'white', padding: 15, marginVertical: 5, borderRadius: 8 }]}>
-                            <View style={{ marginVertical: 10 }}>
-                                <Text style={{ fontSize: 30, fontFamily: 'Bold' }}>Snapshot</Text>
-                            </View>
-                            <View style={{ flexDirection: "row", alignItems: 'center' }}>
-                                <Icon type="ant-design" name="hearto" color="grey" size={20} style={{ margin: 5 }} />
-                                <Text numberOfLines={1} style={{ fontFamily: 'Bold' }}>{searchedRestaurant} has 1934 regulars</Text>
-                            </View>
-                            <View style={{ flexDirection: "row", alignItems: 'center' }}>
-                                <Icon type="material-icons" name="rate-review" outline color="grey" size={20} style={{ margin: 5 }} />
-                                <Text numberOfLines={1} style={{ fontFamily: 'Bold' }}>2 new reviews from {searchedRestaurant}</Text>
-                            </View>
-                            <View style={{ flexDirection: "row", alignItems: 'center' }}>
-                                <Icon type="feather" name="edit" color="grey" size={20} style={{ margin: 5 }} />
-                                <Text numberOfLines={1} style={{ fontFamily: 'Bold' }}>Charles made edit to dashboard</Text>
-                            </View>
-                            <Text style={{ fontFamily: 'Primary' }}>(Not Functional...)</Text>
-                        </View>
-
-                        {/* TOP RANKING */}
-                        <View style={[styles.shadowProp, { backgroundColor: 'white', padding: 15, marginVertical: 5, borderRadius: 8 }]}>
-                            <View style={{ marginVertical: 10 }}>
-                                <Text style={{ fontSize: 30, fontFamily: 'Bold' }}>Top Ranking</Text>
-                            </View>
-                            <View style={{ flexDirection: "row", alignItems: 'center' }}>
-                                <Text numberOfLines={1} style={{ fontFamily: 'Bold' }}>Rank #23 </Text>
-                            </View>
-                            <Text style={{ fontFamily: 'Primary' }}>(Not Functional...)</Text>
-                        </View>
-                        {/* STATS */}
-                        <View style={[styles.shadowProp, { backgroundColor: 'white', padding: 15, marginVertical: 5, borderRadius: 8 }]}>
-                            <View style={{ marginVertical: 5 }}>
-                                <Text style={{ fontSize: 20, fontFamily: 'Bold', textAlign: 'center' }}>Statistics</Text>
-                            </View>
-                            <View style={{ flexDirection: "row", alignItems: 'center' }}>
-                                <Icon type="ant-design" name="hearto" color="grey" size={20} style={{ margin: 5 }} />
-                                <View>
-                                    <Text numberOfLines={1} style={{ fontFamily: 'Bold', fontSize: 18 }}>203844 </Text>
-                                    <Text numberOfLines={1} style={{ fontFamily: 'Bold', fontSize: 12 }}>total likes </Text>
-                                </View>
-                            </View>
-                            <View style={{ flexDirection: "row", alignItems: 'center' }}>
-                                <Icon type="material-community" name="qrcode-scan" color="grey" size={20} style={{ margin: 5 }} />
-                                <View>
-                                    <Text numberOfLines={1} style={{ fontFamily: 'Bold', fontSize: 18 }}>{scanTotal} </Text>
-                                    <Text numberOfLines={1} style={{ fontFamily: 'Bold', fontSize: 12 }}>total scans </Text>
-                                </View>
-                            </View>
-                            <Text style={{ fontFamily: 'Primary' }}>(Not Functional...)</Text>
-                        </View>
-                        {/* COMP ANALYSIS */}
-                        <View style={[styles.shadowProp, { backgroundColor: 'white', padding: 15, marginVertical: 5, borderRadius: 8 }]}>
-                            <View style={{ marginVertical: 10 }}>
-                                <Text style={{ fontSize: 17, fontFamily: 'Bold' }}>Competitive Analysis</Text>
-                                <Text style={{ fontSize: 15, fontFamily: 'Primary' }}>based on 23,000 competitors</Text>
-                            </View>
-                            <View style={{ flexDirection: "row", alignItems: 'center' }}>
-                                <Text numberOfLines={1} style={{ fontFamily: 'Bold' }}>Rank #23 </Text>
-                            </View>
-                            <Text style={{ fontFamily: 'Primary' }}>(Not Functional...).</Text>
-                        </View>
-
-                    </View>
-                    :
-                    <></>
-                }
-                <View style={[styles.shadowProp, { backgroundColor: 'white', marginHorizontal: 10, borderRadius: 13, overflow: 'hidden', flex: 3 }]}>
+                <View style={[styles.shadowProp, { max: 600, backgroundColor: 'white', marginHorizontal: 10, borderRadius: 13, overflow: 'hidden', flex: 3 }]}>
                     <ImageBackground style={{ margin: 5, borderTopLeftRadius: 13, borderTopRightRadius: 13, overflow: 'hidden', height: Platform.OS === "web" ? 250 : 75 }} resizeMode="cover" source={{ uri: restaurantImage }}>
                         <LinearGradient
                             colors={['#00000000', '#000000']}
                             style={{ height: '100%', width: '100%', }}>
                             <View style={{ width: "100%", maxWidth: 600, flex: 1, alignSelf: 'center', flexDirection: 'row-reverse' }}>
                                 <View style={{ justifyContent: 'flex-end', margin: 10 }}>
-                                    {(windowWidth >= 500) ?
-                                        <TouchableOpacity >
-                                            <Image style={{ height: 80, width: 80, borderRadius: 100 }} source={require("../../assets/guestphoto.jpg")} />
-                                        </TouchableOpacity> :
-                                        <></>}
                                 </View>
                                 <View style={{
                                     flex: 1,
@@ -623,128 +503,55 @@ const MenuEdit = ({ route, navigation }) => {
                                 }}>
                                     <Text ellipsizeMode='tail' numberOfLines={2} style={[styles.headerText, { color: "white", textAlign: 'left' }]}>{searchedRestaurant} </Text>
                                     <Text style={{ color: "white", fontWeight: "bold", textAlign: 'left', margin: 10 }}>Viewing as Admin</Text>
-                                    <Text onPress={() => navigation.navigate("RestaurantWeb", {restId: loginSession,})} style={{ color: "white", textDecorationLine: 'underline', fontWeight: "bold", textAlign: 'left', margin: 10 }}>Customer View</Text>
                                 </View>
                             </View>
                         </LinearGradient>
                     </ImageBackground >
-                    <View style={{ maxWidth: 700, alignSelf: Platform.OS === 'web' ? 'center' : '', width: '100%', padding: 10 }}>
-                        <View>
-                            <View style={{ alignSelf: "center", maxWidth: 500, width: "100%" }}>
 
-
-                                <Button title="Add Food" buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 200 }]} titleStyle={styles.buttonTitle} onPress={() => { navigation.navigate("FoodAdd", { userId: restaurantId }), dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurant_address, restaurantPhone, restaurantId, restaurantColor)) }} />
-
-                                <Text style={styles.subHeaderText}>About Us</Text>
-
-                                <View >
-                                    <Text style={{ margin: 10 }}>{restaurantDesc} </Text>
-                                    <View style={{ flexDirection: "row", alignContent: "center", alignItems: 'center', margin: 5 }}>
-
-                                        <Icon name="location-pin" color="black" size="35" />
-                                        <Text onPress={() => Linking.openURL(`https://www.google.com/maps/place/${restaurant_address} ${restaurant_city}, ${restaurant_state} ${restaurant_zip}`)}
-                                            style={{ fontFamily: 'Bold', fontSize: 14, marginHorizontal: 10 }}>
-                                            {restaurant_address} {restaurant_city}, {restaurant_state} {restaurant_zip}
-                                        </Text>
-
-                                    </View>
-                                    <View style={{ flexDirection: "row", alignContent: "center", alignItems: 'center', margin: 5 }}>
-                                        <Icon name="call" color="black" size="35" />
-                                        <Text onPress={() => Linking.openURL("https://htmlcolorcodes.com/")} style={{ fontFamily: 'Bold', fontSize: 14, marginHorizontal: 10 }}>{restaurantPhone}</Text>
-                                    </View>
-                                    <View style={{ flexDirection: "row", alignContent: "center", margin: 5, alignItems: 'center' }}>
-                                        <Icon name="web" color="black" size="35" />
-                                        <Text onPress={() => Linking.openURL(`${restaurant_website}`)} style={{ fontFamily: 'Bold', fontSize: 14, marginHorizontal: 10 }} >{restaurant_website}</Text>
-                                    </View>
-
+                    <View style={{ maxWidth: 850, alignSelf: Platform.OS === 'web' ? 'center' : '', width: '100%', padding: 10 }}>
+                        <Text style={styles.subHeaderText}>Your Current Plan: Starter</Text>
+                        <View style={{ flexDirection: 'row', justifyContent: "center", flexWrap: "wrap" }}>
+                            <View style={[styles.shadowProp, { backgroundColor: 'white', minWidth: 350, maxWidth: 350, flex: 1, margin: 10, padding: 10, borderRadius: 13 }]}>
+                                <View style={{ justifyContent: "center", marginLeft: 5 }}>
+                                    <Text style={styles.headerText}>Starter</Text>
+                                    <Text>The basicis setup for your interactive menu</Text>
+                                    <Text style={{ fontSize: 20, }}>$12/per month </Text>
                                 </View>
-                            </View>
-                            <Text style={styles.headerText}>
-                                Menu
-                            </Text>
-                            {!(windowWidth >= 500) ?
-                                <View style={{ backgroundColor: 'white' }}>
-
-                                    <FlatList
-                                        showsHorizontalScrollIndicator={false}
-                                        horizontal
-                                        data={selectedMenus}
-                                        renderItem={renderMenus}
-                                        initialNumToRender={10}
-
-                                    />
-                                </View>
-                                :
-                                <View style={{ backgroundColor: 'white' }}>
-
-                                    <FlatList
-                                        showsHorizontalScrollIndicator={false}
-                                        data={selectedMenus}
-                                        renderItem={renderMenus}
-                                        initialNumToRender={10}
-
-                                    />
-                                </View>
-                            }
-
-                            <Divider style={{ margin: 10 }} />
-                            {menusDesc === "" ?
-                                <Text style={{ textAlign: "center", fontWeight: '800' }}> Pick a Menu</Text>
-                                :
-                                <Text style={{ textAlign: "center" }}>{menusDesc}</Text>
-                            }
-                            <View>
-                                <Text style={[styles.subHeaderText, { fontSize: 20 }]}>Categories</Text>
-
-                                <FlatList
-                                    showsHorizontalScrollIndicator={false}
-                                    horizontal
-                                    data={selectedCategory}
-                                    renderItem={renderItem}
-                                    initialNumToRender={10}
-                                />
-
-                            </View>
-                        </View>
-                        <View style={[styles.menuItemContaner, { marginVertical: 20 }]}>
-                            <Input
-                                inputContainerStyle={{ borderBottomWidth: 0, marginBottom: Platform.OS === 'web' ? -15 : -20 }}
-                                onChangeText={(text) => searchFilter(text)}
-                                value={text}
-                                placeholder="Chicken Tacos..."
-                                leftIcon={{ type: 'material-community', name: "taco" }}
-                            />
-
-                        </View>
-                        <FlatList
-                            data={filtered}
-                            keyExtractor={(item, index) => index}
-                            renderItem={({ item, index }) =>
                                 <View>
-                                    <Card
-                                        onPress={() => {
-                                            dispatch(setFoodItemId(item.food_id, item.food, item.price, item.description, item.upvotes, item.restaurant)), navigation.navigate("Food", {
-                                                restId: restId,
-                                                foodId: item.food_id,
-                                                restName: item.restaurant,
-                                            })
-                                        }}
-                                        restaurant={item.restaurant}
-                                        ranking={index + item.upvotes}
-                                        menu={item.menus}
-                                        food={item.food}
-                                        percent={item.ratingCount > 0 ? (item.eatagain * 100 / item.ratingCount).toFixed(0) : (item.eatagain)}
-                                        upvotes={item.upvotes}
-                                        upvoteColor={restaurantColor}
 
-                                    />
-                                    <View style={{ flexDirection: 'row', marginBottom: 20 }}>
-                                        <Button onPress={() => deleteFood(item.food_id)} buttonStyle={{ backgroundColor: '#8A3333' }} buttonTitle={{ fontFamily: 'Bold', fontSize: "20" }} title="Delete" />
-                                        <Button onPress={() => console.log("Not Done")} buttonStyle={{ backgroundColor: 'orange' }} buttonTitle={{ fontFamily: 'Bold', fontSize: "20" }} title="Edit" />
+                                    <TouchableOpacity style={[styles.button, { maxWidth: 200, opacity: 0.5 }]} >
+                                        <Text style={[styles.buttonTitle, { paddingHorizontal: 5, textAlign: 'center' }]}>Switch to Starter</Text>
+                                    </TouchableOpacity>
+                                    <View style={{ marginTop: 10, marginLeft: 5 }}>
+                                        <Text style={{ fontFamily: 'Bold', marginVertical: 5 }}>Customizable QR Menus</Text>
+                                        <Text style={{ fontFamily: 'Bold', marginVertical: 5 }}>Dynamic QR Menus</Text>
+                                        <Text style={{ fontFamily: 'Bold', marginVertical: 5 }}>Free delivery</Text>
+                                        <Text style={{ fontFamily: 'Bold', marginVertical: 5 }}>Data Metrics on Scans</Text>
                                     </View>
                                 </View>
-                            }
-                        />
+                            </View>
+                            <View style={[styles.shadowProp, { backgroundColor: 'white', minWidth: 350, maxWidth: 350, flex: 1, margin: 10, padding: 10, borderRadius: 13 }]}>
+                                <View style={{ justifyContent: "center", marginLeft: 5 }}>
+                                    <Text style={styles.headerText}>Premium</Text>
+                                    <Text>The interactive menu and feiri dashboard</Text>
+                                    <Text style={{ fontSize: 20, }}>$30/per month </Text>
+                                </View>
+                                <View>
+
+                                    <TouchableOpacity style={[styles.button, { maxWidth: 200 }]} >
+                                        <Text style={[styles.buttonTitle, { paddingHorizontal: 5, textAlign: 'center' }]}>Switch to Premium</Text>
+                                    </TouchableOpacity>
+                                    <View style={{ marginTop: 10, marginLeft: 5 }}>
+                                        <Text style={{ fontFamily: 'Bold', marginVertical: 5 }}>Customizable QR Menus</Text>
+                                        <Text style={{ fontFamily: 'Bold', marginVertical: 5 }}>Dynamic QR Menus</Text>
+                                        <Text style={{ fontFamily: 'Bold', marginVertical: 5 }}>Free delivery</Text>
+                                        <Text style={{ fontFamily: 'Bold', marginVertical: 5 }}>Data Metrics on Scans</Text>
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
+
+
                     </View>
                 </View>
             </View>
@@ -755,4 +562,4 @@ const MenuEdit = ({ route, navigation }) => {
     );
 };
 
-export default MenuEdit
+export default Billing

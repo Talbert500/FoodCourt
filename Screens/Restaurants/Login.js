@@ -11,7 +11,7 @@ import { Link } from '@react-navigation/native';
 import { useFonts } from '@use-expo/font';
 import { uid } from 'uid';
 import { setSearchedRestaurantImage, setSearchedRestaurant, setNewRestaurant,setUserProps } from '../../redux/action'
-import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { signInWithPopup, GoogleAuthProvider,onAuthStateChanged } from "firebase/auth";
 import { db, provider, auth, database } from '../../firebase-config'
 import { setDoc, getDoc, doc } from 'firebase/firestore'
 import { ref, set, update, onValue } from 'firebase/database'
@@ -40,6 +40,15 @@ function Login({ navigation }) {
   useEffect(() => {
     dispatch(setSearchedRestaurant(null, null, null, null, null, null))
     dispatch(setNewRestaurant(null, null, null, null, null))
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+          setloggedin(true)
+          navigation.navigate("Home")
+      } else {
+          setloggedin(false)
+      }
+  })
 
   }, [])
 
@@ -76,9 +85,9 @@ function Login({ navigation }) {
 
 
 
-        navigation.navigate("RestaurantAdmin", {
+        navigation.navigate("MenuEdit", {
           userId: user.uid,
-          loginSession: user.uid
+          restId: user.uid
         })
       }).catch((error) => {
         const errorCode = error.code;
@@ -99,9 +108,9 @@ function Login({ navigation }) {
         console.log(userCredential_id)
         dispatch(setNewRestaurant(userCredential_id, emails))
 
-        navigation.navigate("RestaurantAdmin", {
-          userId: loginSession,
-          loginSession: userCredential_id
+        navigation.navigate("MenuEdit", {
+          userId: userCredential_id,
+          restId: userCredential_id
         })
       }).catch((error) => {
         seterror(error.code)
@@ -151,7 +160,7 @@ function Login({ navigation }) {
 
           )}
           <Text style={{ fontFamily: 'Primary', alignSelf: "center", fontSize: Platform.OS === 'web' ? 17 : 14, fontWeight: "600" }}>
-            for mexican restaurants
+            for restaurants
           </Text>
         </View>
 

@@ -27,6 +27,7 @@ import AddAddress from './Screens/Restaurants/AddAddress';
 import AddMenus from './Screens/Restaurants/AddMenus';
 import MenuEdit from './Screens/Restaurants/MenuEdit';
 import QRMenus from './Screens/QRMenus'
+import Billing from './Screens/web/Billing';
 
 const Stack = createNativeStackNavigator();
 
@@ -101,6 +102,9 @@ export default function App() {
         },
         MenuEdit:{
           path: 'menu-edit'
+        },
+        Billing:{
+          path: 'billing-edit'
         }
       }
       /* configuration for matching screens with paths */
@@ -110,9 +114,17 @@ export default function App() {
 
   return (
     <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>
-      <View><Text style={{ color: 'red', fontSize: 10 }}> Unstable Alpha v2.9\\ BIG UI/UX UPDATE ! lookin good!</Text></View>
+      <View><Text style={{ color: 'red', fontSize: 10 }}> Unstable Alpha v3.2\\ UPDATED QRMENUS and EDIT PROFILE </Text></View>
       <Provider store={store}>
         <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen
+            name="Billing"
+            component={Billing}
+            options={{
+              headerShown: false,
+
+            }}
+          />
         <Stack.Screen
             name="QRMenus"
             component={QRMenus}

@@ -59,7 +59,7 @@ function CreateMenu({ navigation }) {
 
     const AddMenus = async () => {
         const uuid = uid();
-        update(ref(database, "restaurants/" + restaurantId + "/menus"), {
+        update(ref(database, "restaurants/" + restaurantId ), {
             menus
         });
 
@@ -116,7 +116,7 @@ function CreateMenu({ navigation }) {
                         source={require('../../assets/logo_name_simple.png')} />
                 </TouchableOpacity>
                 <Text style={{ fontFamily: 'Primary', alignSelf: "center", fontSize: Platform.OS === 'web' ? 17 : 14, fontWeight: "600" }}>
-                    for mexican restaurants
+                    for restaurants
                 </Text>
             </View>
             <View style={{ marginBottom: '10%', backgroundColor: 'orange' }}>

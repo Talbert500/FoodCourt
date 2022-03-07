@@ -1,45 +1,82 @@
 
 import { useRef } from 'react'
-import { TextInput, RefreshControl, ImageBackground, Animated, Image, ScrollView, Text, View, SafeAreaView, FlatList, TouchableOpacity } from 'react-native';
+import { Dimensions, Platform, TextInput, RefreshControl, ImageBackground, Animated, Image, ScrollView, Text, View, SafeAreaView, FlatList, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { Button } from 'react-native-elements'
+import { Button, Input } from 'react-native-elements'
 import { styles } from '../../styles'
 import { ref, onValue, orderByChild, query } from 'firebase/database'
-import { collection, getDoc, doc, setDoc ,updateDoc} from 'firebase/firestore'
+import { collection, getDoc, doc, setDoc, updateDoc } from 'firebase/firestore'
 import { storage } from '../../firebase-config';
 import { useEffect, useState } from 'react';
 import Card from '../../Components/Card'
 import { setFoodItemId } from '../../redux/action'
 import { uploadBytes, getDownloadURL, ref as tef, list } from 'firebase/storage';
 import { BlurView } from 'expo-blur';
-import { setSearchedRestaurantImage, setSearchedRestaurant } from '../../redux/action'
+import { setSearchedRestaurantImage, setSearchedRestaurant, setNewRestaurant } from '../../redux/action'
 import { auth, database } from '../../firebase-config'
 import { db } from '../../firebase-config'
 import { Link } from '@react-navigation/native';
-import { signOut } from 'firebase/auth'
+import Footer from '../../Components/Footer';
+import { LinearGradient } from 'expo-linear-gradient';
+import { signOut, onAuthStateChanged } from 'firebase/auth'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Divider } from 'react-native-elements/dist/divider/Divider';
+import { Icon } from 'react-native-elements'
+import { useFonts } from '@use-expo/font';
 
+function Settings({ navigation }) {
 
-function Settings({navigation}) {
+    let [fontsLoaded] = useFonts({
+        'Primary': require('../../assets/fonts/proxima_nova_reg.ttf'),
+        'Bold': require('../../assets/fonts/proxima_nova_bold.ttf'),
+        'Black': require('../../assets/fonts/proxima_nova_black.otf')
+    });
+
+    const windowWidth = Dimensions.get("window").width;
+    const windowHeight = Dimensions.get("window").height;
 
     const dispatch = useDispatch();
 
-    const [color, setColor] = useState([]);
-    const [phone, setPhone] = useState([]);
-    const [desc, setDesc] = useState([]);
+    // const searchedRestaurant = useSelector(state => state.searchedRestaurant)
+    // const restaurantImage = useSelector(state => state.restaurantImage)
+    // const restaurantDesc = useSelector(state => state.restaurantDesc)
+    // const restaurantId = useSelector(state => state.restaurantId)
+    // const restaurantColor = useSelector(state => state.restaurantColor)
+    // const restaurantAddress = useSelector(state => state.restaurantAddress)
+    // const restaurantPhone = useSelector(state => state.restaurantPhone)
+    // const tookPicture = useSelector(state => state.foodImage)
 
-    const searchedRestaurant = useSelector(state => state.searchedRestaurant)
-    const restaurantImage = useSelector(state => state.restaurantImage)
-    const restaurantDesc = useSelector(state => state.restaurantDesc)
-    const restaurantId = useSelector(state => state.restaurantId)
-    const restaurantColor = useSelector(state => state.restaurantColor)
-    const restaurantAddress = useSelector(state => state.restaurantAddress)
-    const restaurantPhone = useSelector(state => state.restaurantPhone)
-    const tookPicture = useSelector(state => state.foodImage)
 
-    const setRestaurant = async () => {
-        const restId = auth.currentUser.uid;
+    const [color, setColor] = useState("");
+    const [text, onChangeText] = useState("")
+    const [desc, setDesc] = useState(restaurantDesc);
+    const [isRestaruant, setIsRestaurant] = useState("");
+    const [userPhoto, setUserPhoto] = useState("");
+    const [searchedRestaurant, setCurrentRest] = useState("")
+    const [restaurantImage, setRestaurantImage] = useState("");
+    const [restaurantColor, setRestaurantColor] = useState("");
+    const [restaurantAddress, setRestaurantAddress] = useState("");
+    const [restaurantPhone, setRestaurantPhone] = useState("");
+    const [restaurantDesc, setRestaurantDesc] = useState("");
+    const [phone, setPhone] = useState(restaurantPhone);
+    const [restId, setRestId] = useState("")
+
+    const [hoverside, setHoverSide] = useState(false)
+    const [hoverside1, setHoverSide1] = useState(false)
+    const [hoverside2, setHoverSide2] = useState(false)
+    const [hoverside3, setHoverSide3] = useState(false)
+    const [hoverside4, setHoverSide4] = useState(false)
+    const [hoverside5, setHoverSide5] = useState(false)
+    const [hoverside6, setHoverSide6] = useState(false)
+    const [hoverside7, setHoverSide7] = useState(false)
+
+    const [regulars, setRegulars] = useState([])
+    const [bookmarked, setBookmarked] = useState(false)
+    const [loggedin, setloggedin] = useState(false);
+    const [userName, setUserName] = useState('')
+
+    const setRestaurant = async (restId) => {
+
         const docRef = doc(db, "restaurants", restId);
         const snapshot = await getDoc(docRef)
         if (snapshot.exists()) {
@@ -51,106 +88,301 @@ function Settings({navigation}) {
             const restaurant_color = snapshot.data().restaurant_color
 
             dispatch(setSearchedRestaurant(restaurant_name, restaurant_desc, restaurant_address, restaurant_phone, restaurant_id, restaurant_color))
+            setCurrentRest(snapshot.data().restaurant_name)
+            setRestaurantColor(snapshot.data().restaurant_color)
+            setRestaurantAddress(snapshot.data().restaurant_address)
+            setRestaurantPhone(snapshot.data().restaurant_phone)
+            setRestaurantDesc(snapshot.data().restaurant_desc)
+
+
         } else {
             console.log("No souch document!")
         }
     }
-    const getImage = async () => {
-        const imageRef = tef(storage, 'imagesRestaurant/' + restaurantId);
+    const getImage = async (restId) => {
+        const imageRef = tef(storage, 'imagesRestaurant/' + restId);
         await getDownloadURL(imageRef).then((url) => {
             dispatch(setSearchedRestaurantImage(url))
+            setRestaurantImage(url)
         })
     }
     const AddNewRestaurant = async () => {
+
         console.log(auth.currentUser.email)
         console.log(auth.currentUser.uid)
         console.log("Updated")
+
         updateDoc(doc(db, "restaurants", auth.currentUser.uid), {
-            restaurant_phone: phone,
-            restaurant_desc: desc,
-            restaurant_color: color
+            restaurant_phone: restaurantPhone,
+            restaurant_desc: restaurantDesc,
+            restaurant_color: restaurantColor
 
         }).catch((error) => {
             const errorCode = error;
             console.log("ERROR" + errorCode)
         })
         //just added 
-        console.log(tookPicture);
-        const getImageRef = tef(storage, 'imagesRestaurant/' + auth.currentUser.uid); //check if the storage updates 
-        //convert image to array of bytes
-        const img = await fetch(tookPicture);
-        const bytes = await img.blob();
-        uploadBytes(getImageRef, bytes).catch((error) => {
-            console.log(error)
-        })
-        dispatch(setSearchedRestaurantImage(tookPicture));
-        updateProfile(auth.currentUser, {
-            displayName: inputRest,
-            photoURL: tookPicture
-        }).then(() => {
-            console.log()
-        })
+
+        // console.log(tookPicture);
+        // const getImageRef = tef(storage, 'imagesRestaurant/' + auth.currentUser.uid); //check if the storage updates 
+        // //convert image to array of bytes
+        // const img = await fetch(tookPicture);
+        // const bytes = await img.blob();
+        // uploadBytes(getImageRef, bytes).catch((error) => {
+        //     console.log(error)
+        // })
+        // dispatch(setSearchedRestaurantImage(tookPicture));
+        // updateProfile(auth.currentUser, {
+        //     displayName: inputRest,
+        //     photoURL: tookPicture
+        // }).then(() => {
+        //     console.log()
+        // })
+
         //we can keep it local or do a check on the backend side and out from there
         //dispatch(setSearchedRestaurant(inputRest,restaurant_desc,restaurant_address,restaurant_phone,restaurant_id))
-        navigation.navigate("CreateMenu")
+        navigation.navigate("Settings")
 
     }
 
 
+    const userSignOut = () => {
+        signOut(auth).then(() => {
+            dispatch(setSearchedRestaurant(null, null, null, null, null, null))
+            dispatch(setNewRestaurant(null, null, null, null, null))
+            if (Platform.OS === 'web') {
+                navigation.navigate("RestaurantHome")
+            } else {
+                navigation.navigate("Home")
+            }
+
+        }).catch((error) => {
+            console.log(error)
+        })
+    }
 
     useEffect(() => {
-        setRestaurant();
-        getImage();
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setRestId(user.uid)
+                setRestaurant(user.uid);
+                getImage(user.uid);
+                console.log(user)
+                const userRef = ref(database, "user/" + user.uid)
+                onValue(userRef, (snapshot) => {
+                    const data = snapshot.val();
+                    if (data !== null) {
+                        console.log(data)
+                        setIsRestaurant(data.hasRestaurant)
+                        setUserPhoto(data.userPhoto)
+                        setUserName(data.userName)
+
+
+                    }
+
+                });
+
+
+            } else {
+                navigation.navigate("Home")
+            }
+        })
+
+
     }, [])
 
     return (
         <KeyboardAwareScrollView enableOnAndroid extraHeight={120} style={{ flex: 1, backgroundColor: "white" }}>
-            <View style={{ backgroundColor: "white", margin: 30 }}>
-
-                <View style={[styles.shadowProp, { backgroundColor: "#F2F2F2", padding: 10, borderRadius: 13, }]}>
-                    <Text style={[styles.subHeaderText, { marginVertical: 20 }]}> {searchedRestaurant} </Text>
-                    <View style={{ alignItems: 'center' }}>
-                        <Image source={{ uri: restaurantImage }} style={{ width: 200, height: 200, borderRadius: 30, backgroundColor: '#D3D3D3' }} />
-                        <Button onPress={() => { navigation.navigate("Camera") }} buttonStyle={[styles.button, { backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} title="Change Profile Picutre" />
-                    </View>
-                    <Divider style={{ margin: 10 }} />
-                    <Text style={styles.subHeaderText}>Restaurant Address</Text>
-                    <Text style={[styles.subHeaderText, { fontSize: 20, margin: 10 }]}>{restaurantAddress}</Text>
-                    <Text style={styles.subHeaderText}>Phone Number</Text>
-                    <TextInput
-                        style={[styles.inputContainer, { padding: 10, alignSelf: 'center', }]}
-                        onChangeText={setPhone}
-                        value={phone}
-                        placeholder={restaurantPhone}
-                        autoCapitalize='words'
-                    />
-                    <View style={{ flexDirection: 'row' }}>
-                        <Text style={styles.subHeaderText}>Color Theme</Text>
-                        <Text onPress={() => Linking.openURL("https://htmlcolorcodes.com/")} style={{ backgroundColor: 'grey', alignSelf: 'center', borderRadius: 50, color: 'white', justifyContent: 'center' }}> ? </Text>
-                    </View>
-                    <TextInput
-                        style={[styles.inputContainer, { padding: 10, alignSelf: 'center', }]}
-                        onChangeText={setColor}
-                        value={color}
-                        placeholder={restaurantColor}
-                        autoCapitalize='words'
-                    />
-                    <Text style={styles.subHeaderText}> Description </Text>
-                    <TextInput
-                        style={[styles.inputContainer, { padding: 10, alignSelf: 'center', }]}
-                        onChangeText={setDesc}
-                        value={desc}
-                        placeholder={restaurantDesc}
-                        autoCapitalize='words'
-                    />
-                    <Text style={{ fontSize: 14, margin: 10, textDecorationLine: 'underline' }}>Delete Restaurant</Text>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-                        <Button onPress={AddNewRestaurant} buttonStyle={[styles.button, { backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} title="Save" />
-                        <Button onPress={()=> navigation.goBack()} buttonStyle={[styles.button, { backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} title="Return" />
+            {Platform.OS === 'web' ? (
+                <View style={{ width: '100%', padding: 5, flexDirection: "row", backgroundColor: Platform.OS === "web" ? "white" : "transparent", zIndex: 1 }}>
+                    <TouchableOpacity onPress={() => navigation.navigate("Home")}>
+                        <Image
+                            style={{
+                                justifyContent: 'flex-start',
+                                width: 75,
+                                height: 75,
+                                resizeMode: "contain",
+                            }}
+                            source={require('../../assets/splash.png')} />
+                    </TouchableOpacity>
+                    <View style={{ flexDirection: "row", marginLeft: 'auto' }}>
+                        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+                            <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
+                                <Image
+                                    style={{ height: 50, width: 50, borderRadius: 40, marginHorizontal: 10 }}
+                                    source={{ uri: userPhoto }}
+                                />
+                            </TouchableOpacity>
+                            <Text style={{ fontFamily: 'Bold' }}>{userName}</Text>
+                        </View>
                     </View>
                 </View>
+            ) : (<></>)
+            }
+            <View style={{ flexDirection: windowWidth >= 500 ? 'row' : 'column', flexWrap: 'wrap-reverses', margin: 5 }}>
+                {(windowWidth >= 500) ?
+                    <View style={{ marginTop: 10, padding: 10 }}>
+                        <TouchableOpacity onMouseOver={() => (setHoverSide(true))} onMouseLeave={() => { setHoverSide(false) }} style={{ marginBottom: 12 }}>
+                            <Icon style={{ top: (hoverside === true) ? 0 : 3 }} onPress={() => { navigation.navigate("MenuEdit", { restId: restId }) }} type="entypo" name="home" color="#F6AE2D" size={35} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onMouseOver={() => (setHoverSide1(true))} onMouseLeave={() => { setHoverSide1(false) }} onPress={() => navigation.navigate("Billing", { restId: restId })} style={{ marginBottom: 12 }}>
+                            <Icon style={{ top: (hoverside1 === true) ? 0 : 3 }} type="material" name="analytics" color="#F6AE2D" size={35} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onMouseOver={() => (setHoverSide2(true))} onMouseLeave={() => { setHoverSide2(false) }} onPress={() => navigation.navigate("QRMenus", { userId: restId })} style={{ marginBottom: 12 }}>
+                            <Icon style={{ top: (hoverside2 === true) ? 3 : 3 }} type="material-community" name="qrcode-edit" color="#F6AE2D" size={35} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onMouseOver={() => (setHoverSide3(true))} onMouseLeave={() => { setHoverSide3(false) }} style={{ marginBottom: 12 }}>
+                            <Icon style={{ top: (hoverside3 === true) ? 0 : 3 }} type="material-community" name="message-text" color="#F6AE2D" size={35} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onMouseOver={() => (setHoverSide4(true))} onMouseLeave={() => { setHoverSide4(false) }} style={{ marginBottom: 12 }}>
+                            <Icon style={{ top: (hoverside4 === true) ? 0 : 3 }} type="material" name="fastfood" color="#F6AE2D" size={35} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onMouseOver={() => (setHoverSide5(true))} onMouseLeave={() => { setHoverSide5(false) }} onPress={() => { navigation.navigate("Settings") }} style={{ marginBottom: 12 }}>
+                            <Icon style={{ top: (hoverside5 === true) ? 0 : 3 }} type="fontisto" name="player-settings" color="grey" size={35} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onMouseOver={() => (setHoverSide6(true))} onMouseLeave={() => { setHoverSide6(false) }} onPress={userSignOut} style={{ marginBottom: 12 }}>
+                            <Icon style={{ top: (hoverside6 === true) ? 0 : 3 }} type="material-community" name="logout-variant" color="#F6AE2D" size={35} />
+                        </TouchableOpacity>
+                    </View>
+                    :
+                    <View>
+                        {/*ON PHONE*/}
+                    </View>
+                }
+                <View style={{ backgroundColor: 'white', flex: 1 }}>
+                    <View style={[styles.shadowProp, { backgroundColor: 'white', marginHorizontal: 10, borderRadius: 13, overflow: 'hidden', flex: 1 }]}>
+                        <ImageBackground style={{ margin: 5, borderTopLeftRadius: 13, borderTopRightRadius: 13, overflow: 'hidden', height: Platform.OS === "web" ? 150 : 75 }} resizeMode="cover" source={{ uri: restaurantImage }}>
+                            <LinearGradient
+                                colors={['#00000000', '#000000']}
+                                style={{ height: '100%', width: '100%' }}>
+                                <View style={{ width: "100%", maxWidth: 600, flex: 1, alignSelf: 'center', flexDirection: 'row-reverse' }}>
+                                    <View style={{ justifyContent: 'flex-end', margin: 10 }}>
+                                    </View>
+                                    <View style={{
+                                        flex: 1,
+                                    }}>
+                                        <Text ellipsizeMode='tail' numberOfLines={2} style={[styles.subHeaderText, { color: "white", textAlign: 'left', marginLeft: 10 }]}>Account Details</Text>
+
+                                    </View>
+                                </View>
+                            </LinearGradient>
+                        </ImageBackground >
+                        <View style={{ flex: 1, maxWidth: 700, alignSelf: Platform.OS === 'web' ? 'center' : '', width: '100%', padding: 10 }}>
+                            <View>
+                                <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold' }}>Display name</Text>
+                                <TextInput
+                                    style={[styles.inputContainer, { padding: 10, alignSelf: 'center', }]}
+                                    onChangeText={setSearchedRestaurant}
+                                    value={searchedRestaurant}
+                                    placeholder={searchedRestaurant}
+                                    autoCapitalize='words'
+                                />
+                            </View>
+                            <View>
+                                <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold' }}>Display name</Text>
+                                <TextInput
+                                    style={[styles.inputContainer, { padding: 10, alignSelf: 'center', }]}
+                                    onChangeText={setRestaurantDesc}
+                                    value={restaurantDesc}
+                                    placeholder={restaurantDesc}
+                                    autoCapitalize='words'
+                                />
+                            </View>
+                            <View style={{ flexDirection: 'row', width: '100%', flexWrap: 'wrap' }}>
+                                <View style={{ marginHorizontal: 5, width: "45%" }} >
+                                    <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold', marginRight: 'auto' }}>Display name</Text>
+                                    <TextInput
+                                        placeholder="John"
+                                        value={searchedRestaurant}
+                                        onChangeText={setSearchedRestaurant}
+                                        style={[styles.inputContainer, { padding: 10, alignSelf: 'center', }]}
+                                    />
+                                </View>
+                                <View style={{ marginHorizontal: 5, width: "45%", marginLeft: "auto" }} >
+                                    <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold', marginRight: 'auto' }}>Address</Text>
+                                    <TextInput
+                                        placeholder="Doe"
+                                        value={restaurantAddress}
+                                        onChangeText={setRestaurantAddress}
+                                        style={[styles.inputContainer, { padding: 10, alignSelf: 'center', }]}
+                                    />
+                                </View>
+                            </View>
+                            <View style={{ flexDirection: 'row', width: '100%', flexWrap: 'wrap' }}>
+                                <View style={{ marginHorizontal: 5, width: "45%" }} >
+                                    <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold', marginRight: 'auto' }}>Phone Number</Text>
+                                    <TextInput
+                                        placeholder="John"
+                                        value={restaurantPhone}
+                                        onChangeText={setRestaurantPhone}
+                                        style={[styles.inputContainer, { padding: 10, alignSelf: 'center', }]}
+                                    />
+                                </View>
+                                <View style={{ marginHorizontal: 5, width: "45%", marginLeft: "auto" }} >
+                                    <View style={{ flexDirection: 'row' }}>
+                                        <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold', marginRight: 'auto' }}>Color Theme</Text>
+                                        <Text onPress={() => Linking.openURL("https://htmlcolorcodes.com/")} style={{ backgroundColor: 'grey', borderRadius: 50, color: 'white', marginRight: 'auto' }}> ? </Text>
+                                    </View>
+                                    <TextInput
+                                        placeholder="John"
+                                        value={restaurantColor}
+                                        onChangeText={setRestaurantColor}
+                                        style={[styles.inputContainer, { padding: 10, alignSelf: 'center', }]}
+                                    />
+                                </View>
+                            </View>
+
+                        </View>
+                    </View>
+
+                    <View style={[styles.shadowProp, { backgroundColor: 'white', marginHorizontal: 10, borderRadius: 13, overflow: 'hidden', marginTop: 15 }]}>
+                        <Text style={{ margin: 10 }}>Billing Settings</Text>
+                        <View>
+                            <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold' }}>Display name</Text>
+                            <TextInput
+                                style={[styles.inputContainer, { padding: 10, alignSelf: 'center', }]}
+                                onChangeText={setRestaurantDesc}
+                                value={restaurantDesc}
+                                placeholder={restaurantDesc}
+                                autoCapitalize='words'
+                            />
+                        </View>
+                        <View>
+                            <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold' }}>Display name</Text>
+                            <TextInput
+                                style={[styles.inputContainer, { padding: 10, alignSelf: 'center', }]}
+                                onChangeText={setRestaurantDesc}
+                                value={restaurantDesc}
+                                placeholder={restaurantDesc}
+                                autoCapitalize='words'
+                            />
+                        </View>
+                        <View>
+                            <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold' }}>Display name</Text>
+                            <TextInput
+                                style={[styles.inputContainer, { padding: 10, alignSelf: 'center', }]}
+                                onChangeText={setRestaurantDesc}
+                                value={restaurantDesc}
+                                placeholder={restaurantDesc}
+                                autoCapitalize='words'
+                            />
+                        </View>
+                    </View>
+                </View>
+
+            </View>
+
+            <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+                <Button onPress={AddNewRestaurant} buttonStyle={[styles.button, { backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} title="Save" />
+                <Button onPress={() => navigation.goBack()} buttonStyle={[styles.button, { backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} title="Return" />
+            </View>
+
+            <View style={{ marginTop: "20%" }}>
+                <Footer />
             </View>
         </KeyboardAwareScrollView>
+
+
     )
 
 }

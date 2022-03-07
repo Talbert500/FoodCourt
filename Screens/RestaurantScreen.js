@@ -227,17 +227,12 @@ function RestaurantScreen({ route, navigation }) {
                 <View style={{ maxWidth: 700, alignSelf: Platform.OS === 'web' ? 'center' : '', width: '100%' }}>
                     <View style={{ margin: 10 }}>
                         <View style={{ flexDirection: 'row', margin: 5, flexWrap: 'wrap', justifyContent: 'center' }}>
-                            <Button onPress={() => {
-                                navigation.navigate("MenuEdit", {
-                                    restId: loginSession
-
-                                }), setLocalData()
+                            <Button onPress={() => {navigation.navigate("MenuEdit", {restId: loginSession}), setLocalData()
                             }} buttonStyle={[styles.button, { backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} title="Edit Menu"></Button>
 
                             <Button onPress={() =>
                                 navigation.navigate("RestaurantWeb", {
                                     restId: loginSession
-
                                 })}
                                 buttonStyle={[styles.button, { backgroundColor: "white", borderColor: restaurantColor, borderWidth: 1 }]} titleStyle={[styles.buttonTitle, { color: restaurantColor }]} title="View Menu">
                             </Button>
