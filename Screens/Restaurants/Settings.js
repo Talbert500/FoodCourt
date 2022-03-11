@@ -4,7 +4,7 @@ import { Dimensions, Platform, TextInput, RefreshControl, ImageBackground, Anima
 import { useSelector, useDispatch } from 'react-redux';
 import { Button, Input } from 'react-native-elements'
 import { styles } from '../../styles'
-import { ref, onValue, orderByChild, query } from 'firebase/database'
+import { ref, onValue, orderByChild, query, update } from 'firebase/database'
 import { collection, getDoc, doc, setDoc, updateDoc } from 'firebase/firestore'
 import { storage } from '../../firebase-config';
 import { useEffect, useState } from 'react';
@@ -22,6 +22,7 @@ import { signOut, onAuthStateChanged } from 'firebase/auth'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Divider } from 'react-native-elements/dist/divider/Divider';
 import { Icon } from 'react-native-elements'
+import * as ImagePicker from 'expo-image-picker';
 import { useFonts } from '@use-expo/font';
 
 function Settings({ navigation }) {
@@ -49,6 +50,7 @@ function Settings({ navigation }) {
 
     const [color, setColor] = useState("");
     const [text, onChangeText] = useState("")
+    const [image, setImage] = useState("")
     const [desc, setDesc] = useState(restaurantDesc);
     const [isRestaruant, setIsRestaurant] = useState("");
     const [userPhoto, setUserPhoto] = useState("");
@@ -73,7 +75,10 @@ function Settings({ navigation }) {
     const [regulars, setRegulars] = useState([])
     const [bookmarked, setBookmarked] = useState(false)
     const [loggedin, setloggedin] = useState(false);
-    const [userName, setUserName] = useState('')
+
+    const [userName, setUserName] = useState('');
+    const [userEmail, setUserEmail] = useState('');
+    const [userCreated, setUserCreated] = useState('');
 
     const setRestaurant = async (restId) => {
 
@@ -121,6 +126,11 @@ function Settings({ navigation }) {
             const errorCode = error;
             console.log("ERROR" + errorCode)
         })
+
+        update(ref(database, "user/" + auth.currentUser.uid), {
+            userName: searchedRestaurant
+
+        });
         //just added 
 
         // console.log(tookPicture);
@@ -168,6 +178,8 @@ function Settings({ navigation }) {
                 setRestaurant(user.uid);
                 getImage(user.uid);
                 console.log(user)
+                setUserEmail(user.email)
+                setUserCreated(user.metadata.creationTime)
                 const userRef = ref(database, "user/" + user.uid)
                 onValue(userRef, (snapshot) => {
                     const data = snapshot.val();
@@ -177,9 +189,7 @@ function Settings({ navigation }) {
                         setUserPhoto(data.userPhoto)
                         setUserName(data.userName)
 
-
                     }
-
                 });
 
 
@@ -190,6 +200,33 @@ function Settings({ navigation }) {
 
 
     }, [])
+
+    const editPhoto = async (imagee) => {
+        const getImageRef = tef(storage, 'imagesRestaurant/' + restId); //how the image will be addressed inside the storage
+        //convert image to array of bytes
+        const img = await fetch(imagee);
+        const bytes = await img.blob();
+        uploadBytes(getImageRef, bytes).catch((error) => {
+            console.log(error)
+        })
+
+
+    }
+
+    let openImagePickerAsync = async () => {
+        let permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+        if (permissionResult.granted === false) {
+            alert("Permission to access camera roll is required!");
+            return;
+        }
+
+        let pickerResult = await ImagePicker.launchImageLibraryAsync();
+        // dispatch(setFoodItemImage(pickerResult.uri))
+        setImage(pickerResult.uri)
+        editPhoto(pickerResult.uri)
+
+    }
 
     return (
         <KeyboardAwareScrollView enableOnAndroid extraHeight={120} style={{ flex: 1, backgroundColor: "white" }}>
@@ -205,7 +242,7 @@ function Settings({ navigation }) {
                             }}
                             source={require('../../assets/splash.png')} />
                     </TouchableOpacity>
-                    <View style={{ flexDirection: "row", marginLeft: 'auto' }}>
+                    <View style={{ flexDirection: "row", marginLeft: 'auto', marginRight: 30 }}>
                         <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
                             <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
                                 <Image
@@ -249,7 +286,29 @@ function Settings({ navigation }) {
                         {/*ON PHONE*/}
                     </View>
                 }
-                <View style={{ backgroundColor: 'white', flex: 1 }}>
+                {(windowWidth >= 500) ?
+                    <View style={{ flex: 1, maxWidth: 400, margin: 8 }}>
+
+                        {/* SNAPSHOT */}
+                        <View style={[styles.shadowProp, { backgroundColor: 'white', padding: 15, marginVertical: 5, borderRadius: 8 }]}>
+                            <View style={{ marginVertical: 10 }}>
+                                <Text style={{ fontSize: 50, fontFamily: 'Bold' }}>Settings</Text>
+                            </View>
+                            <View style={{ flexDirection: "row", alignItems: 'center' }}>
+                                <Icon type="ant-design" name="hearto" color="grey" size={20} style={{ margin: 5 }} />
+                                <Text numberOfLines={1} style={{ fontFamily: 'Bold' }}>Account Settings</Text>
+                            </View>
+                            <View style={{ flexDirection: "row", alignItems: 'center' }}>
+                                <Icon type="material-icons" name="rate-review" outline color="grey" size={20} style={{ margin: 5 }} />
+                                <Text numberOfLines={1} style={{ fontFamily: 'Bold' }}>Restaurant Settings</Text>
+                            </View>
+                            <Text style={{ fontFamily: 'Primary', marginTop: 50 }}>(Not Functional...)</Text>
+                        </View>
+                    </View>
+                    :
+                    <></>
+                }
+                <View style={{ backgroundColor: 'white', flex: 2 }}>
                     <View style={[styles.shadowProp, { backgroundColor: 'white', marginHorizontal: 10, borderRadius: 13, overflow: 'hidden', flex: 1 }]}>
                         <ImageBackground style={{ margin: 5, borderTopLeftRadius: 13, borderTopRightRadius: 13, overflow: 'hidden', height: Platform.OS === "web" ? 150 : 75 }} resizeMode="cover" source={{ uri: restaurantImage }}>
                             <LinearGradient
@@ -260,26 +319,37 @@ function Settings({ navigation }) {
                                     </View>
                                     <View style={{
                                         flex: 1,
+                                        flexDirection: 'row'
                                     }}>
-                                        <Text ellipsizeMode='tail' numberOfLines={2} style={[styles.subHeaderText, { color: "white", textAlign: 'left', marginLeft: 10 }]}>Account Details</Text>
-
+                                        <View>
+                                            <Text ellipsizeMode='tail' numberOfLines={2} style={[styles.subHeaderText, { color: "white", textAlign: 'left', marginLeft: 10, margin: 10 }]}>Account Details</Text>
+                                            <Image
+                                                style={{ height: 75, width: 75, borderRadius: 40, marginHorizontal: 10, marginLeft: 20 }}
+                                                source={{ uri: userPhoto }}
+                                            />
+                                        </View>
+                                        <View style={{ justifyContent: 'flex-end', marginLeft: 'auto' }}>
+                                            <TouchableOpacity onPress={openImagePickerAsync}>
+                                                <Text style={{ color: "white", fontSize: 18, fontWeight: 500 }}>Edit Photo</Text>
+                                            </TouchableOpacity>
+                                        </View>
                                     </View>
                                 </View>
                             </LinearGradient>
                         </ImageBackground >
                         <View style={{ flex: 1, maxWidth: 700, alignSelf: Platform.OS === 'web' ? 'center' : '', width: '100%', padding: 10 }}>
-                            <View>
-                                <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold' }}>Display name</Text>
+                            <View style={{ margin: 10 }}>
+                                <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold', marginVertical: -5 }}>Display name</Text>
                                 <TextInput
-                                    style={[styles.inputContainer, { padding: 10, alignSelf: 'center', }]}
-                                    onChangeText={setSearchedRestaurant}
+                                    style={[styles.inputContainer, { padding: 10, width: 300, alignContent: 'flex-start' }]}
+                                    onChangeText={searchedRestaurant}
                                     value={searchedRestaurant}
-                                    placeholder={searchedRestaurant}
+                                    placeholder="El Taco Norte"
                                     autoCapitalize='words'
                                 />
                             </View>
-                            <View>
-                                <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold' }}>Display name</Text>
+                            <View style={{ margin: 9 }}>
+                                <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold', marginVertical: -5 }}>Description</Text>
                                 <TextInput
                                     style={[styles.inputContainer, { padding: 10, alignSelf: 'center', }]}
                                     onChangeText={setRestaurantDesc}
@@ -288,23 +358,24 @@ function Settings({ navigation }) {
                                     autoCapitalize='words'
                                 />
                             </View>
+                            <Divider style={{ marginVertical: 10 }} />
                             <View style={{ flexDirection: 'row', width: '100%', flexWrap: 'wrap' }}>
                                 <View style={{ marginHorizontal: 5, width: "45%" }} >
-                                    <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold', marginRight: 'auto' }}>Display name</Text>
+                                    <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold', marginRight: 'auto' }}>Email address</Text>
                                     <TextInput
-                                        placeholder="John"
-                                        value={searchedRestaurant}
-                                        onChangeText={setSearchedRestaurant}
-                                        style={[styles.inputContainer, { padding: 10, alignSelf: 'center', }]}
+                                        placeholder="john@gmail.com"
+                                        value={userEmail}
+                                        onChangeText={userEmail}
+                                        style={[styles.inputContainer, { padding: 10, alignSelf: 'center', backgroundColor: '#ECECEC' }]}
                                     />
                                 </View>
                                 <View style={{ marginHorizontal: 5, width: "45%", marginLeft: "auto" }} >
                                     <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold', marginRight: 'auto' }}>Address</Text>
                                     <TextInput
-                                        placeholder="Doe"
+                                        placeholder="247 W Camelback Rd"
                                         value={restaurantAddress}
-                                        onChangeText={setRestaurantAddress}
-                                        style={[styles.inputContainer, { padding: 10, alignSelf: 'center', }]}
+                                        onChangeText={restaurantAddress}
+                                        style={[styles.inputContainer, { padding: 10, alignSelf: 'center', backgroundColor: '#ECECEC' }]}
                                     />
                                 </View>
                             </View>
@@ -312,7 +383,7 @@ function Settings({ navigation }) {
                                 <View style={{ marginHorizontal: 5, width: "45%" }} >
                                     <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold', marginRight: 'auto' }}>Phone Number</Text>
                                     <TextInput
-                                        placeholder="John"
+                                        placeholder="9372249843"
                                         value={restaurantPhone}
                                         onChangeText={setRestaurantPhone}
                                         style={[styles.inputContainer, { padding: 10, alignSelf: 'center', }]}
@@ -336,50 +407,63 @@ function Settings({ navigation }) {
                     </View>
 
                     <View style={[styles.shadowProp, { backgroundColor: 'white', marginHorizontal: 10, borderRadius: 13, overflow: 'hidden', marginTop: 15 }]}>
-                        <Text style={{ margin: 10 }}>Billing Settings</Text>
-                        <View>
-                            <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold' }}>Display name</Text>
-                            <TextInput
-                                style={[styles.inputContainer, { padding: 10, alignSelf: 'center', }]}
-                                onChangeText={setRestaurantDesc}
-                                value={restaurantDesc}
-                                placeholder={restaurantDesc}
-                                autoCapitalize='words'
-                            />
+                        <View style={{ flex: 1, maxWidth: 700, alignSelf: Platform.OS === 'web' ? 'center' : '', width: '100%', padding: 10, margin: 10 }}>
+                            <Text style={[styles.subHeaderText, { color: "black", textAlign: 'left', marginLeft: 10, fontSize: 22 }]}>Billing Details</Text>
+                            <Divider style={{ marginVertical: 10 }} />
+                            <View style={{ flexDirection: 'row' }}>
+                                <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold', minWidth: 150, alignSelf: 'center' }}>Subscription plan</Text>
+                                <TextInput
+                                    style={[styles.inputContainer, { padding: 10, alignSelf: 'center', backgroundColor: '#ECECEC' }]}
+                                    placeholder='Starter monthly plan ($12.00)'
+                                    autoCapitalize='words'
+                                />
+                            </View>
+                            <View style={{ flexDirection: 'row' }}>
+                                <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold', minWidth: 150, alignSelf: 'center' }}>Next billing date</Text>
+                                <TextInput
+                                    style={[styles.inputContainer, { padding: 10, alignSelf: 'center', backgroundColor: '#ECECEC' }]}
+                                    placeholder='Sat Mar 04 17:33:05 GMT-0700 (Mountain Standard Time)'
+                                    autoCapitalize='words'
+                                />
+                            </View>
+                            <View style={{ flexDirection: 'row' }}>
+                                <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold', minWidth: 150, alignSelf: 'center' }}>Payment method</Text>
+                                <TextInput
+                                    style={[styles.inputContainer, { padding: 10, alignSelf: 'center', backgroundColor: '#ECECEC' }]}
+                                    placeholder='American Express ending in 1005'
+                                    autoCapitalize='words'
+                                />
+                                <Button onPress={() => navigation.goBack()} buttonStyle={[styles.button, { backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} title="Change" />
+                            </View>
                         </View>
-                        <View>
-                            <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold' }}>Display name</Text>
-                            <TextInput
-                                style={[styles.inputContainer, { padding: 10, alignSelf: 'center', }]}
-                                onChangeText={setRestaurantDesc}
-                                value={restaurantDesc}
-                                placeholder={restaurantDesc}
-                                autoCapitalize='words'
-                            />
+                    </View>
+                    <View style={{ maxWidth: 700, margin: 15, alignSelf: 'center' }}>
+                        <View style={{ flexDirection: 'row', alignSelf: 'center' }}>
+                            <View style={{ flex: 1 }}>
+                                <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold', minWidth: 150 }}>Delete Account</Text>
+                                <Text style={{ textAlign: 'left' }}>By deleting your account you will lose all your data and no longer be able to access your restaurant</Text>
+                            </View>
+                            <View style={{ width: 200, maxWidth: 200, marginRight: 'auto' }}>
+                                <Button buttonStyle={[styles.button, { backgroundColor: 'white' }]} titleStyle={[styles.buttonTitle, { color: "#828182" }]} title="Delete Account" />
+                            </View>
                         </View>
-                        <View>
-                            <Text style={{ fontSize: 18, fontWeight: "500", fontFamily: 'Bold' }}>Display name</Text>
-                            <TextInput
-                                style={[styles.inputContainer, { padding: 10, alignSelf: 'center', }]}
-                                onChangeText={setRestaurantDesc}
-                                value={restaurantDesc}
-                                placeholder={restaurantDesc}
-                                autoCapitalize='words'
-                            />
+                        <View style={{ width: 200, maxWidth: 200, marginLeft: 'auto', marginTop: 10 }}>
+                            <Button onPress={AddNewRestaurant} buttonStyle={[styles.button, { backgroundColor: '#F6AE2D' }]} titleStyle={styles.buttonTitle} title="Save" />
                         </View>
                     </View>
                 </View>
 
             </View>
 
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-                <Button onPress={AddNewRestaurant} buttonStyle={[styles.button, { backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} title="Save" />
-                <Button onPress={() => navigation.goBack()} buttonStyle={[styles.button, { backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} title="Return" />
-            </View>
-
             <View style={{ marginTop: "20%" }}>
                 <Footer />
             </View>
+            {/* <View style={{backgroundColor:'rgba(0, 0,0,0.5)',position: 'absolute',zIndex:1,top:'0',bottom:'0',left:'0',right:'0',paddingTop:"20%",paddingHorizontal:'3%'}}>
+                <View style={[styles.shadowProp, { flex:1,backgroundColor: 'white', maxHeight: 600,alignSelf:'center',width:'100%',backgroundColor:'white',borderRadius:5}]}>
+
+                </View>
+            </View> */}
+
         </KeyboardAwareScrollView>
 
 

@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Button, Input, Divider } from 'react-native-elements'
 import { useSelector, useDispatch } from 'react-redux';
 import { uid } from 'uid'
-import { database,auth } from '../firebase-config'
+import { database, auth } from '../firebase-config'
 import { ref, set, update, push, increment } from 'firebase/database'
 import { collection, getDocs } from 'firebase/firestore'
 import { setSearchedRestaurant } from '../redux/action'
@@ -20,7 +20,7 @@ import Slider from '@react-native-community/slider';
 import * as ImagePicker from 'expo-image-picker';
 import { setFoodItemImage } from '../redux/action'
 
-import { onAuthStateChanged} from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
@@ -33,8 +33,8 @@ function RatingFood({ route, navigation }) {
     const [inputRating, setInputRating] = useState("");
     const [name, setName] = useState("")
     const [image, setImage] = useState();
-    const [userPhoto,setUserPhoto] = useState()
-    const [userId,setUserId]= useState("")
+    const [userPhoto, setUserPhoto] = useState()
+    const [userId, setUserId] = useState("")
     const [refreshing, setRefreshing] = useState(false);
     const tookPicture = useSelector(state => state.foodImage);
     const [restaurantColor, setRestaurantColor] = useState("")
@@ -55,17 +55,20 @@ function RatingFood({ route, navigation }) {
     const [appearancevalue, setAppearanceValue] = useState()
     const [appearanceColor, setAppearanceValueColor] = useState(0)
     const [appearanceValueText, setAppearanceValueText] = useState("")
-    
+
     const [tastevalue, setTasetValue] = useState()
     const [tasteColor, setTasteValueColor] = useState(0)
     const [tasteText, setTasteValueText] = useState("")
-   
+
     const [loggedin, setloggedin] = useState("")
 
     const [eatagain, setEatAgain] = useState(0);
 
+    const [imageUrl, setImageUrl] = useState(false)
 
     const AddFoodRating = async () => {
+        const date = new Date().toDateString();
+        const uuid = uid();
         update(ref(database, "restaurants/" + restId + "/foods" + "/" + foodId), {
             ratingCount: increment(1),
         });
@@ -75,49 +78,64 @@ function RatingFood({ route, navigation }) {
                 eatagain: increment(1),
             });
         }
+        if (imageUrl == true) {
+            const imageRatingRaf = tef(storage, 'foodRatingImage/' + foodId + "/" + userId);
+            if (imageRatingRaf !== null) {
+                getDownloadURL(imageRatingRaf)
+                    .then((rateurl) => {
+                        Object.values(imageRatingRaf).map((foodData) => {
+                            console.log("Rating imaged URL :", rateurl)
 
-        const date = new Date().toDateString();
-        const uuid = uid();
-        set(ref(database, "restaurants/" + restId + "/ratings" + "/" + foodId + `/${uuid}`), {
-            review_id:uuid,
-            food_id: foodId,
-            food_name: food,
-            rating: inputRating,
-            restaurant: searchedRestaurant,
-            raters_name: name,
-            verfied: loggedin,
-            upvotes: 0,
-            rating_date: date,
-            taste: tastevalue,
-            appearance: appearancevalue,
-            execution: executionvalue,
-            personaleatagain: eatagain,
-            user_Id: userId,
-            userPhoto: userPhoto,
-            likes: 0,
-            dislikes: 0
+                            set(ref(database, "restaurants/" + restId + "/ratings" + "/" + foodId + `/${userId}`), {
+                                review_id: uuid,
+                                food_id: foodId,
+                                food_name: food,
+                                rating: inputRating,
+                                restaurant: searchedRestaurant,
+                                raters_name: name,
+                                verfied: loggedin,
+                                upvotes: 0,
+                                rating_date: date,
+                                taste: tastevalue,
+                                appearance: appearancevalue,
+                                execution: executionvalue,
+                                personaleatagain: eatagain,
+                                user_Id: userId,
+                                userPhoto: userPhoto,
+                                likes: 0,
+                                dislikes: 0,
+                                imageUrl: rateurl
 
-        });
+                            });
+
+                        })
+                    })
+            }
+        }
+        if (imageUrl == false){
+            set(ref(database, "restaurants/" + restId + "/ratings" + "/" + foodId + `/${userId}`), {
+                review_id: uuid,
+                food_id: foodId,
+                food_name: food,
+                rating: inputRating,
+                restaurant: searchedRestaurant,
+                raters_name: name,
+                verfied: loggedin,
+                upvotes: 0,
+                rating_date: date,
+                taste: tastevalue,
+                appearance: appearancevalue,
+                execution: executionvalue,
+                personaleatagain: eatagain,
+                user_Id: userId,
+                userPhoto: userPhoto,
+                likes: 0,
+                dislikes: 0,
+                imageUrl: null
+
+            });
+        }
         setInputRating("");
-        const metadata = {
-            contentType: `${uuid}`,
-            user: `${name}`
-        }
-        if (Platform.OS === 'web') {
-            const getImage = tef(storage, 'foodRatingImage/' + foodId + "/" + uuid); //how the image will be addressed inside the storage
-            //convert image to array of bytes
-            const img = await fetch(image);
-            const bytes = await img.blob();
-            await uploadBytes(getImage, bytes, metadata);
-
-        } else {
-            console.log(tookPicture)
-            const getImage = tef(storage, 'foodRatingImage/' + foodId + "/" + uuid); //how the image will be addressed inside the storage
-            //convert image to array of bytes
-            const img = await fetch(tookPicture);
-            const bytes = await img.blob();
-            await uploadBytes(getImage, bytes, metadata);
-        }
 
         dispatch(setFoodItemImage(""))
 
@@ -284,7 +302,31 @@ function RatingFood({ route, navigation }) {
         let pickerResult = await ImagePicker.launchImageLibraryAsync();
         // dispatch(setFoodItemImage(pickerResult.uri))
         setImage(pickerResult.uri)
+
+        const metadata = {
+            contentType: `${userId}`,
+            user: `${name}`
+        }
+        if (Platform.OS === 'web') {
+            setImageUrl(true)
+            const getImage = tef(storage, 'foodRatingImage/' + foodId + "/" + userId); //how the image will be addressed inside the storage
+            //convert image to array of bytes
+            const img = await fetch(pickerResult.uri);
+            const bytes = await img.blob();
+            await uploadBytes(getImage, bytes, metadata);
+
+        } else {
+            setImageUrl(true)
+            console.log(pickerResult.uri)
+            const getImage = tef(storage, 'foodRatingImage/' + foodId + "/" + userId); //how the image will be addressed inside the storage
+            //convert image to array of bytes
+            const img = await fetch(pickerResult.uri);
+            const bytes = await img.blob();
+            await uploadBytes(getImage, bytes, metadata);
+        }
+
     }
+
 
     return (
         <KeyboardAwareScrollView enableOnAndroid extraHeight={120} style={{ flex: 1, backgroundColor: "white" }} refreshControl={

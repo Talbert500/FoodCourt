@@ -24,7 +24,7 @@ const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 
 function RatingRestaurant({ route, navigation }) {
-    const { restaurantId, restName } = route.params;
+    const { restaurantId,userId } = route.params;
     const dispatch = useDispatch();
     const [inputRating, setInputRating] = useState("");
     const [name, setName] = useState()
@@ -51,7 +51,7 @@ function RatingRestaurant({ route, navigation }) {
 
         const date = new Date().toDateString();
         const uuid = uid();
-        set(ref(database, "restaurants/" + restaurantId + "/restaurantRatings" + `/${uuid}`), {
+        set(ref(database, "restaurants/" + restaurantId + "/restaurantRatings/" + userId), {
             rating: inputRating,
             restaurant: searchedRestaurant,
             raters_name: name,

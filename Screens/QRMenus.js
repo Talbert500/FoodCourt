@@ -298,7 +298,7 @@ function RestaurantScreen({ route, navigation }) {
                             source={require('../assets/splash.png')} />
                     </TouchableOpacity>
                     <View style={{ flexDirection: "row", marginLeft: 'auto' }}>
-                        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+                        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center',marginRight:30}}>
                             <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
                                 <Image
                                     style={{ height: 50, width: 50, borderRadius: 40, marginHorizontal: 10 }}

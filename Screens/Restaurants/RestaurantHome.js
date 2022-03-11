@@ -106,13 +106,13 @@ function RestaurantHome({ navigation }) {
                             <Text style={[styles.buttonText, { paddingHorizontal: 10 }]}>Login</Text>
                         </TouchableOpacity>
                         {(windowWidth >= 500) ?
-                        <TouchableOpacity
-                            onPress={() => { navigation.navigate("SignUp") }}
-                            style={[styles.button, styles.buttonOutline, { paddingHorizontal: 10, flexDirection: 'row' }]}
-                        >
-                            <Text style={styles.buttonOutlineText}>Create Menu Online</Text>
-                        </TouchableOpacity>:
-                        <></>}
+                            <TouchableOpacity
+                                onPress={() => { navigation.navigate("SignUp") }}
+                                style={[styles.button, styles.buttonOutline, { paddingHorizontal: 10, flexDirection: 'row' }]}
+                            >
+                                <Text style={styles.buttonOutlineText}>Create Menu Online</Text>
+                            </TouchableOpacity> :
+                            <></>}
                     </View>
                 ) : (
                     <View style={{ flex: 1 }}>
@@ -159,7 +159,7 @@ function RestaurantHome({ navigation }) {
                         <Text style={{ color: '#242325', fontSize: 50, fontFamily: 'Bold', margin: 20, marginVertical: 10, paddingTop: 10 }}>It's free to use Feiri</Text>
                         <View style={{ margin: 20 }}>
                             <Text ellipsizeMode="middle" numberOfLines={2} style={{ color: '#242325', fontSize: 20, fontWeight: "400", marginBottom: 5 }}>An interactive menu that you can manage real-time</Text>
-                            <Text ellipsizeMode="middle" numberOfLines={2} style={{ color: '#242325', fontSize: 20, fontWeight: "400", marginBottom: 5 }}>Recieve ratings on individual food items</Text>
+                            <Text ellipsizeMode="middle" numberOfLines={2} style={{ color: '#242325', fontSize: 20, fontWeight: "400", marginBottom: 5 }}>Receive ratings on individual food items</Text>
                             <Text ellipsizeMode="middle" numberOfLines={2} style={{ color: '#242325', fontSize: 20, fontWeight: "400", marginBottom: 5 }}>See and analyze food metric data</Text>
                             <Text style={{ fontSize: 12, fontWeight: "bold" }}>Add your menu in 10 minutes!</Text>
                         </View>
@@ -229,7 +229,7 @@ function RestaurantHome({ navigation }) {
                         {/*removed text align left*/}
                         <Text style={{ fontSize: 50, fontFamily: 'Bold', maxWidth: 500 }}>It's alway been about just the food! </Text>
                         <Text style={{ fontWeight: "550", fontSize: 20, fontFamily: 'Primary', maxWidth: 500, textAlign: 'left', marginVertical: 20 }}>
-                            For centuries we have missed the opportunity to receive ratings and reviews on all your food options. Not to mention the overdue experience with your menu that makes your customers more confident in your food. </Text>
+                            For centuries we have missed the opportunity to receive ratings and reviews for your food. But, now it got a whole lot easier with our interactive virtual menu. </Text>
                         <TouchableOpacity onPress={() => { navigation.navigate("SignUp") }} style={[styles.button, { flexDirection: 'row', alignItems: 'center', maxWidth: 200, width: 200 }]}>
                             <Icon
                                 name="menu-book"
@@ -242,7 +242,7 @@ function RestaurantHome({ navigation }) {
                     <View style={{ maxWidth: 500, minWidth: 300, flex: 1 }}>
                         <Divider style={{ marginVertical: 5 }} />
                         {/*removed text align left*/}
-                        <Text style={{ fontSize: 35, fontFamily: 'Bold', maxWidth: 400 }}>It's alway been about just the food! </Text>
+                        <Text style={{ fontSize: 35, fontFamily: 'Bold', maxWidth: 400 }}>It's always been about just the food! </Text>
                         <Text style={{ fontWeight: "550", fontSize: 20, fontFamily: 'Primary', textAlign: 'left', marginVertical: 10 }}>
                             For centuries we have missed the opportunity to receive ratings and reviews on all your food options. </Text>
                         <TouchableOpacity onPress={() => { navigation.navigate("SignUp") }} style={[styles.button, { flexDirection: 'row', alignItems: 'center', maxWidth: 200, width: 200 }]}>
@@ -281,7 +281,7 @@ function RestaurantHome({ navigation }) {
                     </Text>
                     {(windowWidth >= 500) ?
                         <Text style={{ fontSize: 16, fontWeight: "475", marginBottom: 5, maxWidth: 450, textAlign: 'center' }}>
-                            Creating a menu takes 10 minutes, You can scan or manually add prices, description and other details about your food item.
+                            It only takes 10 minutes! You can scan or manually add prices, description and other details about your food item.
                         </Text> :
                         <></>}
                 </View>
@@ -298,7 +298,7 @@ function RestaurantHome({ navigation }) {
                     </Text>
                     {(windowWidth >= 500) ?
                         <Text style={{ fontSize: 16, fontWeight: "475", marginBottom: 5, maxWidth: 450, textAlign: 'center' }}>
-                            The QR Menus is how your customers will access your virtual menu. We will send you QR menus for your restaurant, you will also have an option to create them your own.
+                            Your customers can gain full access to your restaurants virtual menu by scanning it. Upon creation our team will send you a QR menu, but you will also have the option to personalize them.
                         </Text> :
                         <></>}
                 </View>
@@ -315,7 +315,7 @@ function RestaurantHome({ navigation }) {
                     </Text>
                     {(windowWidth >= 500) ?
                         <Text style={{ fontSize: 16, fontWeight: "475", marginBottom: 5, maxWidth: 450, textAlign: 'center' }}>
-                            Leverage your ratings to attract more customers who are craving to have your foods
+                            Leverage your ratings to attract more customers craving to have your foods
                         </Text> :
                         <></>}
                 </View>
@@ -332,7 +332,7 @@ function RestaurantHome({ navigation }) {
                     </Text>
                     {(windowWidth >= 500) ?
                         <Text style={{ fontSize: 16, fontWeight: "475", marginBottom: 5, maxWidth: 450, textAlign: 'center' }}>
-                            No food left behind! 72% of customers won't take any buying action untill they've read reviews.
+                            No food left behind! 72% of customers will not purchase food until they have read reviews.
                         </Text> :
                         <></>}
                 </View>
@@ -353,18 +353,20 @@ function RestaurantHome({ navigation }) {
                     {/* removed text align left*/}
                     {(windowWidth >= 500) ?
                         <Text style={{ marginTop: 20, fontSize: 50, fontWeight: "600", maxWidth: 600, minWidth: 400, flex: 1, fontFamily: 'Bold' }}>
-                            An interactive menu that allows your food items to
+                            Feiri is an interactive menu that allows your food items to
                             recieve ratings. Giving your customers the confidence they need.
                         </Text> : <></>}
-                    <TouchableOpacity onPress={() => { navigation.navigate("SignUp") }} style={[styles.button, { flexDirection: 'row', alignItems: 'center', maxWidth: 200, width: 200 }]}>
-                        <Icon
-                            name="menu-book"
-                            color="white"
-                            size="20"
-                        />
-                        <Text adjustsFontSizeToFit ellipsizeMode="middle" numberOfLines={1} style={[styles.buttonText, { paddingHorizontal: 10 }]}>Create Menu Online</Text>
-                    </TouchableOpacity>
-                </View>
+
+                </View>                    
+                <TouchableOpacity onPress={() => { navigation.navigate("SignUp") }} style={[styles.button, { flexDirection: 'row', alignItems: 'center',alignSelf:'center', maxWidth: 200, width: 200 }]}>
+                    <Icon
+                        name="menu-book"
+                        color="white"
+                        size="20"
+                    />
+                    <Text adjustsFontSizeToFit ellipsizeMode="middle" numberOfLines={1} style={[styles.buttonText, { paddingHorizontal: 10 }]}>Create Menu Online</Text>
+                </TouchableOpacity>
+
 
             </View>
 

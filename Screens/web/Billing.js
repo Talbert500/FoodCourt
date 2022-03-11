@@ -443,7 +443,7 @@ const Billing = ({ route, navigation }) => {
                                 >
                                     <Text style={[styles.buttonTitle, { paddingHorizontal: 10 }]}>Old Dashboard</Text>
                                 </TouchableOpacity> :
-                                <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+                                <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center',marginRight:30 }}>
                                     <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
                                         <Image
                                             style={{ height: 50, width: 50, borderRadius: 40, marginHorizontal: 10 }}

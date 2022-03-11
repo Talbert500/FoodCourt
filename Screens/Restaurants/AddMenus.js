@@ -75,7 +75,7 @@ function CreateMenu({ navigation }) {
 
 
     const joinData = () => {
-        setTextInputs([...menus, { time: nameHolder, desc: textHolder,isDefault:"false" }])
+        setTextInputs([...menus, { time: nameHolder, desc: textHolder,isDefault:"true" }])
         if (textHolder === "Breakfast") {
             setNameHolder("11am - 9pm")
             setTextHolder("Lunch & Dinner")

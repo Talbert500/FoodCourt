@@ -174,6 +174,8 @@ function FoodAdd({ route, navigation }) {
     // dispatch(setFoodItemImage(pickerResult.uri))
     setImage(pickerResult.uri)
   }
+  
+
 
 
   return (

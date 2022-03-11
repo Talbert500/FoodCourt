@@ -1,6 +1,6 @@
 
 import * as React from 'react';
-import { TextInput, RefreshControl, Dimensions, TouchableWithoutFeedback, Keyboard, Platform, KeyboardAvoidingView, StyleSheet, Text, View, SafeAreaView, FlatList, TouchableOpacity, Image } from 'react-native';
+import { ActivityIndicator, RefreshControl, Dimensions, TouchableWithoutFeedback, Keyboard, Platform, KeyboardAvoidingView, StyleSheet, Text, View, SafeAreaView, FlatList, TouchableOpacity, Image } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Button, Input } from 'react-native-elements'
 import { useDispatch, useSelector } from 'react-redux';
@@ -66,7 +66,6 @@ function HomeScreen({ navigation }) {
         const credential = GoogleAuthProvider.credentialFromResult(result);
         const token = credential.accessToken;
         const user = result.user;
-        setUserPhoto(user.photoURL)
         console.log(user)
         setLoggedIn(true);
         //Storing user data
@@ -130,8 +129,9 @@ function HomeScreen({ navigation }) {
           if (data !== null) {
             console.log(data)
             setIsRestaurant(data.hasRestaurant)
-            setUserPhoto(data.userPhot)
-            
+            setUserPhoto(data.userPhoto)
+            setUserName(data.userName)
+
           }
 
         });
@@ -233,54 +233,31 @@ function HomeScreen({ navigation }) {
         <RefreshControl refreshing={refreshing} onRefresh={getRest} />}
         enableOnAndroid extraHeight={120} style={{ backgroundColor: "white" }}>
         {Platform.OS === 'web' ? (
-          <View style={[styles.shadowProp, { flexDirection: "row", backgroundColor: "white", zIndex: 1, alignItems: 'center' }]}>
-            <TouchableOpacity style={{ flex: 1, backgroundColor: 'white', alignItems: 'center' }} onPress={() => { navigation.navigate("Home") }}>
-              {/* <Image
-                style={[styles.shadowProp, {
-                  width: 100, height: 70, shadowColor: '#171717',
-                  marginTop: Platform.OS === 'ios' ? "30%" : 0,
-                  shadowOffset: { width: -1, height: 2 },
-                  shadowOpacity: 0.2,
-                  shadowRadius: 3,
-                }]}
-                source={require('../assets/splash.png')}
-              /> */}
+          <View style={[styles.shadowProp, { width: '100%', padding: 5, flexDirection: "row", backgroundColor: Platform.OS === "web" ? "white" : "transparent", zIndex: 1 }]}>
+            <TouchableOpacity onPress={() => navigation.navigate("Home")}>
+              <Image
+                style={{
+                  justifyContent: 'flex-start',
+                  width: 50,
+                  height: 50,
+                  resizeMode: "contain",
+                  opacity: Platform.OS === 'web' ? 1 : 0
+                }}
+                source={require('../assets/splash.png')} />
             </TouchableOpacity>
-            <View style={{ flexDirection: "row", marginLeft: 'auto', paddingHorizontal: 12 }}>
-              {loggedIn ? (
-                <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+            <View style={{ flexDirection: "row", marginLeft: 'auto' }}>
+              <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', marginRight: 30 }}>
+                <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
                   <Image
                     style={{ height: 50, width: 50, borderRadius: 40, marginHorizontal: 10 }}
                     source={{ uri: userPhoto }}
-                    onPress={() => {
-                      navigation.navigate("RestaurantAdmin", {
-                        loginSession: userId,
-                        userId: null,
-                      })
-                    }}
                   />
-                  <TouchableOpacity
-                    style={[styles.buttonOutline, styles.shadowProp, { borderRadius: 5 }]}
-                    onPress={googleSignOut}
-                  >
-                    <Text style={[styles.buttonOutlineText, { padding: 10 }]}>Sign Out</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (<></>
-                // <TouchableOpacity
-                //   style={styles.button}
-                //   onPress={googleSignIn}
-                // >
-                //   <Text style={[styles.buttonTitle, { paddingHorizontal: 10 }]}>Google Sign In</Text>
-                // </TouchableOpacity>
-              )}
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        ) :
-          (<View>
-          </View>
-          )}
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop:"5%" }}>
+        ) : (<></>)}
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: "5%" }}>
           <View style={{
             alignContent: 'flex-start',
             flex: 1,
@@ -386,11 +363,11 @@ function HomeScreen({ navigation }) {
               )}
             </View>
           </View>
-          <View style={[styles.shadowProp,{ alignItems: 'center', borderRadius:10, overflow:'hidden'}]}>
+          <View style={[styles.shadowProp, { alignItems: 'center', borderRadius: 10, overflow: 'hidden' }]}>
           </View>
         </View>
         {Platform.OS === 'web' ?
-          <View style={{ marginTop: "10%",marginBottom:'auto'}}>
+          <View style={{ marginTop: "10%", marginBottom: 'auto' }}>
             <Footer />
           </View> :
           <View>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ImageBackground, KeyboardAvoidingView, Dimensions, FlatList, ScrollView, View, TouchableOpacity, Image, StyleSheet, Text, Platform, Linking, Keyboard, BackHandler } from 'react-native';
+import { ActivityIndicator, ImageBackground, KeyboardAvoidingView, Dimensions, FlatList, ScrollView, View, TouchableOpacity, Image, StyleSheet, Text, Platform, Linking, Keyboard, BackHandler } from 'react-native';
 import { Button, Input } from 'react-native-elements'
 import { database } from '../../firebase-config'
 import { ref, onValue, remove, equalTo, query, limitToLast } from 'firebase/database'
@@ -92,6 +92,9 @@ const MenuEdit = ({ route, navigation }) => {
     const [hoverside5, setHoverSide5] = useState(false)
     const [hoverside6, setHoverSide6] = useState(false)
     const [hoverside7, setHoverSide7] = useState(false)
+
+    const [loadingbio, setLoadingBio] = useState(true);
+    const [loadingPic, setLoadingPic] = useState(true);
 
     function googleSignOut() {
         signOut(auth).then(() => {
@@ -272,6 +275,7 @@ const MenuEdit = ({ route, navigation }) => {
         await getDownloadURL(imageRef).then((url) => {
             dispatch(setSearchedRestaurantImage(url))
             setRestaurantImage(url)
+            setLoadingPic(false);
         })
     }
     const getRestaurant = async () => {
@@ -294,13 +298,15 @@ const MenuEdit = ({ route, navigation }) => {
             dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurant_address, restaurantPhone, restaurantId, restaurantColor))
             getMenus();
             getImage();
+            setLoadingBio(false);
         } else {
             console.log("No souch document!")
         }
     }
 
     useEffect(() => {
-
+        setLoadingBio(true);
+        setLoadingPic(true);
         console.log("Mounting")
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -317,6 +323,7 @@ const MenuEdit = ({ route, navigation }) => {
                         setIsRestaurant(data.hasRestaurant)
                         setUserPhoto(data.userPhoto)
                         setUserName(data.userName)
+
                     }
                 });
             } else {
@@ -421,7 +428,7 @@ const MenuEdit = ({ route, navigation }) => {
     function onCategoryClick(clicked) {
         // setSetCate(clicked)
         if (setCate != clicked) {
-           
+
             setSetCate(clicked)
             const newData = menuData.filter((item) => {
                 const cateDate = item.category ?
@@ -431,7 +438,7 @@ const MenuEdit = ({ route, navigation }) => {
                 return cateDate.indexOf(cate) > -1;
             });
             setFiltered(newData);
-            
+
         } else {
             setSetCate("")
             setFiltered(menuData)
@@ -476,18 +483,11 @@ const MenuEdit = ({ route, navigation }) => {
                         <View style={{ flexDirection: "row", marginLeft: 'auto' }}>
 
                             {!isRestaurant ?
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        navigation.navigate("RestaurantAdmin", {
-                                            loginSession: loginSession,
-                                            userId: accessToken,
-                                        })
-                                    }}
-                                    style={styles.button}
-                                >
-                                    <Text style={[styles.buttonTitle, { paddingHorizontal: 10 }]}>Old Dashboard</Text>
-                                </TouchableOpacity> :
-                                <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+                                <Image
+                                    style={{ height: 50, width: 50, borderRadius: 40, marginHorizontal: 10 }}
+                                    source={{ uri: userPhoto }}
+                                /> :
+                                <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', marginRight: 30 }}>
                                     <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
                                         <Image
                                             style={{ height: 50, width: 50, borderRadius: 40, marginHorizontal: 10 }}
@@ -496,7 +496,7 @@ const MenuEdit = ({ route, navigation }) => {
                                     </TouchableOpacity>
                                     <Text style={{ fontFamily: 'Bold' }}>{userName}</Text>
                                 </View>
-                                }
+                            }
                         </View>
 
                     )}
@@ -608,104 +608,110 @@ const MenuEdit = ({ route, navigation }) => {
                         <LinearGradient
                             colors={['#00000000', '#000000']}
                             style={{ height: '100%', width: '100%', }}>
-                            <View style={{ width: "100%", maxWidth: 600, flex: 1, alignSelf: 'center', flexDirection: 'row-reverse' }}>
-                                <View style={{ justifyContent: 'flex-end', margin: 10 }}>
-                                    {(windowWidth >= 500) ?
-                                        <TouchableOpacity >
-                                            <Image style={{ height: 80, width: 80, borderRadius: 100 }} source={require("../../assets/guestphoto.jpg")} />
-                                        </TouchableOpacity> :
-                                        <></>}
-                                </View>
-                                <View style={{
-                                    flex: 1,
-                                    justifyContent: "flex-end",
-                                    marginLeft: 10
-                                }}>
-                                    <Text ellipsizeMode='tail' numberOfLines={2} style={[styles.headerText, { color: "white", textAlign: 'left' }]}>{searchedRestaurant} </Text>
-                                    <Text style={{ color: "white", fontWeight: "bold", textAlign: 'left', margin: 10 }}>Viewing as Admin</Text>
-                                    <Text onPress={() => navigation.navigate("RestaurantWeb", {restId: loginSession,})} style={{ color: "white", textDecorationLine: 'underline', fontWeight: "bold", textAlign: 'left', margin: 10 }}>Customer View</Text>
-                                </View>
-                            </View>
+                            {loadingPic ? <ActivityIndicator size="large" style={{ flex: 1, alignContent: 'center', justifyContent: 'center', alignSelf: 'center' }} color="#F6AE2D" /> :
+                                <View style={{ width: "100%", maxWidth: 600, flex: 1, alignSelf: 'center', flexDirection: 'row-reverse' }}>
+                                    <View style={{ justifyContent: 'flex-end', margin: 10 }}>
+                                        {(windowWidth >= 500) ?
+                                            <TouchableOpacity >
+                                                <Image
+                                                    style={{ height: 50, width: 50, borderRadius: 40, marginHorizontal: 10 }}
+                                                    source={{ uri: userPhoto }}
+                                                />
+                                            </TouchableOpacity> :
+                                            <></>}
+                                    </View>
+                                    <View style={{
+                                        flex: 1,
+                                        justifyContent: "flex-end",
+                                        marginLeft: 10
+                                    }}>
+                                        <Text ellipsizeMode='tail' numberOfLines={2} style={[styles.headerText, { color: "white", textAlign: 'left' }]}>{searchedRestaurant} </Text>
+                                        <Text style={{ color: "white", fontWeight: "bold", textAlign: 'left', margin: 10 }}>Viewing as Admin</Text>
+                                        <Text onPress={() => navigation.navigate("RestaurantWeb", { restId: loginSession, })} style={{ color: "white", textDecorationLine: 'underline', fontWeight: "bold", textAlign: 'left', margin: 10 }}>Customer View</Text>
+                                    </View>
+                                </View>}
                         </LinearGradient>
                     </ImageBackground >
                     <View style={{ maxWidth: 700, alignSelf: Platform.OS === 'web' ? 'center' : '', width: '100%', padding: 10 }}>
-                        <View>
-                            <View style={{ alignSelf: "center", maxWidth: 500, width: "100%" }}>
+                        {loadingbio ? <ActivityIndicator style={{ flex: 1, justifyContent: 'center' }} size="large" color="#F6AE2D" /> :
+                            <View>
+                                <View style={{ alignSelf: "center", maxWidth: 500, width: "100%" }}>
 
 
-                                <Button title="Add Food" buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 200 }]} titleStyle={styles.buttonTitle} onPress={() => { navigation.navigate("FoodAdd", { userId: restaurantId }), dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurant_address, restaurantPhone, restaurantId, restaurantColor)) }} />
+                                    <Button title="Add Food" buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 200 }]} titleStyle={styles.buttonTitle} onPress={() => { navigation.navigate("FoodAdd", { userId: restaurantId }), dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurant_address, restaurantPhone, restaurantId, restaurantColor)) }} />
 
-                                <Text style={styles.subHeaderText}>About Us</Text>
+                                    <Text style={styles.subHeaderText}>About Us</Text>
 
-                                <View >
-                                    <Text style={{ margin: 10 }}>{restaurantDesc} </Text>
-                                    <View style={{ flexDirection: "row", alignContent: "center", alignItems: 'center', margin: 5 }}>
+                                    <View >
+                                        <Text style={{ margin: 10 }}>{restaurantDesc} </Text>
+                                        <View style={{ flexDirection: "row", alignContent: "center", alignItems: 'center', margin: 5 }}>
 
-                                        <Icon name="location-pin" color="black" size="35" />
-                                        <Text onPress={() => Linking.openURL(`https://www.google.com/maps/place/${restaurant_address} ${restaurant_city}, ${restaurant_state} ${restaurant_zip}`)}
-                                            style={{ fontFamily: 'Bold', fontSize: 14, marginHorizontal: 10 }}>
-                                            {restaurant_address} {restaurant_city}, {restaurant_state} {restaurant_zip}
-                                        </Text>
+                                            <Icon name="location-pin" color="black" size="35" />
+                                            <Text onPress={() => Linking.openURL(`https://www.google.com/maps/place/${restaurant_address} ${restaurant_city}, ${restaurant_state} ${restaurant_zip}`)}
+                                                style={{ fontFamily: 'Bold', fontSize: 14, marginHorizontal: 10 }}>
+                                                {restaurant_address} {restaurant_city}, {restaurant_state} {restaurant_zip}
+                                            </Text>
+
+                                        </View>
+                                        <View style={{ flexDirection: "row", alignContent: "center", alignItems: 'center', margin: 5 }}>
+                                            <Icon name="call" color="black" size="35" />
+                                            <Text onPress={() => Linking.openURL("https://htmlcolorcodes.com/")} style={{ fontFamily: 'Bold', fontSize: 14, marginHorizontal: 10 }}>{restaurantPhone}</Text>
+                                        </View>
+                                        <View style={{ flexDirection: "row", alignContent: "center", margin: 5, alignItems: 'center' }}>
+                                            <Icon name="web" color="black" size="35" />
+                                            <Text onPress={() => Linking.openURL(`${restaurant_website}`)} style={{ fontFamily: 'Bold', fontSize: 14, marginHorizontal: 10 }} >{restaurant_website}</Text>
+                                        </View>
 
                                     </View>
-                                    <View style={{ flexDirection: "row", alignContent: "center", alignItems: 'center', margin: 5 }}>
-                                        <Icon name="call" color="black" size="35" />
-                                        <Text onPress={() => Linking.openURL("https://htmlcolorcodes.com/")} style={{ fontFamily: 'Bold', fontSize: 14, marginHorizontal: 10 }}>{restaurantPhone}</Text>
-                                    </View>
-                                    <View style={{ flexDirection: "row", alignContent: "center", margin: 5, alignItems: 'center' }}>
-                                        <Icon name="web" color="black" size="35" />
-                                        <Text onPress={() => Linking.openURL(`${restaurant_website}`)} style={{ fontFamily: 'Bold', fontSize: 14, marginHorizontal: 10 }} >{restaurant_website}</Text>
-                                    </View>
-
                                 </View>
-                            </View>
-                            <Text style={styles.headerText}>
-                                Menu
-                            </Text>
-                            {!(windowWidth >= 500) ?
-                                <View style={{ backgroundColor: 'white' }}>
+                                <Text style={styles.headerText}>
+                                    Menu
+                                </Text>
+                                {!(windowWidth >= 500) ?
+                                    <View style={{ backgroundColor: 'white' }}>
+
+                                        <FlatList
+                                            showsHorizontalScrollIndicator={false}
+                                            horizontal
+                                            data={selectedMenus}
+                                            renderItem={renderMenus}
+                                            initialNumToRender={10}
+
+                                        />
+                                    </View>
+                                    :
+                                    <View style={{ backgroundColor: 'white' }}>
+
+                                        <FlatList
+                                            showsHorizontalScrollIndicator={false}
+                                            data={selectedMenus}
+                                            renderItem={renderMenus}
+                                            initialNumToRender={10}
+
+                                        />
+                                    </View>
+                                }
+
+                                <Divider style={{ margin: 10 }} />
+                                {menusDesc === "" ?
+                                    <Text style={{ textAlign: "center", fontWeight: '800' }}> Pick a Menu</Text>
+                                    :
+                                    <Text style={{ textAlign: "center" }}>{menusDesc}</Text>
+                                }
+                                <View>
+                                    <Text style={[styles.subHeaderText, { fontSize: 20 }]}>Categories</Text>
 
                                     <FlatList
                                         showsHorizontalScrollIndicator={false}
                                         horizontal
-                                        data={selectedMenus}
-                                        renderItem={renderMenus}
+                                        data={selectedCategory}
+                                        renderItem={renderItem}
                                         initialNumToRender={10}
-
                                     />
+
                                 </View>
-                                :
-                                <View style={{ backgroundColor: 'white' }}>
-
-                                    <FlatList
-                                        showsHorizontalScrollIndicator={false}
-                                        data={selectedMenus}
-                                        renderItem={renderMenus}
-                                        initialNumToRender={10}
-
-                                    />
-                                </View>
-                            }
-
-                            <Divider style={{ margin: 10 }} />
-                            {menusDesc === "" ?
-                                <Text style={{ textAlign: "center", fontWeight: '800' }}> Pick a Menu</Text>
-                                :
-                                <Text style={{ textAlign: "center" }}>{menusDesc}</Text>
-                            }
-                            <View>
-                                <Text style={[styles.subHeaderText, { fontSize: 20 }]}>Categories</Text>
-
-                                <FlatList
-                                    showsHorizontalScrollIndicator={false}
-                                    horizontal
-                                    data={selectedCategory}
-                                    renderItem={renderItem}
-                                    initialNumToRender={10}
-                                />
-
                             </View>
-                        </View>
+                        }
                         <View style={[styles.menuItemContaner, { marginVertical: 20 }]}>
                             <Input
                                 inputContainerStyle={{ borderBottomWidth: 0, marginBottom: Platform.OS === 'web' ? -15 : -20 }}
@@ -731,8 +737,9 @@ const MenuEdit = ({ route, navigation }) => {
                                         }}
                                         restaurant={item.restaurant}
                                         ranking={index + item.upvotes}
-                                        menu={item.menus}
+                                        price={item.price}
                                         food={item.food}
+                                        description={item.description}
                                         percent={item.ratingCount > 0 ? (item.eatagain * 100 / item.ratingCount).toFixed(0) : (item.eatagain)}
                                         upvotes={item.upvotes}
                                         upvoteColor={restaurantColor}
@@ -740,7 +747,7 @@ const MenuEdit = ({ route, navigation }) => {
                                     />
                                     <View style={{ flexDirection: 'row', marginBottom: 20 }}>
                                         <Button onPress={() => deleteFood(item.food_id)} buttonStyle={{ backgroundColor: '#8A3333' }} buttonTitle={{ fontFamily: 'Bold', fontSize: "20" }} title="Delete" />
-                                        <Button onPress={() => console.log("Not Done")} buttonStyle={{ backgroundColor: 'orange' }} buttonTitle={{ fontFamily: 'Bold', fontSize: "20" }} title="Edit" />
+                                        <Button onPress={() => navigation.navigate("FoodEdit", {restId:restaurantId,foodId:item.food_id,restName:searchedRestaurant})} buttonStyle={{ backgroundColor: 'orange' }} buttonTitle={{ fontFamily: 'Bold', fontSize: "20" }} title="Edit" />
                                     </View>
                                 </View>
                             }

@@ -246,7 +246,7 @@ function AddRestaurant({ navigation }) {
                         {Platform.OS === "web" ?
                             <View>
                                 <Image source={{ uri: image }} style={{ alignSelf: 'center', width: "90%", height: 250, backgroundColor: '#D3D3D3', marginTop: 10 }} />
-                                <Button title="Add Photo" buttonStyle={[styles.button, { marginHorizontal: 60 }]} titleStyle={styles.buttonTitle} title="Add Picture" onPress={openImagePickerAsync} />
+                                <Button title="Add Photo" buttonStyle={[styles.button, { marginHorizontal: 60 }]} titleStyle={styles.buttonTitle} onPress={openImagePickerAsync} />
                             </View>
                             :
                             <View>

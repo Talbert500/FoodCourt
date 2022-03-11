@@ -1,5 +1,5 @@
 import React from 'react';
-import { Animated, ImageBackground, KeyboardAvoidingView, Dimensions, FlatList, ScrollView, View, TouchableOpacity, Image, StyleSheet, Text, Platform, Linking, Keyboard, BackHandler } from 'react-native';
+import { Animated, ImageBackground, ActivityIndicator, Dimensions, FlatList, ScrollView, View, TouchableOpacity, Image, StyleSheet, Text, Platform, Linking, Keyboard, BackHandler } from 'react-native';
 import { Button, Input } from 'react-native-elements'
 import { database } from '../../firebase-config'
 import { ref, onValue, orderByValue, equalTo, push, update, set, off } from 'firebase/database'
@@ -94,7 +94,9 @@ const MenuWeb = ({ route, navigation }) => {
     const [bookmarked, setBookmarked] = useState(false)
     const spring = new Animated.Value(0.3)
 
-
+    const [loadingbio, setLoadingBio] = useState(true);
+    const [loadingPic, setLoadingPic] = useState(true);
+    const [restaurantRatings, setRestaurantRatings] = useState([])
 
     function googleSignOut() {
         signOut(auth).then(() => {
@@ -148,6 +150,7 @@ const MenuWeb = ({ route, navigation }) => {
     }
     const getMenus = async () => {
         console.log("Getting Menu")
+        getRestaurantRatings();
         const menus = ref(database, "restaurants/" + restId + "/menus")
         onValue(menus, (snapshot) => {
             const data = snapshot.val();
@@ -256,6 +259,7 @@ const MenuWeb = ({ route, navigation }) => {
         await getDownloadURL(imageRef).then((url) => {
             dispatch(setSearchedRestaurantImage(url))
             setRestaurantImage(url)
+            setLoadingPic(false);
         })
     }
     const getRestaurant = async () => {
@@ -264,6 +268,7 @@ const MenuWeb = ({ route, navigation }) => {
         const docRef = doc(db, "restaurants", restId);
         const snapshot = await getDoc(docRef)
         if (snapshot.exists()) {
+            setLoadingBio(false);
             setRestaurantId(snapshot.data().restaurant_id)
             setRestaurantPhone(snapshot.data().restaurant_phone)
             setRestaurantAddress(snapshot.data().restaurant_address)
@@ -284,6 +289,8 @@ const MenuWeb = ({ route, navigation }) => {
 
 
     useEffect(() => {
+        setLoadingBio(true);
+        setLoadingPic(true);
         console.log("Mounting")
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -354,6 +361,14 @@ const MenuWeb = ({ route, navigation }) => {
         )
 
     }
+    const randomRating = ({ item }) => {
+        return (
+            <View style={[styles.shadowProp, { overflow: 'hidden', borderRadius: 5, margin: 5, flex: 1,backgroundColor: 'rgba(52, 52, 52, 0.2)',marginVertical:10}]}>
+                <Text numberOfLines={1} style={{ fontFamily: 'Bold', paddingTop: 10,color:'white',opacity:1}} >{item.rater} says, </Text>
+                <Text numberOfLines={2} style={{ fontFamily: 'Primary', paddingBottom: 7,color:"white",opacity:1,margin:3}}>{item.review}</Text>
+            </View>
+        )
+    }
 
     const searchFilter = (text) => {
         if (text) {
@@ -365,11 +380,11 @@ const MenuWeb = ({ route, navigation }) => {
 
                 return itemData.indexOf(textData) > -1;
             });
-            setFiltered(newData);
+            setFiltered(newData.sort((a,b)=> b.upvotes- a.upvotes));
             onChangeText(text);
             setSetCate(null)
         } else {
-            setFiltered(menuData);
+            setFiltered(menuData.sort((a,b)=> b.upvotes- a.upvotes));
             onChangeText(text);
 
         }
@@ -393,7 +408,7 @@ const MenuWeb = ({ route, navigation }) => {
 
                 return cateDate.indexOf(cate) > -1;
             });
-            setFiltered(newData);
+            setFiltered(newData.sort((a,b)=> b.upvotes- a.upvotes));
 
         } else {
             setSetCate("")
@@ -420,10 +435,10 @@ const MenuWeb = ({ route, navigation }) => {
 
                 return cateDate.indexOf(cate) > -1;
             });
-            setFiltered(newData);
+            setFiltered(newData.sort((a,b)=> b.upvotes- a.upvotes));
         } else {
             setSetCate("")
-            setFiltered(menuData)
+            setFiltered(menuData.sort((a,b)=> b.upvotes- a.upvotes))
         }
 
 
@@ -432,7 +447,7 @@ const MenuWeb = ({ route, navigation }) => {
         if (loginSession !== restaurantId) {
             if (loggedin) {
                 dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurant_address, restaurantPhone, restaurantId, restaurantColor))
-                navigation.navigate("RatingRestaurant", { restaurantId: restaurantId })
+                navigation.navigate("RatingRestaurant", { restaurantId: restaurantId ,userId:loginSession})
             } else {
                 googleSignIn();
             }
@@ -494,17 +509,32 @@ const MenuWeb = ({ route, navigation }) => {
         })
     }
 
+    const getRestaurantRatings = async () => {
+        console.log("Getting Restaurant Rattings")
+        const restRatings = ref(database, "restaurants/" + restId + "/restaurantRatings/")
+        onValue(restRatings, (snapshot) => {
+            const data = snapshot.val();
+            console.log("category", data)
+            if (data !== null) {
+                Object.values(data).map((foodData) => {
+                    setRestaurantRatings((oldArray) => [...oldArray, { rater: foodData.raters_name, review: foodData.rating }])
 
+                })
+            }
+
+        })
+
+    }
     return (
         <KeyboardAwareScrollView enableOnAndroid extraHeight={120} style={{ flex: 1, backgroundColor: "white" }}>
             {Platform.OS === 'web' ? (
-                <View style={{ width: '100%', padding: 5, flexDirection: "row", backgroundColor: Platform.OS === "web" ? "white" : "transparent", zIndex: 1 }}>
+                <View style={{ width: '100%', padding: 0, flexDirection: "row", backgroundColor: Platform.OS === "web" ? "white" : "transparent", zIndex: 1 }}>
                     <TouchableOpacity onPress={() => navigation.navigate("Home")}>
                         <Image
                             style={{
                                 justifyContent: 'flex-start',
-                                width: 75,
-                                height: 75,
+                                width: 50,
+                                height: 50,
                                 resizeMode: "contain",
                             }}
                             source={require('../../assets/splash.png')} />
@@ -536,16 +566,15 @@ const MenuWeb = ({ route, navigation }) => {
                                     style={styles.button}
                                 >
                                     <Text style={[styles.buttonTitle, { paddingHorizontal: 10 }]}>Menu Dashboard</Text>
-                                </TouchableOpacity> 
+                                </TouchableOpacity>
                                 :
                                 <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
                                     <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
                                         <Image
-                                            style={{ height: 50, width: 50, borderRadius: 40, marginHorizontal: 10 }}
+                                            style={{ height: 50, width: 50, borderRadius: 40, marginHorizontal: 30 }}
                                             source={{ uri: userPhoto }}
                                         />
                                     </TouchableOpacity>
-                                    <Text style={{ fontFamily: 'Bold' }}>{userName}</Text>
                                 </View>
                             }
                         </View>
@@ -607,21 +636,22 @@ const MenuWeb = ({ route, navigation }) => {
                     </View>
                     :
                     <View style={{ marginTop: -15, flexDirection: 'row', justifyContent: 'space-around' }}>
-                        <View style={{ marginBottom: 10, padding: 10, top: (hoverside === true) ? 0 : 3 }}>
+
+                        {/* <View style={{ marginBottom: 10, padding: 10, top: (hoverside === true) ? 0 : 3 }}>
                             <View style={{ flexDirection: '', flex: 1 }}>
                                 <Icon onMouseOver={() => (setHoverSide(true))} onMouseLeave={() => { setHoverSide(false) }}
                                     onPress={() => { navigation.navigate("Home") }} type="entypo" name="home" color="#F6AE2D" size={35} />
 
                             </View>
-                        </View>
-                        <View style={{ padding: 10, marginBottom: 10, top: (hoverside1 === true) ? 0 : 3 }}>
+                        </View> */}
+                        {/* <View style={{ padding: 10, marginBottom: 10, top: (hoverside1 === true) ? 0 : 3 }}>
                             <View style={{ flexDirection: 'column' }}>
                                 <Icon onMouseOver={() => (setHoverSide1(true))} onMouseLeave={() => { setHoverSide1(false) }}
                                     onPress={rateHandler} type="material-community" name="message-draw" color="#F6AE2D" size={35} />
 
                             </View>
-                        </View>
-                        <View style={{ marginBottom: 10, padding: 10, top: (hoverside2 === true) ? 0 : 3 }}>
+                        </View> */}
+                        {/* <View style={{ marginBottom: 10, padding: 10, top: (hoverside2 === true) ? 0 : 3 }}>
                             <View style={{ flexDirection: 'column', justifyContent: "center" }}>
                                 {(bookmarked == false) ?
                                     <Icon onPress={newRegularSave} onMouseOver={() => (setHoverSide2(true))} onMouseLeave={() => { setHoverSide2(false) }} type="font-awesome" name="bookmark" color="#F6AE2D" size={35} />
@@ -631,92 +661,115 @@ const MenuWeb = ({ route, navigation }) => {
                                 }
 
                             </View>
-                        </View>
-                        <View onMouseOver={() => (setHoverSide3(true))} onMouseLeave={() => { setHoverSide3(false) }} style={{ marginBottom: 10, padding: 10, top: (hoversid3 === true) ? 0 : 3 }}>
+                        </View> */}
+                        {/* <View onMouseOver={() => (setHoverSide3(true))} onMouseLeave={() => { setHoverSide3(false) }} style={{ marginBottom: 10, padding: 10, top: (hoversid3 === true) ? 0 : 3 }}>
                             <View style={{ flexDirection: 'column' }}>
                                 <Icon type="fontisto" name="player-settings" color="#F6AE2D" size={35} />
 
                             </View>
-                        </View>
+                        </View> */}
                     </View>
                 }
                 <View style={[styles.shadowProp, { backgroundColor: 'white', marginHorizontal: 10, borderRadius: 13, overflow: 'hidden', flex: 1 }]}>
-                    <ImageBackground style={{ margin: 5, borderTopLeftRadius: 13, borderTopRightRadius: 13, overflow: 'hidden', height: Platform.OS === "web" ? 250 : 75 }} resizeMode="cover" source={{ uri: restaurantImage }}>
+                    <ImageBackground style={{ margin: 5, borderTopLeftRadius: 13, borderTopRightRadius: 13, overflow: 'hidden', height: Platform.OS === "web" ? 225 : 50 }} resizeMode="cover" source={{ uri: restaurantImage }}>
                         <LinearGradient
                             colors={['#00000000', '#000000']}
                             style={{ height: '100%', width: '100%' }}>
-                            <View style={{ width: "100%", maxWidth: 600, flex: 1, alignSelf: 'center', flexDirection: 'row-reverse' }}>
-                                <View style={{ justifyContent: 'flex-end', margin: 10 }}>
+                            {loadingPic ? <ActivityIndicator size="large" style={{ flex: 1, alignContent: 'center', justifyContent: 'center', alignSelf: 'center' }} color="#F6AE2D" /> :
+                                <View style={{ width: "100%", maxWidth: 600, flex: 1, alignSelf: 'center', flexDirection: 'row-reverse' }}>
+                                    <View style={{ justifyContent: 'flex-end', margin: 10 }}>
+                                    </View>
+                                    <View style={{
+                                        flex: 1,
+                                        justifyContent: "flex-end",
+                                    }}>
+                                        {/* <Text ellipsizeMode='tail' numberOfLines={2} style={[styles.subHeaderText, { color: "white", fontSize: 16, textAlign: 'left', marginLeft: 10, }]}>{regulars.length} Regulars</Text> */}
+                                        {(windowWidth >= 500) ?
+                                        <Text ellipsizeMode='tail' numberOfLines={2} style={[styles.headerText, { color: "white", fontSize: 60, textAlign: 'left', marginLeft: 10, }]}>{searchedRestaurant} </Text>
+                                        :
+                                        <Text ellipsizeMode='tail' numberOfLines={3} style={[styles.headerText, { color: "white", fontSize: 35, textAlign: 'left', marginLeft: 10, }]}>{searchedRestaurant} </Text>
+                                        }
+                                        <View>
+                                            <FlatList
+                                                showsHorizontalScrollIndicator={false}
+                                                horizontal
+                                                data={restaurantRatings}
+                                                renderItem={randomRating}
+                                            />
+                                        </View>
+                                    </View>
                                 </View>
-                                <View style={{
-                                    flex: 1,
-                                    justifyContent: "flex-end",
-                                }}>
-                                    <Text ellipsizeMode='tail' numberOfLines={2} style={[styles.subHeaderText, { color: "white", fontSize: 16, textAlign: 'left', marginLeft: 10 }]}>{regulars.length} Regulars</Text>
-                                    <Text ellipsizeMode='tail' numberOfLines={2} style={[styles.headerText, { color: "white", fontSize: 50, textAlign: 'left', marginLeft: 10 }]}>{searchedRestaurant} </Text>
-                                </View>
-                            </View>
+                            }
                         </LinearGradient>
                     </ImageBackground >
                     <View style={{ maxWidth: 700, alignSelf: Platform.OS === 'web' ? 'center' : '', width: '100%', padding: 10 }}>
+
                         <View>
                             <View style={{ alignSelf: "center", maxWidth: 500, width: "100%", flexDirection: 'row' }}>
-
-                                <View>
-                                    <Text style={{ color: "black", fontWeight: "bold", textAlign: 'left', marginLeft: 10 }}>{overall} Overall Ratings</Text>
+                                <View style={{ flex: 1 }}>
+                                    {/* <Text style={{ color: "black", fontWeight: "bold", textAlign: 'left', marginLeft: 10 }}>{overall} Overall Ratings</Text> */}
                                     {!(loginSession === restaurantId) ?
-                                        <View style={{ alignSelf: 'center', flex: 1, margin: 10 }}>
+                                        <View style={{ alignSelf: 'left', flex: 1, margin: 10 }}>
                                             {loggedin ?
-                                                <Button title="Rate Us" buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 250, width: 250 }]}
-                                                    titleStyle={styles.buttonTitle}
-                                                    onPress={() => {
-                                                        navigation.navigate("RatingRestaurant", { restaurantId: restaurantId }),
-                                                            dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurant_address, restaurantPhone, restaurantId, restaurantColor))
-                                                    }}
-                                                />
+                                                <View>
+                                                    <Button title="Rate Us" buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 140, width: 140, height: 30}]}
+                                                        titleStyle={styles.buttonTitle}
+                                                        onPress={() => {
+                                                            navigation.navigate("RatingRestaurant", { restaurantId: restaurantId,userId:loginSession}),
+                                                                dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurant_address, restaurantPhone, restaurantId, restaurantColor))
+                                                        }}
+                                                    />
+
+                                                </View>
                                                 :
-                                                <Button title="Rate Us" buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 240, width: 240 }]}
-                                                    titleStyle={styles.buttonTitle}
-                                                    onPress={googleSignIn}
-                                                />
+                                                <View style={{ flex: 1 }}>
+
+                                                    <Button title="Rate Us" buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 140, width: 140 }]}
+                                                        titleStyle={styles.buttonTitle}
+                                                        onPress={googleSignIn}
+                                                    />
+                                                </View>
                                             }
 
                                         </View>
                                         :
                                         <View>
                                             <Button title="Rate Us" buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 240, width: 240, opacity: 0.5 }]} titleStyle={styles.buttonTitle} />
-                                            <Text onPress={() => navigation.navigate("MenuEdit", { restId: loginSession })} style={{ color: "black", textDecorationLine: 'underline', marginHorizontal:5 }}>Admin View</Text>
+                                            <Text onPress={() => navigation.navigate("MenuEdit", { restId: loginSession })} style={{ color: "black", textDecorationLine: 'underline', marginHorizontal: 5 }}>Admin View</Text>
                                         </View>
                                     }
                                 </View>
                             </View>
                             <View style={{ maxWidth: '100%', width: 550, alignSelf: "center" }}>
                                 <Text style={styles.subHeaderText}>About Us</Text>
+                                {loadingbio ? <ActivityIndicator size="large" style={{ flex: 1, alignContent: 'center', justifyContent: 'center', alignSelf: 'center' }} color="#F6AE2D" />
+                                    :
+                                    <View >
+                                        <Text style={{ margin: 10 }}>{restaurantDesc} </Text>
+                                        <View style={{ flexDirection: "row", alignContent: "center", alignItems: 'center', margin: 5 }}>
 
-                                <View >
-                                    <Text style={{ margin: 10 }}>{restaurantDesc} </Text>
-                                    <View style={{ flexDirection: "row", alignContent: "center", alignItems: 'center', margin: 5 }}>
+                                            <Icon name="location-pin" color="black" size="35" />
+                                            <Text onPress={() => Linking.openURL(`https://www.google.com/maps/place/${restaurant_address} ${restaurant_city}, ${restaurant_state} ${restaurant_zip}`)}
+                                                style={{ fontFamily: 'Bold', fontSize: 14, marginHorizontal: 10 }}>
+                                                {restaurant_address} {restaurant_city}, {restaurant_state} {restaurant_zip}
+                                            </Text>
 
-                                        <Icon name="location-pin" color="black" size="35" />
-                                        <Text onPress={() => Linking.openURL(`https://www.google.com/maps/place/${restaurant_address} ${restaurant_city}, ${restaurant_state} ${restaurant_zip}`)}
-                                            style={{ fontFamily: 'Bold', fontSize: 14, marginHorizontal: 10 }}>
-                                            {restaurant_address} {restaurant_city}, {restaurant_state} {restaurant_zip}
+                                        </View>
+                                        <View style={{ flexDirection: "row", alignContent: "center", alignItems: 'center', margin: 5 }}>
+                                            <Icon name="call" color="black" size="35" />
+                                            <Text onPress={() => Linking.openURL("https://htmlcolorcodes.com/")} style={{ fontFamily: 'Bold', fontSize: 14, marginHorizontal: 10 }}>{restaurantPhone}</Text>
+                                        </View>
+                                        <View style={{ flexDirection: "row", alignContent: "center", margin: 5, alignItems: 'center' }}>
+                                            <Icon name="web" color="black" size="35" />
+                                            <Text onPress={() => Linking.openURL(`${restaurant_website}`)} style={{ fontFamily: 'Bold', fontSize: 14, marginHorizontal: 10 }} >{restaurant_website}</Text>
+                                        </View>
+                                        <Text style={styles.headerText}>
+                                            Menu
                                         </Text>
-
                                     </View>
-                                    <View style={{ flexDirection: "row", alignContent: "center", alignItems: 'center', margin: 5 }}>
-                                        <Icon name="call" color="black" size="35" />
-                                        <Text onPress={() => Linking.openURL("https://htmlcolorcodes.com/")} style={{ fontFamily: 'Bold', fontSize: 14, marginHorizontal: 10 }}>{restaurantPhone}</Text>
-                                    </View>
-                                    <View style={{ flexDirection: "row", alignContent: "center", margin: 5, alignItems: 'center' }}>
-                                        <Icon name="web" color="black" size="35" />
-                                        <Text onPress={() => Linking.openURL(`${restaurant_website}`)} style={{ fontFamily: 'Bold', fontSize: 14, marginHorizontal: 10 }} >{restaurant_website}</Text>
-                                    </View>
-                                    <Text style={styles.headerText}>
-                                        Menu
-                                    </Text>
-                                </View>
+                                }
                             </View>
+
                             <View style={{ backgroundColor: 'white' }}>
 
                             </View>
@@ -787,10 +840,10 @@ const MenuWeb = ({ route, navigation }) => {
                                             restName: item.restaurant,
                                         })
                                     }}
-                                    restaurant={item.restaurant}
-                                    ranking={index + item.upvotes}
 
-                                    menu={item.category}
+                                    ranking={index + item.upvotes}
+                                    description={item.description}
+                                    price={item.price}
                                     food={item.food}
                                     percent={item.ratingCount > 0 ? (item.eatagain * 100 / item.ratingCount).toFixed(0) : (item.eatagain)}
                                     upvotes={item.upvotes}
