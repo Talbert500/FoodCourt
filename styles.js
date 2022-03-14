@@ -71,7 +71,7 @@ categories: {
 
     },
     menuItemContaner: {
-      borderRadius: 20,
+      borderRadius: 10,
       borderWidth: 1,
       borderColor: "white",
       backgroundColor: "white",

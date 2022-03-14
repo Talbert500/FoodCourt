@@ -3,8 +3,7 @@ import { StyleSheet, TextInput, Text, View, SafeAreaView, FlatList, TouchableOpa
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { styles } from '../styles'
-import Icon from 'react-native-vector-icons/AntDesign'
-
+import { Icon } from 'react-native-elements'
 
 function Card(props) {
 
@@ -16,23 +15,23 @@ function Card(props) {
                 </Text> */}
             </View>
             <View style={{ flex: 1, maxWidth: "70%", alignContent: 'flex-start' }}>
-                <Text style={[styles.subHeaderText, { fontSize: 35, fontWeight: '100' }]} >
+                <Text style={[styles.subHeaderText, { fontSize: 30, fontWeight: '100' }]} >
                     {props.food}
                 </Text>
                 <Text style={[styles.subHeaderText, { fontSize: 14 ,maxWidth:400}]} numberOfLines={2} >{props.description}</Text>
-                <Text>{props.price}</Text>
+                <Text>${props.price}</Text>
 
                 <Text style={[styles.subHeaderText, { fontSize: 13, alignSelf: 'flex-end' }]}>
-                    {props.percent}% would eat again
+                    click for more
                 </Text>
             </View>
 
             <View style={{ justifyContent: 'center', right: "10%" }}>
                 {/* <TouchableOpacity style={{alignSelf:'center'}} onPress={() => console.log(`upvoted ${props.food} by ${props.restaurant}`)}> */}
-                <Icon color={props.upvoteColor} size={30} name="caretup" />
+                <Icon style={{ alignSelf: 'center'}} size={25} type="ant-design" color={props.upvoteColor} name="hearto"  />
                 {/* </TouchableOpacity> */}
-                <Text style={[styles.subHeaderText, { fontSize: 20, alignSelf: 'center' }]}>
-                    {props.upvotes}
+                <Text style={[styles.subHeaderText, { fontSize: 10, alignSelf: 'center' }]}>
+                     {props.upvotes} 
                 </Text>
             </View>
 

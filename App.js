@@ -29,6 +29,7 @@ import MenuEdit from './Screens/Restaurants/MenuEdit';
 import QRMenus from './Screens/QRMenus'
 import Billing from './Screens/web/Billing';
 import FoodEdit from './Screens/Restaurants/FoodEdit';
+import Guidelines from './Screens/Terms/Guidelines'
 
 const Stack = createNativeStackNavigator();
 
@@ -107,6 +108,9 @@ export default function App() {
         Billing:{
           path: 'billing-edit'
         },
+        Guidelines:{
+          path: 'guidlines'
+        },
       }
       /* configuration for matching screens with paths */
     },
@@ -115,9 +119,17 @@ export default function App() {
 
   return (
     <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>
-      <View><Text style={{ color: 'red', fontSize: 10 }}> Unstable Alpha v4.1\\Added reviews can now showcase images</Text></View>
+      <View><Text style={{ color: 'red', fontSize: 10 }}> Unstable Alpha v4.3\\Even better UX with liking food, pop help</Text></View>
       <Provider store={store}>
         <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen 
+                    name="Guidelines"
+                    component={Guidelines}
+                    options={{
+                      headerShown: false,
+        
+                    }}
+        />
         <Stack.Screen
             name="FoodEdit"
             component={FoodEdit}

@@ -20,6 +20,7 @@ import Slider from '@react-native-community/slider';
 import * as ImagePicker from 'expo-image-picker';
 import { setFoodItemImage } from '../redux/action'
 
+
 import { onAuthStateChanged } from 'firebase/auth';
 
 const windowWidth = Dimensions.get("window").width;
@@ -27,7 +28,13 @@ const windowHeight = Dimensions.get("window").height;
 
 
 function RatingFood({ route, navigation }) {
-    const { restId, foodId, restName } = route.params;
+    let [fontsLoaded] = useFonts({
+        'Primary': require('../assets/fonts/proxima_nova_reg.ttf'),
+        'Bold': require('../assets/fonts/proxima_nova_bold.ttf'),
+        'Black': require('../assets/fonts/proxima_nova_black.otf')
+    });
+
+    //const { restId, foodId, restName } = route.params;
     const dispatch = useDispatch();
 
     const [inputRating, setInputRating] = useState("");
@@ -36,16 +43,16 @@ function RatingFood({ route, navigation }) {
     const [userPhoto, setUserPhoto] = useState()
     const [userId, setUserId] = useState("")
     const [refreshing, setRefreshing] = useState(false);
-    const tookPicture = useSelector(state => state.foodImage);
     const [restaurantColor, setRestaurantColor] = useState("")
-    const searchedRestaurant = useSelector(state => state.searchedRestaurant)
-    const restaurantId = useSelector(state => state.restaurantId)
-    // const username = useSelector(state => state.username)
-    //const userPhoto = useSelector(state => state.userPhoto)
-    //const userId = useSelector(state => state.userId)
-    const foodItemId = useSelector(state => state.foodItemId)
-    const food = useSelector(state => state.food)
-    const foodImage = useSelector(state => state.foodImage)
+    //const searchedRestaurant = useSelector(state => state.searchedRestaurant)
+    //const food = useSelector(state => state.food)
+    //const foodImage = useSelector(state => state.foodImage)
+
+    const food = "Chicken Sandwhich"
+    const foodImage = "test"
+    const searchedRestaurant = "Canyon 49 Griill"
+    const restId = "2kkaW6jvTzWghR27IGuXckUUhul1"
+    const foodId = "56e6852e4a2"
 
     const [toggle, setToggle] = useState(false)
     const [executionvalue, setExecutionValue] = useState()
@@ -61,9 +68,7 @@ function RatingFood({ route, navigation }) {
     const [tasteText, setTasteValueText] = useState("")
 
     const [loggedin, setloggedin] = useState("")
-
     const [eatagain, setEatAgain] = useState(0);
-
     const [imageUrl, setImageUrl] = useState(false)
 
     const AddFoodRating = async () => {
@@ -112,7 +117,7 @@ function RatingFood({ route, navigation }) {
                     })
             }
         }
-        if (imageUrl == false){
+        if (imageUrl == false) {
             set(ref(database, "restaurants/" + restId + "/ratings" + "/" + foodId + `/${userId}`), {
                 review_id: uuid,
                 food_id: foodId,
@@ -301,7 +306,7 @@ function RatingFood({ route, navigation }) {
 
         let pickerResult = await ImagePicker.launchImageLibraryAsync();
         // dispatch(setFoodItemImage(pickerResult.uri))
-        setImage(pickerResult.uri)
+        setImageUrl(pickerResult.uri)
 
         const metadata = {
             contentType: `${userId}`,
@@ -332,117 +337,127 @@ function RatingFood({ route, navigation }) {
         <KeyboardAwareScrollView enableOnAndroid extraHeight={120} style={{ flex: 1, backgroundColor: "white" }} refreshControl={
             <RefreshControl refreshing={refreshing} />
         }>
-
-
-            <Icon
-                color="black" size={35} name="arrow-left" onPress={() => { navigation.goBack() }}
-            />
-            <View style={[styles.shadowProp, { backgroundColor: 'white', alignSelf: 'center', padding: 5, margin: 20, borderRadius: 20, width: '90%', maxWidth: 650 }]}>
-
-
-                <View style={{ flex: 1, padding: 12 }}>
-                    <View style={{ flex: 1, padding: 10, borderRadius: 13, }}>
-                        <Text style={[styles.subHeaderText, { fontSize: 20 }]}>Lets rate,</Text>
-                        <Text style={styles.subHeaderText}>{searchedRestaurant}</Text>
-                        <Text style={[styles.headerText, { fontSize: 40, marginBottom: 20 }]}>{food}</Text>
-                        <Text style={{ fontSize: 35, fontWeight: "400" }}>1.  Rate Your Food</Text>
-
-
-                        {Platform.OS === "web" ?
-                            <View>
-                                <Button buttonStyle={[styles.button, { marginHorizontal: 40, backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} title="Add Picture" onPress={openImagePickerAsync} />
-                                <Image source={{ uri: image }} style={{ alignSelf: 'center', width: 200, height: 200, borderRadius: 30, backgroundColor: '#D3D3D3' }} /></View>
-                            :
-                            <View>
-                                <Button buttonStyle={[styles.button, { marginHorizontal: 40, backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} title="Add Picture" onPress={() => { navigation.navigate("Camera") }} />
-                                <Image source={{ uri: foodImage }} style={{ alignSelf: 'center', width: 200, height: 200, borderRadius: 30, backgroundColor: '#D3D3D3' }} />
-                            </View>
-                        }
-
-
-                        <Text style={[styles.subHeaderText, { fontSize: 20, alignSelf: 'center', marginTop: 30 }]}>Would you eat again?</Text>
-                        {!toggle ?
-                            <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                                <Button buttonStyle={[styles.button, { marginHorizontal: 40, paddingHorizontal: 30, backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} title="Yes" onPress={() => { setEatAgain(1), setToggle(true) }} />
-                                <Button buttonStyle={[styles.button, { marginHorizontal: 40, paddingHorizontal: 30, opacity: 0.5, shadowOpacity: 0 }]} titleStyle={styles.buttonTitle} title="No" onPress={() => { setEatAgain(0) }} />
-                            </View>
-                            :
-                            <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                                <Button buttonStyle={[styles.button, { marginHorizontal: 40, paddingHorizontal: 30, opacity: 0.5, shadowOpacity: 0 }]} titleStyle={styles.buttonTitle} title="Yes" onPress={() => { setEatAgain(1) }} />
-                                <Button buttonStyle={[styles.button, { marginHorizontal: 40, paddingHorizontal: 30, backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} title="No" onPress={() => { setEatAgain(0), setToggle(false) }} />
-                            </View>
-                        }
-
-                        <View style={{ marginVertical: 20 }}>
-                            <Text style={{ fontSize: 25, fontWeight: "500" }}>Execution</Text>
-                            <Text style={{ fontSize: 17, margin: 5 }}>Execution, Did yout food come out in a reasonable time? Did the food choice come together? initial feelings?</Text>
-                            <Text style={[styles.subHeaderText, { fontSize: 20 }]}>"{executionvalueText}"</Text>
-
-                            <Slider
-                                onValueChange={(value) => { setExecutionValue(value) }}
-                                maximumValue={5}
-                                minimumValue={0}
-                                step
-                                minimumTrackTintColor={executionvalueColor}
-                                style={[styles.shadowProp, { height: 30, borderRadius: 20, backgroundColor: `${executionvalueColor}`, marginHorizontal: 30 }]}
-                            />
-
+            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#F6AE2D', width: '100%' }}>
+                <Text style={{ margin: 5 }}>Go Back to: </Text>
+                <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <Text style={[styles.subHeaderText, { textDecorationLine: 'underline', fontSize: 15, fontFamily: 'Primary', marginVertical: 5 }]}>{searchedRestaurant}</Text>
+                </TouchableOpacity>
+            </View>
+            <View style={{padding:5}}>
+                <View style={{ backgroundColor: 'white', alignSelf: 'center', margin: 5, borderRadius: 20, width: '90%', maxWidth: 650 }}>
+                    <View style={{ flex: 1, padding: 0 }}>
+                        <View style={{ flex: 1, padding: 0, }}>
+                            <Text style={[styles.subHeaderText, { fontSize: 20 }]}>Lets rate,</Text>
+                            <Text style={styles.subHeaderText}>{searchedRestaurant}</Text>
+                            <Text style={[styles.headerText, { fontSize: 40, marginBottom: 20 }]}>{food}</Text>
                         </View>
-                        <Divider />
-                        <View style={{ marginVertical: 10 }}>
-                            <Text style={[styles.subHeaderText, { fontSize: 25 }]}>Appearance</Text>
-                            <Text style={{ fontSize: 17, margin: 5 }}>Appearance, Is it pleasing to the eye? Does it look appertizing? Did you want to take a big bite out of it?</Text>
-                            <Text style={[styles.subHeaderText, { fontSize: 20 }]}>"{appearanceValueText}"</Text>
-                            <Slider
-                                onValueChange={(value) => { setAppearanceValue(value) }}
-                                maximumValue={5}
-                                minimumValue={0}
-                                step
-                                minimumTrackTintColor={appearanceColor}
-                                style={[styles.shadowProp, { height: 30, borderRadius: 20, backgroundColor: `${appearanceColor}`, marginHorizontal: 30 }]}
-                            />
-                        </View>
-                        <Divider />
-                        <View style={{ marginVertical: 10 }}>
-                            <Text style={[styles.subHeaderText, { fontSize: 25 }]}>Taste</Text>
-                            <Text style={{ fontSize: 17, margin: 5 }}>Taste, Is it pleasing to the taste buds? Does it make you want more? Is there an appropriate balance of flavors?</Text>
-                            <Text style={[styles.subHeaderText, { fontSize: 20 }]}>"{tasteText}"</Text>
-                            <Slider
-                                onValueChange={(value) => { setTasetValue(value) }}
-                                maximumValue={5}
-                                minimumValue={0}
-                                step
-                                minimumTrackTintColor={tasteColor}
-                                style={[styles.shadowProp, { height: 30, borderRadius: 20, backgroundColor: `${tasteColor}`, marginHorizontal: 30 }]}
-                            />
-                        </View>
-                        <Divider color="black" style={{ marginVertical: 10 }} />
-                        <Text style={{ fontSize: 35, fontWeight: "400" }}>2.  Review</Text>
-                        <TextInput
-                            style={[styles.inputContainer, { padding: 10, alignSelf: 'center', }]}
-                            onChangeText={setName}
-                            value={name}
-                            placeholder="Name"
-                            autoCapitalize='words'
-
-                        />
-                        <TextInput
-                            style={[styles.inputContainer, { padding: 14, paddingBottom: 50, alignSelf: 'center' }]}
-                            onChangeText={setInputRating}
-                            value={inputRating}
-                            placeholder="This was the best food I have ever had because..."
-                            numberOfLines={10}
-                            multiline="true"
-                            maxlength="70"
-                        />
-
-                        <Text style={{ fontSize: 17, margin: 5 }}>Before leaving a negative review please try to work with the restaurant for them to improve on your food.</Text>
-
-                        <Button onPress={AddFoodRating} buttonStyle={[styles.button, { marginHorizontal: 40, backgroundColor: restaurantColor }]} titleStyle={styles.buttonTitle} title="Finish" />
                     </View>
                 </View>
-            </View>
-        </KeyboardAwareScrollView>
+
+                <View style={[styles.shadowProp, { width: "100%", backgroundColor: 'white', alignSelf: 'center', padding: 15, borderRadius: 5, maxWidth: 650, flex: 1 }]}>
+                    <Text style={{ fontSize: 21, fontFamily: 'Bold', marginBottom: 5 }}>Take a Photo</Text>
+                    {Platform.OS === "web" ?
+                        <View style={{ flexDirection: 'row', flex: 1, padding: 10 }}>
+                            <Button buttonStyle={[styles.button, { alignItems: 'center', backgroundColor: '#F6AE2D' }]} titleStyle={styles.buttonTitle} title="Add Picture" onPress={openImagePickerAsync} />
+                            <Image source={{ uri: imageUrl }} style={{ marginBottom: 20, marginLeft: "auto", justifyContent: 'center', alignSelf: 'center', width: (windowWidth >= 500) ? 150 : 100, height: (windowWidth >= 500) ? 150 : 100, borderRadius: 5, backgroundColor: '#D3D3D3' }} />
+                        </View>
+                        :
+                        <View style={{ flexDirection: 'row', flex: 1, padding: 10 }}>
+                            <Button buttonStyle={[styles.button, { marginHorizontal: 40, backgroundColor: '#F6AE2D' }]} titleStyle={styles.buttonTitle} title="Add Picture" onPress={() => { navigation.navigate("Camera") }} />
+                            <Image source={{ uri: imageUrl }} style={{ marginLeft: "auto", justifyContent: 'center', alignSelf: 'center', width: 200, height: 200, borderRadius: 5, backgroundColor: '#D3D3D3' }} />
+                        </View>
+                    }
+                </View>
+
+                <View style={[styles.shadowProp, { backgroundColor: 'white', alignSelf: 'center', padding: 15, margin: 20, borderRadius: 5, maxWidth: 650, flex: 1, width: "100%" }]}>
+                    <Text style={{ fontSize: 21, fontFamily: 'Bold', marginBottom: 5 }}>Would you eat here again?</Text>
+                    {!toggle ?
+                        <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center' }}>
+                            <Button buttonStyle={[styles.button, { marginHorizontal: 40, paddingHorizontal: 30, backgroundColor: "white", borderWidth: 2, borderColor: '#ECECEC' }]} titleStyle={[styles.buttonTitle, { color: "black" }]} title="Yes" onPress={() => { setEatAgain(1), setToggle(true) }} />
+                            <Button buttonStyle={[styles.button, { marginHorizontal: 40, paddingHorizontal: 30, backgroundColor: "#c34632" }]} titleStyle={[styles.buttonTitle, { color: "white" }]} title="No" onPress={() => { setEatAgain(0) }} />
+                        </View>
+                        :
+                        <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center' }}>
+                            <Button buttonStyle={[styles.button, { marginHorizontal: 40, paddingHorizontal: 30, backgroundColor: "#c5e1a5" }]} titleStyle={styles.buttonTitle} title="Yes" onPress={() => { setEatAgain(1) }} />
+                            <Button buttonStyle={[styles.button, { marginHorizontal: 40, paddingHorizontal: 30, backgroundColor: "white", borderWidth: 2, borderColor: '#ECECEC' }]} titleStyle={[styles.buttonTitle, { color: "black" }]} title="No" onPress={() => { setEatAgain(0), setToggle(false) }} />
+                        </View>
+                    }
+                </View>
+
+                <View style={[styles.shadowProp, { width: '100%', backgroundColor: 'white', alignSelf: 'center', padding: 15, margin: 20, borderRadius: 5, maxWidth: 650 }]}>
+                    <Text style={{ fontSize: 21, fontFamily: 'Bold', marginBottom: 5 }}>Execution</Text>
+                    <Text style={{ fontSize: 17, margin: 5 }}>Execution, Did yout food come out in a reasonable time? Did the food choice come together? initial feelings?</Text>
+                    <Text style={[styles.subHeaderText, { fontSize: 20 }]}>"{executionvalueText}"</Text>
+
+                    <Slider
+                        onValueChange={(value) => { setExecutionValue(value) }}
+                        maximumValue={5}
+                        minimumValue={0}
+                        step
+                        minimumTrackTintColor={executionvalueColor}
+                        style={[styles.shadowProp, { height: 30, borderRadius: 20, backgroundColor: `${executionvalueColor}`, marginHorizontal: 30 }]}
+                    />
+                    <View style={{ flexDirection: 'row' }}>
+                        <Text style={[styles.subHeaderText, { fontSize: 10, margin: 10 }]}>1 - Horrible</Text>
+                        <Text style={[styles.subHeaderText, { fontSize: 10, marginLeft: 'auto', margin: 10 }]}>5 - Spectacular</Text>
+                    </View>
+                </View>
+                <Divider />
+                <View style={[styles.shadowProp, { width: '100%', backgroundColor: 'white', alignSelf: 'center', padding: 15, margin: 20, borderRadius: 5, maxWidth: 650 }]}>
+                    <Text style={{ fontSize: 21, fontFamily: 'Bold', marginBottom: 5 }}>Appearance</Text>
+                    <Text style={{ fontSize: 17, margin: 5 }}>Appearance, Is it pleasing to the eye? Does it look appertizing? Did you want to take a big bite out of it?</Text>
+                    <Text style={[styles.subHeaderText, { fontSize: 20 }]}>"{appearanceValueText}"</Text>
+                    <Slider
+                        onValueChange={(value) => { setAppearanceValue(value) }}
+                        maximumValue={5}
+                        minimumValue={0}
+                        step
+                        minimumTrackTintColor={appearanceColor}
+                        style={[styles.shadowProp, { height: 30, borderRadius: 20, backgroundColor: `${appearanceColor}`, marginHorizontal: 30 }]}
+                    />
+                    <View style={{ flexDirection: 'row' }}>
+                        <Text style={[styles.subHeaderText, { fontSize: 10, margin: 10 }]}>1 - Inedible</Text>
+                        <Text style={[styles.subHeaderText, { fontSize: 10, marginLeft: 'auto', margin: 10 }]}>5 - Exquisite</Text>
+                    </View>
+                </View>
+                <Divider />
+                <View style={[styles.shadowProp, { width: '100%', backgroundColor: 'white', alignSelf: 'center', padding: 15, margin: 20, borderRadius: 5, maxWidth: 650 }]}>
+                    <Text style={{ fontSize: 21, fontFamily: 'Bold', marginBottom: 5 }}>Taste</Text>
+                    <Text style={{ fontSize: 17, margin: 5 }}>Taste, Is it pleasing to the taste buds? Does it make you want more? Is there an appropriate balance of flavors?</Text>
+                    <Text style={[styles.subHeaderText, { fontSize: 20 }]}>"{tasteText}"</Text>
+                    <Slider
+                        onValueChange={(value) => { setTasetValue(value) }}
+                        maximumValue={5}
+                        minimumValue={0}
+                        step
+                        minimumTrackTintColor={tasteColor}
+                        style={[styles.shadowProp, { height: 30, borderRadius: 20, backgroundColor: `${tasteColor}`, marginHorizontal: 30 }]}
+                    />
+                    <View style={{ flexDirection: 'row' }}>
+                        <Text style={[styles.subHeaderText, { fontSize: 10, margin: 10 }]}>1 - Run Away</Text>
+                        <Text style={[styles.subHeaderText, { fontSize: 10, marginLeft: 'auto', margin: 10 }]}>5 - I would drive 20 miles!</Text>
+                    </View>
+                </View>
+                <View style={[styles.shadowProp, { width: '100%', backgroundColor: 'white', alignSelf: 'center', padding: 15, margin: 20, borderRadius: 5, maxWidth: 650 }]}>
+                    <Text style={{ fontSize: 20, fontWeight: "500" }}>Write a Review</Text>
+                    <Text style={{ fontSize: 17, margin: 5 }}>Before leaving a negative review please try to work with the restaurant for them to improve on your food.</Text>
+
+                    <TextInput
+                        style={[styles.inputContainer, { padding: 14, paddingBottom: 50, alignSelf: 'center' }]}
+                        onChangeText={setInputRating}
+                        value={inputRating}
+                        placeholder="This was the best food I have ever had because..."
+                        numberOfLines={10}
+                        multiline="true"
+                        maxlength="70"
+                    />
+                </View>
+                <View style={{ width: '100%', backgroundColor: 'white', alignSelf: 'center', padding: 15, margin: 20, borderRadius: 5, maxWidth: 650 }}>
+                    <Text style={{ fontSize: 14, margin: 5, textAlign: "center", fontWeight: 'Primary' }}>By clicking the "Submit" button, I acknowledge that I have read and agreed to the Feiri Site Guidelines, Terms of Use, and Privacy Policy. Submitted data becomes the property of feiri.app. IP addresses are logged.</Text>
+                    <Button onPress={AddFoodRating} buttonStyle={[styles.button, { marginHorizontal: 40, backgroundColor: '#F6AE2D', maxWidth: 200, alignSelf: 'center', width: 200 }]} titleStyle={styles.buttonTitle} title="Finish" />
+                </View >
+            </View >
+        </KeyboardAwareScrollView >
     );
 
 }

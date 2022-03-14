@@ -456,7 +456,7 @@ const MenuEdit = ({ route, navigation }) => {
         <KeyboardAwareScrollView enableOnAndroid extraHeight={120} style={{ flex: 1, backgroundColor: "white" }}>
             {Platform.OS === 'web' ? (
                 <View style={{ width: '100%', padding: 5, flexDirection: "row", backgroundColor: Platform.OS === "web" ? "white" : "transparent", zIndex: 1 }}>
-                    <TouchableOpacity onPress={() => navigation.navigate("RestaurantHome")}>
+                    <TouchableOpacity onPress={() => navigation.replace("RestaurantHome")}>
                         <Image
                             style={{
                                 justifyContent: 'flex-start',
@@ -490,11 +490,10 @@ const MenuEdit = ({ route, navigation }) => {
                                 <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', marginRight: 30 }}>
                                     <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
                                         <Image
-                                            style={{ height: 50, width: 50, borderRadius: 40, marginHorizontal: 10 }}
+                                            style={{ height: 40, width: 40, borderRadius: 40, marginHorizontal: 10 }}
                                             source={{ uri: userPhoto }}
                                         />
                                     </TouchableOpacity>
-                                    <Text style={{ fontFamily: 'Bold' }}>{userName}</Text>
                                 </View>
                             }
                         </View>
@@ -503,7 +502,7 @@ const MenuEdit = ({ route, navigation }) => {
                 </View>
             ) : (<></>)
             }
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap-reverses', margin: 5 }}>
+            <View style={{ flexDirection:(windowWidth >= 500)?'row':'column', flexWrap: 'wrap-reverses', margin: 5 }}>
                 {(windowWidth >= 500) ?
                     <View style={{ marginTop: 10, padding: 10 }}>
                         <TouchableOpacity onMouseOver={() => (setHoverSide(true))} onMouseLeave={() => { setHoverSide(false) }} style={{ marginBottom: 12 }}>
@@ -529,7 +528,24 @@ const MenuEdit = ({ route, navigation }) => {
                         </TouchableOpacity>
                     </View>
                     :
-                    <View>
+                    <View style={{ flexDirection: 'row',justifyContent:'space-around' }}>
+
+                        <TouchableOpacity onPress={() => navigation.navigate("Billing", { restId: loginSession })} onMouseOver={() => (setHoverSide2(true))} onMouseLeave={() => { setHoverSide2(false) }} style={{ marginBottom: 12 }}>
+                            <Icon style={{ top: (hoverside2 === true) ? 0 : 3 }} type="material" name="analytics" color="#F6AE2D" size={35} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onMouseOver={() => (setHoverSide4(true))} onMouseLeave={() => { setHoverSide4(false) }} style={{ marginBottom: 12 }}>
+                            <Icon style={{ top: (hoverside4 === true) ? 0 : 3 }} type="material-community" name="message-text" color="#F6AE2D" size={35} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onMouseOver={() => (setHoverSide5(true))} onMouseLeave={() => { setHoverSide5(false) }} style={{ marginBottom: 12 }}>
+                            <Icon style={{ top: (hoverside5 === true) ? 0 : 3 }} type="material" name="fastfood" color="#F6AE2D" size={35} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onMouseOver={() => (setHoverSide6(true))} onMouseLeave={() => { setHoverSide6(false) }} onPress={() => { navigation.navigate("Settings") }} style={{ marginBottom: 12 }}>
+                            <Icon style={{ top: (hoverside6 === true) ? 0 : 3 }} type="fontisto" name="player-settings" color="#F6AE2D" size={35} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onMouseOver={() => (setHoverSide7(true))} onMouseLeave={() => { setHoverSide7(false) }} onPress={userSignOut} style={{ marginBottom: 12 }}>
+                            <Icon style={{ top: (hoverside7 === true) ? 0 : 3 }} type="material-community" name="logout-variant" color="#F6AE2D" size={35} />
+                        </TouchableOpacity>
+
                         {/*ON PHONE*/}
                     </View>
                 }
@@ -747,7 +763,7 @@ const MenuEdit = ({ route, navigation }) => {
                                     />
                                     <View style={{ flexDirection: 'row', marginBottom: 20 }}>
                                         <Button onPress={() => deleteFood(item.food_id)} buttonStyle={{ backgroundColor: '#8A3333' }} buttonTitle={{ fontFamily: 'Bold', fontSize: "20" }} title="Delete" />
-                                        <Button onPress={() => navigation.navigate("FoodEdit", {restId:restaurantId,foodId:item.food_id,restName:searchedRestaurant})} buttonStyle={{ backgroundColor: 'orange' }} buttonTitle={{ fontFamily: 'Bold', fontSize: "20" }} title="Edit" />
+                                        <Button onPress={() => navigation.navigate("FoodEdit", { restId: restaurantId, foodId: item.food_id, restName: searchedRestaurant })} buttonStyle={{ backgroundColor: 'orange' }} buttonTitle={{ fontFamily: 'Bold', fontSize: "20" }} title="Edit" />
                                     </View>
                                 </View>
                             }

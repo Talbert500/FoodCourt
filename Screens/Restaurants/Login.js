@@ -44,7 +44,7 @@ function Login({ navigation }) {
     onAuthStateChanged(auth, (user) => {
       if (user) {
           setloggedin(true)
-          navigation.navigate("Home")
+          navigation.goBack();
       } else {
           setloggedin(false)
       }
@@ -82,13 +82,7 @@ function Login({ navigation }) {
           hasRestaurant: "false",
           userPhoto: user.photoURL
         })
-
-
-
-        navigation.navigate("MenuEdit", {
-          userId: user.uid,
-          restId: user.uid
-        })
+        navigation.goBack();
       }).catch((error) => {
         const errorCode = error.code;
         const email = error.email;
@@ -108,10 +102,8 @@ function Login({ navigation }) {
         console.log(userCredential_id)
         dispatch(setNewRestaurant(userCredential_id, emails))
 
-        navigation.navigate("MenuEdit", {
-          userId: userCredential_id,
-          restId: userCredential_id
-        })
+        navigation.goBack();
+
       }).catch((error) => {
         seterror(error.code)
         const errorCode = error.code;
@@ -201,12 +193,13 @@ function Login({ navigation }) {
               >
                 <Text style={[styles.buttonText, { paddingHorizontal: 30 }]}>Login</Text>
               </TouchableOpacity>
+              
               <TouchableOpacity onPress={googleSignIn} style={[styles.button, { backgroundColor: '#4285F4' }]}>
                 <Text style={[styles.buttonText, { paddingHorizontal: 30 }]}>Google</Text>
               </TouchableOpacity>
 
               <View style={{ flexDirection: 'row' }}>
-                <Text>New to Feiri?</Text>
+                <Text>Restaurant?</Text>
                 <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
                   <Text style={{ color: 'blue' }}> Sign up</Text>
                 </TouchableOpacity>

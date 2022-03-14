@@ -232,7 +232,7 @@ function Settings({ navigation }) {
         <KeyboardAwareScrollView enableOnAndroid extraHeight={120} style={{ flex: 1, backgroundColor: "white" }}>
             {Platform.OS === 'web' ? (
                 <View style={{ width: '100%', padding: 5, flexDirection: "row", backgroundColor: Platform.OS === "web" ? "white" : "transparent", zIndex: 1 }}>
-                    <TouchableOpacity onPress={() => navigation.navigate("Home")}>
+                    <TouchableOpacity onPress={() => navigation.replace("RestaurantHome")}>
                         <Image
                             style={{
                                 justifyContent: 'flex-start',
@@ -282,8 +282,22 @@ function Settings({ navigation }) {
                         </TouchableOpacity>
                     </View>
                     :
-                    <View>
-                        {/*ON PHONE*/}
+                    <View style={{ marginTop: 2, padding: 5,flexDirection:'row',justifyContent:'space-around' }}>
+                        <TouchableOpacity onMouseOver={() => (setHoverSide(true))} onMouseLeave={() => { setHoverSide(false) }} style={{ marginBottom: 12 }}>
+                            <Icon style={{ top: (hoverside === true) ? 0 : 3 }} onPress={() => { navigation.navigate("MenuEdit", { restId: restId }) }} type="entypo" name="home" color="#F6AE2D" size={35} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onMouseOver={() => (setHoverSide3(true))} onMouseLeave={() => { setHoverSide3(false) }} style={{ marginBottom: 12 }}>
+                            <Icon style={{ top: (hoverside3 === true) ? 0 : 3 }} type="material-community" name="message-text" color="#F6AE2D" size={35} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onMouseOver={() => (setHoverSide4(true))} onMouseLeave={() => { setHoverSide4(false) }} style={{ marginBottom: 12 }}>
+                            <Icon style={{ top: (hoverside4 === true) ? 0 : 3 }} type="material" name="fastfood" color="#F6AE2D" size={35} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onMouseOver={() => (setHoverSide5(true))} onMouseLeave={() => { setHoverSide5(false) }} onPress={() => { navigation.navigate("Settings") }} style={{ marginBottom: 12 }}>
+                            <Icon style={{ top: (hoverside5 === true) ? 0 : 3 }} type="fontisto" name="player-settings" color="grey" size={35} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onMouseOver={() => (setHoverSide6(true))} onMouseLeave={() => { setHoverSide6(false) }} onPress={userSignOut} style={{ marginBottom: 12 }}>
+                            <Icon style={{ top: (hoverside6 === true) ? 0 : 3 }} type="material-community" name="logout-variant" color="#F6AE2D" size={35} />
+                        </TouchableOpacity>
                     </View>
                 }
                 {(windowWidth >= 500) ?
@@ -458,6 +472,7 @@ function Settings({ navigation }) {
             <View style={{ marginTop: "20%" }}>
                 <Footer />
             </View>
+
             {/* <View style={{backgroundColor:'rgba(0, 0,0,0.5)',position: 'absolute',zIndex:1,top:'0',bottom:'0',left:'0',right:'0',paddingTop:"20%",paddingHorizontal:'3%'}}>
                 <View style={[styles.shadowProp, { flex:1,backgroundColor: 'white', maxHeight: 600,alignSelf:'center',width:'100%',backgroundColor:'white',borderRadius:5}]}>
 

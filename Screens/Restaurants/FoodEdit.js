@@ -547,7 +547,7 @@ function FoodEdit({ route, navigation }) {
       {Platform.OS === 'web' ? (
         <View>
           <View style={[styles.shadowProp, { flexDirection: "row", backgroundColor: "white", zIndex: 1 }]}>
-            <TouchableOpacity onPress={() => { navigation.navigate("Home") }}>
+            <TouchableOpacity onPress={() => { navigation.replace("RestaurantHome")}}>
               <Image
                 style={{
                   justifyContent: 'flex-start',

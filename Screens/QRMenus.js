@@ -234,6 +234,7 @@ function RestaurantScreen({ route, navigation }) {
             const data = snapshot.val();
             if (data !== null) {
                 console.log(data)
+
                 setUserPhoto(data.userPhoto)
                 setUserName(data.userName)
             }

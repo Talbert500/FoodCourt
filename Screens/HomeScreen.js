@@ -112,6 +112,7 @@ function HomeScreen({ navigation }) {
   }
 
   useEffect(() => {
+
     //dispatch(setSearchedRestaurant(null, null, null, null, null, null))
     setRefreshing(true);
     getRest()
@@ -249,7 +250,7 @@ function HomeScreen({ navigation }) {
               <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', marginRight: 30 }}>
                 <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
                   <Image
-                    style={{ height: 50, width: 50, borderRadius: 40, marginHorizontal: 10 }}
+                    style={{ height: 40, width: 40, borderRadius: 40, marginHorizontal: 10 }}
                     source={{ uri: userPhoto }}
                   />
                 </TouchableOpacity>
@@ -342,7 +343,7 @@ function HomeScreen({ navigation }) {
 
                   </View>
                   <Text style={{ alignSelf: "center", fontFamily: 'Bold', fontSize: 20 }}>
-                    Available on the app store
+                    Unavailable on the app store
                   </Text>
                 </View>)
                 : (<View></View>)}

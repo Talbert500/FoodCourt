@@ -83,7 +83,7 @@ function RestaurantHome({ navigation }) {
         <KeyboardAwareScrollView style={{ backgroundColor: 'white', display: "flex", }}>
             {/** HEADER  */}
             <View style={{ padding: 5, flexDirection: "row", backgroundColor: "white" }}>
-                <TouchableOpacity style={{ justifyContent: 'center', }} onPress={() => { navigation.navigate("Home") }}>
+                <TouchableOpacity style={{ justifyContent: 'center', }} onPress={() => { navigation.replace("RestaurantHome") }}>
                     <Image
                         style={{
                             justifyContent: 'flex-start',
@@ -136,6 +136,8 @@ function RestaurantHome({ navigation }) {
                                     <Text style={[styles.buttonText, { paddingHorizontal: 10 }]}>Sign Out</Text>
                                 </TouchableOpacity>
                             </View> :
+
+                            
                             <View style={{ flexDirection: "row", marginLeft: 'auto', alignItems: 'center', margin: 10 }}>
                                 <Text style={{ fontFamily: 'Bold', textAlign: 'center' }}> Create a restaurant account?</Text>
                             </View>
