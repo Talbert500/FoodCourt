@@ -152,7 +152,8 @@ function FoodEdit({ route, navigation }) {
     update(ref(database, 'restaurants/' + restId + '/foods/' + foodId), {
       food: food,
       price:price,
-      description:description
+      description:description,
+      imageUrl:image
 
   });
   }

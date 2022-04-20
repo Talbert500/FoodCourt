@@ -30,6 +30,7 @@ import QRMenus from './Screens/QRMenus'
 import Billing from './Screens/web/Billing';
 import FoodEdit from './Screens/Restaurants/FoodEdit';
 import Guidelines from './Screens/Terms/Guidelines'
+import Notifications from './Screens/Restaurants/Notifications'
 
 const Stack = createNativeStackNavigator();
 
@@ -111,6 +112,9 @@ export default function App() {
         Guidelines:{
           path: 'guidlines'
         },
+        Notifications: {
+          path:'notiifications'
+        }
       }
       /* configuration for matching screens with paths */
     },
@@ -119,9 +123,17 @@ export default function App() {
 
   return (
     <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>
-      <View><Text style={{ color: 'red', fontSize: 10 }}> Unstable Alpha v4.3\\Even better UX with liking food, pop help</Text></View>
+      <View><Text style={{ color: 'red', fontSize: 10 }}> Unstable Alpha v5.1\\Notifications</Text></View>
       <Provider store={store}>
         <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen 
+                    name="Notifications"
+                    component={Notifications}
+                    options={{
+                      headerShown: false,
+        
+                    }}
+        />
         <Stack.Screen 
                     name="Guidelines"
                     component={Guidelines}

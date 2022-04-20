@@ -72,6 +72,7 @@ function RestaurantScreen({ route, navigation }) {
     const [hoverside7, setHoverSide7] = useState(false)
     const [userPhoto, setUserPhoto] = useState('')
     const [userName, setUserName] = useState('')
+    const [totalLikes,setTotalLikes] = useState(0);
 
     const [currentDate, setCurrentDate] = useState('')
 
@@ -178,7 +179,26 @@ function RestaurantScreen({ route, navigation }) {
 
     }
 
+    function getFullMenu() {
+        const getMenu = ref(database, 'restaurants/' + userId + '/foods/')
+        onValue(getMenu, (snapshot) => {
+
+            const data = snapshot.val();
+            if (data !== null) {
+                console.log(data)
+
+                Object.values(data).map((foodData) => {
+
+                    setTotalLikes(prevState => prevState + foodData.upvotes)
+                })
+                //setSetMenu("Breakfast")
+
+            }
+        })
+
+    }
     const setRestaurant = async () => {
+        getFullMenu();
         //const restId = auth.currentUser.uid;
         const docRef = doc(db, "restaurants", userId);
         const snapshot = await getDoc(docRef)
@@ -324,7 +344,7 @@ function RestaurantScreen({ route, navigation }) {
                         <TouchableOpacity onMouseOver={() => (setHoverSide2(true))} onMouseLeave={() => { setHoverSide2(false) }} onPress={() => navigation.navigate("QRMenus", { userId: userId })} style={{ marginBottom: 12 }}>
                             <Icon style={{ top: (hoverside2 === true) ? 3 : 3 }} type="material-community" name="qrcode-edit" color="grey" size={35} />
                         </TouchableOpacity>
-                        <TouchableOpacity onMouseOver={() => (setHoverSide3(true))} onMouseLeave={() => { setHoverSide3(false) }} style={{ marginBottom: 12 }}>
+                        <TouchableOpacity onMouseOver={() => (setHoverSide3(true))} onMouseLeave={() => { setHoverSide3(false) }} onPress={() => navigation.navigate("Notifications", { restId: userId })} style={{ marginBottom: 12 }}>
                             <Icon style={{ top: (hoverside3 === true) ? 0 : 3 }} type="material-community" name="message-text" color="#F6AE2D" size={35} />
                         </TouchableOpacity>
                         <TouchableOpacity onMouseOver={() => (setHoverSide4(true))} onMouseLeave={() => { setHoverSide4(false) }} style={{ marginBottom: 12 }}>
@@ -342,7 +362,7 @@ function RestaurantScreen({ route, navigation }) {
                         {/*ON PHONE*/}
                     </View>
                 }
-                {(windowWidth >= 800) ?
+                              {(windowWidth >= 500) ?
                     <View style={{ flex: 1, maxWidth: 325, margin: 8 }}>
 
                         {/* SNAPSHOT */}
@@ -352,17 +372,17 @@ function RestaurantScreen({ route, navigation }) {
                             </View>
                             <View style={{ flexDirection: "row", alignItems: 'center' }}>
                                 <Icon type="ant-design" name="hearto" color="grey" size={20} style={{ margin: 5 }} />
-                                <Text numberOfLines={1} style={{ fontFamily: 'Bold' }}>1242 likes from Sweet Waffle </Text>
+                                <Text numberOfLines={1} style={{ fontFamily: 'Bold' }}>{searchedRestaurant} has 0 regulars</Text>
                             </View>
                             <View style={{ flexDirection: "row", alignItems: 'center' }}>
                                 <Icon type="material-icons" name="rate-review" outline color="grey" size={20} style={{ margin: 5 }} />
-                                <Text numberOfLines={1} style={{ fontFamily: 'Bold' }}>2 new reviews from Sweet Waffle </Text>
+                                <Text numberOfLines={1} style={{ fontFamily: 'Bold' }}>2 new reviews from {searchedRestaurant}</Text>
                             </View>
                             <View style={{ flexDirection: "row", alignItems: 'center' }}>
                                 <Icon type="feather" name="edit" color="grey" size={20} style={{ margin: 5 }} />
                                 <Text numberOfLines={1} style={{ fontFamily: 'Bold' }}>Charles made edit to dashboard</Text>
                             </View>
-                            <Text style={{ fontFamily: 'Primary' }}>more...</Text>
+                            <Text style={{ fontFamily: 'Primary' }}>(Semi-Functional...)</Text>
                         </View>
 
                         {/* TOP RANKING */}
@@ -373,7 +393,7 @@ function RestaurantScreen({ route, navigation }) {
                             <View style={{ flexDirection: "row", alignItems: 'center' }}>
                                 <Text numberOfLines={1} style={{ fontFamily: 'Bold' }}>Rank #23 </Text>
                             </View>
-                            <Text style={{ fontFamily: 'Primary' }}>more...</Text>
+                            <Text style={{ fontFamily: 'Primary' }}>(Not Functional...)</Text>
                         </View>
                         {/* STATS */}
                         <View style={[styles.shadowProp, { backgroundColor: 'white', padding: 15, marginVertical: 5, borderRadius: 8 }]}>
@@ -383,18 +403,18 @@ function RestaurantScreen({ route, navigation }) {
                             <View style={{ flexDirection: "row", alignItems: 'center' }}>
                                 <Icon type="ant-design" name="hearto" color="grey" size={20} style={{ margin: 5 }} />
                                 <View>
-                                    <Text numberOfLines={1} style={{ fontFamily: 'Bold', fontSize: 18 }}>203844 </Text>
+                                    <Text numberOfLines={1} style={{ fontFamily: 'Bold', fontSize: 18 }}>{totalLikes} </Text>
                                     <Text numberOfLines={1} style={{ fontFamily: 'Bold', fontSize: 12 }}>total likes </Text>
                                 </View>
                             </View>
                             <View style={{ flexDirection: "row", alignItems: 'center' }}>
                                 <Icon type="material-community" name="qrcode-scan" color="grey" size={20} style={{ margin: 5 }} />
                                 <View>
-                                    <Text numberOfLines={1} style={{ fontFamily: 'Bold', fontSize: 18 }}>203844 </Text>
+                                    <Text numberOfLines={1} style={{ fontFamily: 'Bold', fontSize: 18 }}>{scanTotal} </Text>
                                     <Text numberOfLines={1} style={{ fontFamily: 'Bold', fontSize: 12 }}>total scans </Text>
                                 </View>
                             </View>
-                            <Text style={{ fontFamily: 'Primary' }}>more...</Text>
+                            <Text style={{ fontFamily: 'Primary' }}>(Semi-Functional...)</Text>
                         </View>
                         {/* COMP ANALYSIS */}
                         <View style={[styles.shadowProp, { backgroundColor: 'white', padding: 15, marginVertical: 5, borderRadius: 8 }]}>
@@ -405,7 +425,7 @@ function RestaurantScreen({ route, navigation }) {
                             <View style={{ flexDirection: "row", alignItems: 'center' }}>
                                 <Text numberOfLines={1} style={{ fontFamily: 'Bold' }}>Rank #23 </Text>
                             </View>
-                            <Text style={{ fontFamily: 'Primary' }}>more...</Text>
+                            <Text style={{ fontFamily: 'Primary' }}>(Not Functional...).</Text>
                         </View>
 
                     </View>

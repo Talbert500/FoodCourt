@@ -102,7 +102,11 @@ function FoodAdd({ route, navigation }) {
       upvotes: 0,
       eatagain: 0,
       category: cate,
-      menus: menuname
+      menus: menuname,
+      imageUrl:image,
+      ratingCount:0,
+      overall:0,
+    
     });
 
     setInputItem("");

@@ -4,18 +4,18 @@ import { Modal, Alert, TextInput, RefreshControl, Dimensions, TouchableWithoutFe
 import { useState, useEffect } from 'react';
 import { Button, Input } from 'react-native-elements'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
-import Icon from 'react-native-vector-icons/Feather'
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'; 
 import { useDispatch } from 'react-redux';
 import { Link } from '@react-navigation/native';
 import { useFonts } from '@use-expo/font';
 import { uid } from 'uid';
-import { setSearchedRestaurantImage, setSearchedRestaurant, setNewRestaurant,setUserProps } from '../../redux/action'
-import { signInWithPopup, GoogleAuthProvider,onAuthStateChanged } from "firebase/auth";
+import { setSearchedRestaurantImage, setSearchedRestaurant, setNewRestaurant, setUserProps } from '../../redux/action'
+import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
 import { db, provider, auth, database } from '../../firebase-config'
 import { setDoc, getDoc, doc } from 'firebase/firestore'
 import { ref, set, update, onValue } from 'firebase/database'
 import * as GoogleSignIn from 'expo-google-sign-in';
+import { Icon } from 'react-native-elements'
 
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
@@ -43,12 +43,12 @@ function Login({ navigation }) {
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
-          setloggedin(true)
-          navigation.goBack();
+        setloggedin(true)
+        navigation.goBack();
       } else {
-          setloggedin(false)
+        setloggedin(false)
       }
-  })
+    })
 
   }, [])
 
@@ -59,7 +59,7 @@ function Login({ navigation }) {
         const user = result.user;
         console.log(user)
         setUserPhoto(user.photoURL)
-        dispatch(setUserProps(user.email,user.displayName,user.photoURL))
+        dispatch(setUserProps(user.email, user.displayName, user.photoURL))
         setDoc(doc(db, "users", user.email), {
           userEmail: user.email,
           userName: user.displayName,
@@ -126,10 +126,9 @@ function Login({ navigation }) {
   return (
     <KeyboardAwareScrollView style={{ backgroundColor: '#F6AE2D' }}>
       <View>
-
         <View style={[styles.shadowProp, { zIndex: 1, flexDirection: "row", backgroundColor: "white", paddingTop: Platform.OS === 'web' ? 0 : "10%" }]}>
           {Platform.OS === 'web' ? (
-            <TouchableOpacity style={{ justifyContent: 'center' }} onPress={() => { navigation.navigate("RestaurantHome") }}>
+            <TouchableOpacity style={{ justifyContent: 'center', alignSelf: 'center', flex: 1 }} onPress={() => { navigation.navigate("RestaurantHome") }}>
               <Image
                 style={{
                   justifyContent: 'flex-start',
@@ -138,7 +137,8 @@ function Login({ navigation }) {
                   resizeMode: "contain",
                 }}
                 source={require('../../assets/logo_name_simple.png')} />
-            </TouchableOpacity>) : (
+            </TouchableOpacity>
+          ) : (
             <TouchableOpacity onPress={() => { navigation.navigate("Home") }}>
               <Image
                 style={{
@@ -151,9 +151,6 @@ function Login({ navigation }) {
             </TouchableOpacity>
 
           )}
-          <Text style={{ fontFamily: 'Primary', alignSelf: "center", fontSize: Platform.OS === 'web' ? 17 : 14, fontWeight: "600" }}>
-            for restaurants
-          </Text>
         </View>
 
 
@@ -169,6 +166,14 @@ function Login({ navigation }) {
 
           <View style={[styles.shadowProp, { alignSelf: 'center', backgroundColor: 'white', padding: 20, margin: 10, borderRadius: 10 }]}>
             <View style={{ width: 300 }}>
+              <View>
+                <TouchableOpacity onPress={googleSignIn} style={[styles.button, { backgroundColor: '#4285F4' }]}>
+                  <View style={{flexDirection:'row'}}>
+                  <Icon type="font-awesome" name="google-plus-square" color="white" size={25} />
+                  <Text style={[styles.buttonText, { paddingHorizontal: 30, textAlign: "center", fontWeight: '400',justifyContent:'center' }]}>Continue with Google</Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
               <Text style={{ marginRight: 'auto', fontFamily: 'Bold', marginVertical: 10 }}>Email</Text>
               <TextInput
                 placeholder="Email"
@@ -184,30 +189,20 @@ function Login({ navigation }) {
                 style={[styles.input, { marginHorizontal: Platform.OS === 'web' ? '5%' : 0, backgroundColor: '#F3F3F3' }]}
                 secureTextEntry
               />
-
-            </View>
-            <View style={styles.buttonContainer}>
               <TouchableOpacity
                 onPress={handleLogin}
-                style={styles.button}
+                style={[styles.button, { marginTop: 20 }]}
               >
-                <Text style={[styles.buttonText, { paddingHorizontal: 30 }]}>Login</Text>
+                <Text style={[styles.buttonText, { paddingHorizontal: 30, textAlign: "center" }]}>Login</Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity onPress={googleSignIn} style={[styles.button, { backgroundColor: '#4285F4' }]}>
-                <Text style={[styles.buttonText, { paddingHorizontal: 30 }]}>Google</Text>
-              </TouchableOpacity>
-
-              <View style={{ flexDirection: 'row' }}>
+              <View style={{ flexDirection: 'row', justifyContent: "center" }}>
                 <Text>Restaurant?</Text>
                 <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
                   <Text style={{ color: 'blue' }}> Sign up</Text>
                 </TouchableOpacity>
               </View>
-
-
-
               {Platform.OS === 'web' ? (<Text style={{ color: 'red' }}>{error}</Text>) : (<></>)}
+
             </View>
           </View>
         </View>

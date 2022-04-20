@@ -28,15 +28,14 @@ import { QRapiKey } from '../../config.js'
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
 
-const MenuEdit = ({ route, navigation }) => {
+const Notifications = ({ route, navigation }) => {
 
     let [fontsLoaded] = useFonts({
         'Primary': require('../../assets/fonts/proxima_nova_reg.ttf'),
         'Bold': require('../../assets/fonts/proxima_nova_bold.ttf'),
         'Black': require('../../assets/fonts/proxima_nova_black.otf')
     });
-
-    const { restId } = route.params;
+     const { restId } = route.params;
 
     const [selectedCategory, setSelectedCategory] = useState([]);
     const [restaurant_city, setrestaurant_city] = useState("");
@@ -70,17 +69,13 @@ const MenuEdit = ({ route, navigation }) => {
     const [menuData, setMenuItem] = useState([]);
     const [text, onChangeText] = useState("")
     const [filtered, setFiltered] = useState([]);
-    const [catfilter, setCatFilter] = useState([]);
     const [loggedin, setloggedin] = useState(false);
     const [isRestaurant, setIsRestaurant] = useState(false)
     const [userPhoto, setUserPhoto] = useState('')
-    const [setCate, setSetCate] = useState('');
-    const [setMenu, setSetMenu] = useState('');
-    const [overall, setOverall] = useState()
+
     const [foodItem, setFoodItem] = useState([])
-    const [overallArray, setOverallArray] = useState('')
-    const [selectedMenus, setSelectedMenus] = useState([]);
-    const [menusDesc, setmenusDesc] = useState('')
+
+    const [ratings, setRatings] = useState([])
     const [filterCatgory, setFilteredCategory] = useState('')
     const [userName, setUserName] = useState('')
 
@@ -96,16 +91,8 @@ const MenuEdit = ({ route, navigation }) => {
     const [loadingbio, setLoadingBio] = useState(true);
     const [loadingPic, setLoadingPic] = useState(true);
 
-    const [totalLikes,setTotalLikes] = useState(0);
+    const [totalLikes, setTotalLikes] = useState(0);
 
-    function googleSignOut() {
-        signOut(auth).then(() => {
-            setloggedin(false);
-        }).catch(error => {
-            console.log(error)
-        })
-
-    }
     function googleSignIn() {
         signInWithPopup(auth, provider)
             .then((result) => {
@@ -148,79 +135,28 @@ const MenuEdit = ({ route, navigation }) => {
                 console.log(credential, errorCode)
             })
     }
-    const getMenus = async () => {
+    const getRatings = async () => {
         console.log("Getting Menu")
-        const menus = ref(database, "restaurants/" + restId + "/menus")
-        onValue(menus, (snapshot) => {
+        const ratings = ref(database, "restaurants/" + restId + "/ratings")
+        onValue(ratings, (snapshot) => {
             const data = snapshot.val();
             if (data !== null) {
-
-                console.log(data)
-                setSelectedMenus("")
+                console.log("Ratings", data)
+                setRatings("")
                 Object.values(data).map((foodData) => {
-                    setSelectedMenus((food) => [...food, foodData]);
-                   
+                    Object.values(foodData).map((ratingData) => {
+                        setRatings((rate) => [...rate, ratingData]);
+                        console.log(ratingData)
+                    })
+
+
                 })
-                console.log("Menus COLLECTED")
-                getCategories();
+                console.log("Ratings COLLECTED")
             }
 
         })
     };
 
-    const getCategories = async () => {
-        console.log("Getting Category")
-        const categories = ref(database, "restaurants/" + restId + "/menus/" + menuIndex + "/categories/")
-        onValue(categories, (snapshot) => {
-            const data = snapshot.val();
-            console.log(data)
-            if (data !== null) {
-                setSelectedCategory("")
-                setSelectedCategory(data)
-                setFilteredCategory(data)
-                getFullMenu();
-                getQrId();
-
-
-            }
-
-        })
-
-        const getRestRatings = ref(database, "restaurants/" + restId + "/restaurantRatings");
-        onValue(getRestRatings, (snapshot) => {
-            const data = snapshot.val();
-
-            if (data !== null) {
-                setRating("")
-                Object.values(data).map((ratingData) => {
-                    setRating((food) => [...food, ratingData]);
-
-                })
-            }
-        })
-    };
-
-    function getFullMenu() {
-        const getMenu = ref(database, 'restaurants/' + restId + '/foods/')
-        onValue(getMenu, (snapshot) => {
-
-            const data = snapshot.val();
-            if (data !== null) {
-                console.log(data)
-                setFoodItem("")
-                setFiltered("")
-                setMenuItem("")
-                Object.values(data).map((foodData) => {
-                    setFoodItem((oldArray) => [...oldArray, foodData]);
-                    setMenuItem((oldArray) => [...oldArray, foodData]);
-                    setTotalLikes(prevState => prevState + foodData.upvotes)
-                })
-                //setSetMenu("Breakfast")
-
-            }
-        })
-
-    }
 
     function QRMenuData(id, to, from) {
         console.log("QR DAYA", id)
@@ -299,7 +235,7 @@ const MenuEdit = ({ route, navigation }) => {
             setrestaurant_zip(snapshot.data().restaurant_zip)
 
             dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurant_address, restaurantPhone, restaurantId, restaurantColor))
-            getMenus();
+            getRatings();
             getImage();
             setLoadingBio(false);
         } else {
@@ -335,84 +271,9 @@ const MenuEdit = ({ route, navigation }) => {
         })
         getRestaurant();
     }, [])
-    const [hover, setHover] = useState(false)
-    const [tempSelect, setTempSelect] = useState("")
-    //(item.name==selectedCategory)?"white":"black"
-    const renderItem = ({ item, index }) => {
-        return (
-            <TouchableOpacity onMouseOver={() => (setTempSelect(item), setHover(true))} onMouseLeave={() => { setHover(false) }} onPress={() => (setFiltered(menuData), onCategoryClick(item))}>
-                <View style={[styles.shadowProp, { top: (item === tempSelect) && (hover === true) ? 0 : 3, margin: 15, borderRadius: 10, borderWidth: 1, backgroundColor: (item === setCate) ? "#F2F2F2" : "whtie", borderColor: 'transparent' }]}>
-                    <Text style={{ padding: 20, fontWeight: 600 }}>{item} </Text>
-                </View>
-
-            </TouchableOpacity>
-        )
-
-    }
-    const renderMenus = ({ item, index }) => {
-        return (
-            <TouchableOpacity onPress={() => (setMenuItem(foodItem), setFiltered(menuData), onMenuClick(index, item.desc, item.time), setMenuIndex(index))}>
-                <View style={[(item.desc !== setMenu) ? styles.shadowProp : styles.null, { paddingHorizontal: (item.desc !== setMenu) ? 20 : 60, borderTopLeftRadius: 0, borderTopRightRadius: 0, borderRadius: 5, marginHorizontal: 5, marginBottom: 5, backgroundColor: (item.desc === setMenu) ? restaurantColor : "white", borderColor: 'white' }]}>
-                    <Text style={{ padding: 10, fontWeight: 600, color: (item.desc === setMenu) ? "white" : "black" }}>{item.desc} </Text>
-                </View>
-            </TouchableOpacity >
-
-        )
-
-    }
-
-    const searchFilter = (text) => {
-        if (text) {
-            const newData = menuData.filter((item) => {
-                const itemData = item.food ?
-                    item.food.toUpperCase()
-                    : ' '.toUpperCase()
-                const textData = text.toUpperCase();
-
-                return itemData.indexOf(textData) > -1;
-            });
-            setFiltered(newData);
-            onChangeText(text);
-            setSetCate(null)
-        } else {
-            setFiltered(menuData);
-            onChangeText(text);
-
-        }
-    }
-    function onMenuClick(index, clicked, description) {
-        setmenusDesc(description)
-        // setSetCate(clicked)
-        if (setMenu != clicked) {
-
-            //setting categories
-            setSelectedCategory(selectedMenus[index].categories)
-
-            // Object.values(foodItem.categories).map((food) => {
-            //     setSelectedMenus((food) => [...food, foodData]);
-            // })
-
-            //setting food
-            setSetMenu(clicked)
-            const newData = foodItem.filter((item) => {
-                const cateDate = item.menus ?
-                    item.menus.toUpperCase() : ''.toUpperCase()
-                const cate = clicked.toUpperCase();
-
-                return cateDate.indexOf(cate) > -1;
-            });
-            setFiltered(newData);
-        } else {
-            setSetMenu("")
-            setMenuItem(foodItem)
-            setmenusDesc("")
-            setFiltered(null)
-            setSelectedCategory(null)
-            setmenusDesc("")
-        }
 
 
-    }
+
     const userSignOut = () => {
         signOut(auth).then(() => {
             dispatch(setSearchedRestaurant(null, null, null, null, null, null))
@@ -428,32 +289,7 @@ const MenuEdit = ({ route, navigation }) => {
         })
     }
 
-    function onCategoryClick(clicked) {
-        // setSetCate(clicked)
-        if (setCate != clicked) {
 
-            setSetCate(clicked)
-            const newData = menuData.filter((item) => {
-                const cateDate = item.category ?
-                    item.category.toUpperCase() : ''.toUpperCase()
-                const cate = clicked.toUpperCase();
-
-                return cateDate.indexOf(cate) > -1;
-            });
-            setFiltered(newData);
-
-        } else {
-            setSetCate("")
-            setFiltered(menuData)
-        }
-
-
-    }
-    function deleteFood(food_id) {
-        console.log("deleting", food_id)
-        remove(ref(database, "restaurants/" + loginSession + "/foods" + `/` + food_id));
-
-    }
 
     return (
         <KeyboardAwareScrollView enableOnAndroid extraHeight={120} style={{ flex: 1, backgroundColor: "white" }}>
@@ -505,11 +341,11 @@ const MenuEdit = ({ route, navigation }) => {
                 </View>
             ) : (<></>)
             }
-            <View style={{ flexDirection:(windowWidth >= 500)?'row':'column', flexWrap: 'wrap-reverses', margin: 5 }}>
+            <View style={{ flexDirection: (windowWidth >= 500) ? 'row' : 'column', flexWrap: 'wrap-reverses', margin: 5 }}>
                 {(windowWidth >= 500) ?
                     <View style={{ marginTop: 10, padding: 10 }}>
-                        <TouchableOpacity onMouseOver={() => (setHoverSide(true))} onMouseLeave={() => { setHoverSide(false) }} style={{ marginBottom: 12 }}>
-                            <Icon style={{ top: (hoverside === true) ? 0 : 3 }} type="entypo" name="home" color="grey" size={35} />
+                        <TouchableOpacity onMouseOver={() => (setHoverSide(true))} onMouseLeave={() => { setHoverSide(false) }} onPress={() => { navigation.navigate("MenuEdit", { restId: restId }) }} style={{ marginBottom: 12 }}>
+                            <Icon style={{ top: (hoverside === true) ? 0 : 3 }} type="entypo" name="home" color="#F6AE2D" size={35} />
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => navigation.navigate("Billing", { restId: loginSession })} onMouseOver={() => (setHoverSide2(true))} onMouseLeave={() => { setHoverSide2(false) }} style={{ marginBottom: 12 }}>
                             <Icon style={{ top: (hoverside2 === true) ? 0 : 3 }} type="material" name="analytics" color="#F6AE2D" size={35} />
@@ -517,8 +353,8 @@ const MenuEdit = ({ route, navigation }) => {
                         <TouchableOpacity onMouseOver={() => (setHoverSide3(true))} onMouseLeave={() => { setHoverSide3(false) }} onPress={() => navigation.navigate("QRMenus", { userId: loginSession })} style={{ marginBottom: 12 }}>
                             <Icon style={{ top: (hoverside3 === true) ? 0 : 3 }} type="material-community" name="qrcode-edit" color="#F6AE2D" size={35} />
                         </TouchableOpacity>
-                        <TouchableOpacity onMouseOver={() => (setHoverSide4(true))} onMouseLeave={() => { setHoverSide4(false) }} onPress={() => navigation.navigate("Notifications", { restId: loginSession })} style={{ marginBottom: 12 }}>
-                            <Icon style={{ top: (hoverside4 === true) ? 0 : 3 }} type="material-community" name="message-text" color="#F6AE2D" size={35} />
+                        <TouchableOpacity onMouseOver={() => (setHoverSide4(true))} onMouseLeave={() => { setHoverSide4(false) }} style={{ marginBottom: 12 }}>
+                            <Icon style={{ top: (hoverside4 === true) ? 0 : 3 }} type="material-community" name="message-text" color="grey" size={35} />
                         </TouchableOpacity>
                         <TouchableOpacity onMouseOver={() => (setHoverSide5(true))} onMouseLeave={() => { setHoverSide5(false) }} style={{ marginBottom: 12 }}>
                             <Icon style={{ top: (hoverside5 === true) ? 0 : 3 }} type="material" name="fastfood" color="#F6AE2D" size={35} />
@@ -531,13 +367,13 @@ const MenuEdit = ({ route, navigation }) => {
                         </TouchableOpacity>
                     </View>
                     :
-                    <View style={{ flexDirection: 'row',justifyContent:'space-around' }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
 
                         <TouchableOpacity onPress={() => navigation.navigate("Billing", { restId: loginSession })} onMouseOver={() => (setHoverSide2(true))} onMouseLeave={() => { setHoverSide2(false) }} style={{ marginBottom: 12 }}>
                             <Icon style={{ top: (hoverside2 === true) ? 0 : 3 }} type="material" name="analytics" color="#F6AE2D" size={35} />
                         </TouchableOpacity>
-                        <TouchableOpacity onMouseOver={() => (setHoverSide4(true))} onMouseLeave={() => { setHoverSide4(false) }} onPress={() => navigation.navigate("Notifications", { restId: loginSession })}  style={{ marginBottom: 12 }}>
-                            <Icon style={{ top: (hoverside4 === true) ? 0 : 3 }} type="material-community" name="message-text" color="#F6AE2D" size={35} />
+                        <TouchableOpacity onMouseOver={() => (setHoverSide4(true))} onMouseLeave={() => { setHoverSide4(false) }} style={{ marginBottom: 12 }}>
+                            <Icon style={{ top: (hoverside4 === true) ? 0 : 3 }} type="material-community" name="message-text" color="grey" size={35} />
                         </TouchableOpacity>
                         <TouchableOpacity onMouseOver={() => (setHoverSide5(true))} onMouseLeave={() => { setHoverSide5(false) }} style={{ marginBottom: 12 }}>
                             <Icon style={{ top: (hoverside5 === true) ? 0 : 3 }} type="material" name="fastfood" color="#F6AE2D" size={35} />
@@ -644,126 +480,37 @@ const MenuEdit = ({ route, navigation }) => {
                                         justifyContent: "flex-end",
                                         marginLeft: 10
                                     }}>
-                                        <Text ellipsizeMode='tail' numberOfLines={2} style={[styles.headerText, { color: "white", textAlign: 'left' }]}>{searchedRestaurant} </Text>
+                                        <Text ellipsizeMode='tail' numberOfLines={2} style={[styles.headerText, { color: "white", textAlign: 'left' }]}>Notifications</Text>
                                         <Text style={{ color: "white", fontWeight: "bold", textAlign: 'left', margin: 10 }}>Viewing as Admin</Text>
-                                        <Text onPress={() => navigation.navigate("RestaurantWeb", { restId: loginSession, })} style={{ color: "white", textDecorationLine: 'underline', fontWeight: "bold", textAlign: 'left', margin: 10 }}>Customer View</Text>
                                     </View>
                                 </View>}
                         </LinearGradient>
                     </ImageBackground >
                     <View style={{ maxWidth: 700, alignSelf: Platform.OS === 'web' ? 'center' : '', width: '100%', padding: 10 }}>
-                        {loadingbio ? <ActivityIndicator style={{ flex: 1, justifyContent: 'center' }} size="large" color="#F6AE2D" /> :
-                            <View>
-                                <View style={{ alignSelf: "center", maxWidth: 500, width: "100%" }}>
-
-
-                                    <Button title="Add Food" buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 200 }]} titleStyle={styles.buttonTitle} onPress={() => { navigation.navigate("FoodAdd", { userId: restaurantId }), dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurant_address, restaurantPhone, restaurantId, restaurantColor)) }} />
-
-                                    <Text style={styles.subHeaderText}>About Us</Text>
-
-                                    <View >
-                                        <Text style={{ margin: 10 }}>{restaurantDesc} </Text>
-                                        <View style={{ flexDirection: "row", alignContent: "center", alignItems: 'center', margin: 5 }}>
-
-                                            <Icon name="location-pin" color="black" size="35" />
-                                            <Text onPress={() => Linking.openURL(`https://www.google.com/maps/place/${restaurant_address} ${restaurant_city}, ${restaurant_state} ${restaurant_zip}`)}
-                                                style={{ fontFamily: 'Bold', fontSize: 14, marginHorizontal: 10 }}>
-                                                {restaurant_address} {restaurant_city}, {restaurant_state} {restaurant_zip}
-                                            </Text>
-
-                                        </View>
-                                        <View style={{ flexDirection: "row", alignContent: "center", alignItems: 'center', margin: 5 }}>
-                                            <Icon name="call" color="black" size="35" />
-                                            <Text onPress={() => Linking.openURL("https://htmlcolorcodes.com/")} style={{ fontFamily: 'Bold', fontSize: 14, marginHorizontal: 10 }}>{restaurantPhone}</Text>
-                                        </View>
-                                        <View style={{ flexDirection: "row", alignContent: "center", margin: 5, alignItems: 'center' }}>
-                                            <Icon name="web" color="black" size="35" />
-                                            <Text onPress={() => Linking.openURL(`${restaurant_website}`)} style={{ fontFamily: 'Bold', fontSize: 14, marginHorizontal: 10 }} >{restaurant_website}</Text>
-                                        </View>
-
-                                    </View>
-                                </View>
-                                <Text style={styles.headerText}>
-                                    Menu
-                                </Text>
-                                {!(windowWidth >= 500) ?
-                                    <View style={{ backgroundColor: 'white' }}>
-
-                                        <FlatList
-                                            showsHorizontalScrollIndicator={false}
-                                            horizontal
-                                            data={selectedMenus}
-                                            renderItem={renderMenus}
-                                            initialNumToRender={10}
-
-                                        />
-                                    </View>
-                                    :
-                                    <View style={{ backgroundColor: 'white' }}>
-
-                                        <FlatList
-                                            showsHorizontalScrollIndicator={false}
-                                            data={selectedMenus}
-                                            renderItem={renderMenus}
-                                            initialNumToRender={10}
-
-                                        />
-                                    </View>
-                                }
-
-                                <Divider style={{ margin: 10 }} />
-                                {menusDesc === "" ?
-                                    <Text style={{ textAlign: "center", fontWeight: '800' }}> Pick a Menu</Text>
-                                    :
-                                    <Text style={{ textAlign: "center" }}>{menusDesc}</Text>
-                                }
-                                <View>
-                                    <Text style={[styles.subHeaderText, { fontSize: 20 }]}>Categories</Text>
-
-                                    <FlatList
-                                        showsHorizontalScrollIndicator={false}
-                                        horizontal
-                                        data={selectedCategory}
-                                        renderItem={renderItem}
-                                        initialNumToRender={10}
-                                    />
-
-                                </View>
-                            </View>
-                        }
-                        <View style={[styles.menuItemContaner, { marginVertical: 20 }]}>
-                            <Input
-                                inputContainerStyle={{ borderBottomWidth: 0, marginBottom: Platform.OS === 'web' ? -15 : -20 }}
-                                onChangeText={(text) => searchFilter(text)}
-                                value={text}
-                                placeholder="Chicken Tacos..."
-                                leftIcon={{ type: 'material-community', name: "taco" }}
-                            />
-
-                        </View>
                         <FlatList
-                            data={filtered}
+                            data={ratings}
                             keyExtractor={(item, index) => index}
                             renderItem={({ item, index }) =>
-                                <View>
-                                    <Card
-                                        restaurant={item.restaurant}
-                                        ranking={index + item.upvotes}
-                                        price={item.price}
-                                        food={item.food}
-                                        description={item.description}
-                                        percent={item.ratingCount > 0 ? (item.eatagain * 100 / item.ratingCount).toFixed(0) : (item.eatagain)}
-                                        upvotes={item.upvotes}
-                                        overall={item.overall}
-                                        upvoteColor={restaurantColor}
-                                        category = {item.category}
-                                        imageUrl = {item.imageUrl}
+                                <View style={{ flex: 1 }}>
+                                    <View style={{ flexDirection: 'row', alignItems: "center", flex: 1 }}>
+                                        <Image
+                                            style={{ height: 50, width: 50, borderRadius: 40, marginHorizontal: 10 }}
+                                            source={{ uri: item.userPhoto }}
+                                        />
+                                        <View>
+                                            <Text style={{ fontFamily: 'Bold', marginTop: 2 }}>{item.raters_name},{<Text style={{ fontFamily: 'Primary' }}> rated your </Text>} {<Text style={{ fontFamily: 'Bold' }}>{item.food_name} : </Text>} </Text>
+                                            <Text style={{ fontFamily: 'Primary', marginBottom: 2 }}>{item.rating}</Text>
+                                            <Text style={{ fontFamily: 'Primary', marginVertical: 5 }}>{item.rating_date}</Text>
 
-                                    />
-                                    <View style={{ flexDirection: 'row', marginBottom: 20 }}>
-                                        <Button onPress={() => deleteFood(item.food_id)} buttonStyle={{ backgroundColor: '#8A3333' }} buttonTitle={{ fontFamily: 'Bold', fontSize: "20" }} title="Delete" />
-                                        <Button onPress={() => navigation.navigate("FoodEdit", { restId: restaurantId, foodId: item.food_id, restName: searchedRestaurant })} buttonStyle={{ backgroundColor: 'orange' }} buttonTitle={{ fontFamily: 'Bold', fontSize: "20" }} title="Edit" />
+
+
+                                        </View>
+                                        <View style={{ flex: 1, justifyContent:'flex-end',}}>
+                                            <Button title="Message" buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 100 , alignSelf:'flex-end',alignContent:"flex-end"}]} titleStyle={styles.buttonTitle} />
+                                        </View>
                                     </View>
+
+                                    <Divider style={{ margin: 5 }} />
                                 </View>
                             }
                         />
@@ -777,4 +524,4 @@ const MenuEdit = ({ route, navigation }) => {
     );
 };
 
-export default MenuEdit
+export default Notifications

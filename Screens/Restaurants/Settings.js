@@ -18,7 +18,7 @@ import { db } from '../../firebase-config'
 import { Link } from '@react-navigation/native';
 import Footer from '../../Components/Footer';
 import { LinearGradient } from 'expo-linear-gradient';
-import { signOut, onAuthStateChanged } from 'firebase/auth'
+import { signOut, onAuthStateChanged,updateEmail } from 'firebase/auth'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Divider } from 'react-native-elements/dist/divider/Divider';
 import { Icon } from 'react-native-elements'
@@ -116,6 +116,12 @@ function Settings({ navigation }) {
         console.log(auth.currentUser.email)
         console.log(auth.currentUser.uid)
         console.log("Updated")
+        updateNewEmail();
+
+        updateEmail(auth.currentUser, userEmail ).then(()=> {
+        }).catch((error)=> {
+            console.log(error)
+        })
 
         updateDoc(doc(db, "restaurants", auth.currentUser.uid), {
             restaurant_phone: restaurantPhone,
@@ -161,9 +167,9 @@ function Settings({ navigation }) {
             dispatch(setSearchedRestaurant(null, null, null, null, null, null))
             dispatch(setNewRestaurant(null, null, null, null, null))
             if (Platform.OS === 'web') {
-                navigation.navigate("RestaurantHome")
+                navigation.replace("RestaurantHome")
             } else {
-                navigation.navigate("Home")
+                navigation.replace("Home")
             }
 
         }).catch((error) => {
@@ -228,6 +234,9 @@ function Settings({ navigation }) {
 
     }
 
+    const updateNewEmail = ()=> {
+    }
+
     return (
         <KeyboardAwareScrollView enableOnAndroid extraHeight={120} style={{ flex: 1, backgroundColor: "white" }}>
             {Platform.OS === 'web' ? (
@@ -268,7 +277,7 @@ function Settings({ navigation }) {
                         <TouchableOpacity onMouseOver={() => (setHoverSide2(true))} onMouseLeave={() => { setHoverSide2(false) }} onPress={() => navigation.navigate("QRMenus", { userId: restId })} style={{ marginBottom: 12 }}>
                             <Icon style={{ top: (hoverside2 === true) ? 3 : 3 }} type="material-community" name="qrcode-edit" color="#F6AE2D" size={35} />
                         </TouchableOpacity>
-                        <TouchableOpacity onMouseOver={() => (setHoverSide3(true))} onMouseLeave={() => { setHoverSide3(false) }} style={{ marginBottom: 12 }}>
+                        <TouchableOpacity onMouseOver={() => (setHoverSide3(true))} onMouseLeave={() => { setHoverSide3(false) }} onPress={() => navigation.navigate("Notifications", { restId: restId })} style={{ marginBottom: 12 }}>
                             <Icon style={{ top: (hoverside3 === true) ? 0 : 3 }} type="material-community" name="message-text" color="#F6AE2D" size={35} />
                         </TouchableOpacity>
                         <TouchableOpacity onMouseOver={() => (setHoverSide4(true))} onMouseLeave={() => { setHoverSide4(false) }} style={{ marginBottom: 12 }}>
@@ -286,7 +295,7 @@ function Settings({ navigation }) {
                         <TouchableOpacity onMouseOver={() => (setHoverSide(true))} onMouseLeave={() => { setHoverSide(false) }} style={{ marginBottom: 12 }}>
                             <Icon style={{ top: (hoverside === true) ? 0 : 3 }} onPress={() => { navigation.navigate("MenuEdit", { restId: restId }) }} type="entypo" name="home" color="#F6AE2D" size={35} />
                         </TouchableOpacity>
-                        <TouchableOpacity onMouseOver={() => (setHoverSide3(true))} onMouseLeave={() => { setHoverSide3(false) }} style={{ marginBottom: 12 }}>
+                        <TouchableOpacity onMouseOver={() => (setHoverSide3(true))} onMouseLeave={() => { setHoverSide3(false) }} onPress={() => navigation.navigate("Notifications", { restId: restId })} style={{ marginBottom: 12 }}>
                             <Icon style={{ top: (hoverside3 === true) ? 0 : 3 }} type="material-community" name="message-text" color="#F6AE2D" size={35} />
                         </TouchableOpacity>
                         <TouchableOpacity onMouseOver={() => (setHoverSide4(true))} onMouseLeave={() => { setHoverSide4(false) }} style={{ marginBottom: 12 }}>
@@ -379,7 +388,7 @@ function Settings({ navigation }) {
                                     <TextInput
                                         placeholder="john@gmail.com"
                                         value={userEmail}
-                                        onChangeText={userEmail}
+                                        onChangeText={setUserEmail}
                                         style={[styles.inputContainer, { padding: 10, alignSelf: 'center', backgroundColor: '#ECECEC' }]}
                                     />
                                 </View>

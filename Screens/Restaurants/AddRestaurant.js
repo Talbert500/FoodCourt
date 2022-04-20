@@ -77,7 +77,7 @@ function AddRestaurant({ navigation }) {
                 "isVCard": false,
                 "frameText": `${restaurantName}'s Menu`,
                 "logoImage": "https://www.ratemyfood.app/static/media/splash.8cba55b7.png",
-                "logoScale": 0.1992,
+                "logoScale": 0.2,
                 "frameColor": `${color}`,
                 "frameStyle": "banner-bottom",
                 "logoMargin": 5,

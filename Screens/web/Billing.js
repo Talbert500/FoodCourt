@@ -365,9 +365,9 @@ const Billing = ({ route, navigation }) => {
             dispatch(setSearchedRestaurant(null, null, null, null, null, null))
             dispatch(setNewRestaurant(null, null, null, null, null))
             if (Platform.OS === 'web') {
-                navigation.navigate("RestaurantHome")
+                navigation.replace("RestaurantHome")
             } else {
-                navigation.navigate("Home")
+                navigation.replace("Home")
             }
 
         }).catch((error) => {
@@ -470,7 +470,7 @@ const Billing = ({ route, navigation }) => {
                         <TouchableOpacity onMouseOver={() => (setHoverSide3(true))} onMouseLeave={() => { setHoverSide3(false) }} onPress={() => navigation.navigate("QRMenus", { userId: loginSession })} style={{ marginBottom: 12 }}>
                             <Icon style={{ top: (hoverside3 === true) ? 0 : 3 }} type="material-community" name="qrcode-edit" color="#F6AE2D" size={35} />
                         </TouchableOpacity>
-                        <TouchableOpacity onMouseOver={() => (setHoverSide4(true))} onMouseLeave={() => { setHoverSide4(false) }} style={{ marginBottom: 12 }}>
+                        <TouchableOpacity onMouseOver={() => (setHoverSide4(true))} onMouseLeave={() => { setHoverSide4(false) }}  onPress={() => navigation.navigate("Notifications", { restId: loginSession })}  style={{ marginBottom: 12 }}>
                             <Icon style={{ top: (hoverside4 === true) ? 0 : 3 }} type="material-community" name="message-text" color="#F6AE2D" size={35} />
                         </TouchableOpacity>
                         <TouchableOpacity onMouseOver={() => (setHoverSide5(true))} onMouseLeave={() => { setHoverSide5(false) }} style={{ marginBottom: 12 }}>

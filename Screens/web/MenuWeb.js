@@ -2,7 +2,7 @@ import React from 'react';
 import { Animated, ImageBackground, ActivityIndicator, Dimensions, FlatList, ScrollView, View, TouchableOpacity, Image, StyleSheet, Text, Platform, Linking, Keyboard, BackHandler } from 'react-native';
 import { Button, Input } from 'react-native-elements'
 import { database } from '../../firebase-config'
-import { ref, onValue, orderByValue, equalTo, push, update, set, off } from 'firebase/database'
+import { ref, onValue, orderByValue, equalTo, push, update, set, get } from 'firebase/database'
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { styles } from '../../styles'
@@ -98,54 +98,9 @@ const MenuWeb = ({ route, navigation }) => {
     const [loadingPic, setLoadingPic] = useState(true);
     const [restaurantRatings, setRestaurantRatings] = useState([])
     const [newUser, setNewUser] = useState(false);
+    // To set the max number of Stars
 
-    function googleSignOut() {
-        signOut(auth).then(() => {
-            setloggedin(false);
-        }).catch(error => {
-            console.log(error)
-        })
 
-    }
-    function googleSignIn() {
-        signInWithPopup(auth, provider)
-            .then((result) => {
-                const credential = GoogleAuthProvider.credentialFromResult(result);
-                const token = credential.accessToken;
-                const user = result.user;
-                console.log(user)
-                setloggedin(true);
-                setUserPhoto(user.photoURL)
-                dispatch(setUserProps(user.email, user.displayName, user.photoURL))
-                //Storing user data
-                setDoc(doc(db, "users", user.email), {
-                    userEmail: user.email,
-                    userName: user.displayName,
-                    userId: user.uid,
-                    user_date_add: user.metadata.creationTime,
-                    last_seen: user.metadata.lastSignInTime,
-                    userPhone: user.phoneNumber,
-                }).catch((error) => {
-                    const errorCode = error.code;
-                    console.log("ERROR", errorCode)
-                })
-                //Also storing but tracked user data in realtime
-                set(ref(database, "user/" + user.uid), {
-                    userEmail: user.email,
-                    userName: user.displayName,
-                    userId: user.uid,
-                    user_date_add: user.metadata.creationTime,
-                    last_seen: user.metadata.lastSignInTime,
-                    userPhone: user.phoneNumber,
-                    userPhoto: user.photoURL,
-                });
-            }).catch((error) => {
-                const errorCode = error.code;
-                const email = error.email;
-                const credential = GoogleAuthProvider.credentialFromResult(error);
-                console.log(credential, errorCode)
-            })
-    }
     const getMenus = async () => {
         console.log("Getting Menu")
         getRestaurantRatings();
@@ -224,7 +179,7 @@ const MenuWeb = ({ route, navigation }) => {
 
     function getFullMenu(menudata) {
         const getMenu = ref(database, 'restaurants/' + restId + '/foods/')
-        onValue(getMenu, (snapshot) => {
+        get(getMenu).then((snapshot) => {
             console.log("MENUS", menudata)
             const data = snapshot.val();
             if (data !== null) {
@@ -237,9 +192,11 @@ const MenuWeb = ({ route, navigation }) => {
                     setFoodItem((oldArray) => [...oldArray, foodData]);
                     setMenuItem((oldArray) => [...oldArray, foodData]);
                 })
+                //setFiltered(newData.sort((a, b) => b.ratingCount - a.ratingCount));
                 Object.values(data).map((foodData) => {
                     if (foodData.category == menudata) {
                         setFiltered((oldArray) => [...oldArray, foodData])
+        
                     }
                 })
 
@@ -388,11 +345,11 @@ const MenuWeb = ({ route, navigation }) => {
 
                 return itemData.indexOf(textData) > -1;
             });
-            setFiltered(newData.sort((a, b) => b.upvotes - a.upvotes));
+            setFiltered(newData.sort((a, b) => b.overall - a.overall));
             onChangeText(text);
             setSetCate(null)
         } else {
-            setFiltered(menuData.sort((a, b) => b.upvotes - a.upvotes));
+            setFiltered(menuData.sort((a, b) => b.overall - a.overall));
             onChangeText(text);
 
         }
@@ -416,7 +373,7 @@ const MenuWeb = ({ route, navigation }) => {
 
                 return cateDate.indexOf(cate) > -1;
             });
-            setFiltered(newData.sort((a, b) => b.upvotes - a.upvotes));
+            setFiltered(newData.sort((a, b) => b.overall - a.overall));
 
         } else {
             setSetCate("")
@@ -443,10 +400,10 @@ const MenuWeb = ({ route, navigation }) => {
 
                 return cateDate.indexOf(cate) > -1;
             });
-            setFiltered(newData.sort((a, b) => b.upvotes - a.upvotes));
+            setFiltered(newData.sort((a, b) => b.overall - a.overall));
         } else {
             setSetCate("")
-            setFiltered(menuData.sort((a, b) => b.upvotes - a.upvotes))
+            setFiltered(menuData.sort((a, b) => b.overall - a.overall))
         }
 
 
@@ -647,8 +604,8 @@ const MenuWeb = ({ route, navigation }) => {
                         <View style={{ marginTop: -15, flexDirection: 'row', justifyContent: 'space-around' }}>
                         </View>
                     }
-                    <View style={{flex:1}}>
-                        <View style={[styles.shadowProp, {backgroundColor: 'white', marginHorizontal: 10, borderRadius: 13, overflow: 'hidden', marginVertical: 10,zIndex: 1}]}>
+                    <View style={{ flex: 1 }}>
+                        <View style={[styles.shadowProp, { backgroundColor: 'white', marginHorizontal: 10, borderRadius: 13, overflow: 'hidden', marginVertical: 10, zIndex: 1 }]}>
                             <ImageBackground style={{ margin: 5, borderTopLeftRadius: 13, borderTopRightRadius: 13, overflow: 'hidden', height: Platform.OS === "web" ? 225 : 50 }} resizeMode="cover" source={{ uri: restaurantImage }}>
                                 <LinearGradient
                                     colors={['#00000000', '#000000']}
@@ -749,7 +706,7 @@ const MenuWeb = ({ route, navigation }) => {
                             </View>
                         </View>
                         <View style={[styles.shadowProp, { backgroundColor: 'white', marginHorizontal: 10, borderRadius: 13, overflow: 'hidden', flex: 1 }]}>
-                            <View style={{padding:5, maxWidth: '100%', width: 600, alignSelf: "center" }}>
+                            <View style={{ padding: 5, maxWidth: '100%', width: 600, alignSelf: "center" }}>
                                 <View>
                                     <View style={{ backgroundColor: 'white' }}>
                                         <Text style={styles.headerText}>
@@ -814,6 +771,7 @@ const MenuWeb = ({ route, navigation }) => {
                                     data={filtered}
                                     keyExtractor={(item, index) => index}
                                     renderItem={({ item, index }) =>
+                        
                                         <Card
                                             onPress={() => {
                                                 dispatch(setFoodItemId(item.food_id, item.food, item.price, item.description, item.upvotes, item.restaurant)), navigation.navigate("Food", {
@@ -830,9 +788,16 @@ const MenuWeb = ({ route, navigation }) => {
                                             percent={item.ratingCount > 0 ? (item.eatagain * 100 / item.ratingCount).toFixed(0) : (item.eatagain)}
                                             upvotes={item.upvotes}
                                             upvoteColor={restaurantColor}
-                                        />
+                                            overall={item.overall}
+                                            ratingCount={item.ratingCount > 0?item.ratingCount: 0 } 
+                                            imageUrl = {item.imageUrl}
+                                            category = {item.category}
+                                            />
+                                            
+
                                     }
                                 />
+                                
                             </View>
                         </View>
                     </View>
@@ -867,7 +832,7 @@ const MenuWeb = ({ route, navigation }) => {
                             <View style={{ flex: 1 }}>
                                 <Text style={{ fontSize: 20, textAlign: 'center' }}>{searchedRestaurant} gets it! Deciding what to order on the menu is hard...</Text>
 
-                                <Text style={{ fontSize: 15, textAlign: 'center', marginTop: 5 }}>We make it a piece a cake</Text>
+                                <Text style={{ fontSize: 15, textAlign: 'center', marginTop: 5 }}>We make it a piece of cake</Text>
                                 <Image
                                     style={{
                                         width: 200,
@@ -876,7 +841,7 @@ const MenuWeb = ({ route, navigation }) => {
                                         alignSelf: 'center'
                                     }}
                                     source={require('../../assets/introslides/slide3.png')} />
-                                <Text style={{ fontSize: 15, textAlign: 'center', fontWeight: '500' }}>Click to see what people just like you think of the food.</Text>
+                                <Text style={{ fontSize: 15, textAlign: 'center', fontWeight: '500' }}>Click to see what others think of the food.</Text>
                                 <FlatList
                                     style={[styles.shadowProp, { backgroundColor: 'white', margin: 10 }]}
                                     data={filtered}
@@ -892,14 +857,14 @@ const MenuWeb = ({ route, navigation }) => {
 
 
                                             }}
-
-                                            ranking={index + item.upvotes}
                                             description={item.description}
                                             price={item.price}
                                             food={item.food}
                                             percent={item.ratingCount > 0 ? (item.eatagain * 100 / item.ratingCount).toFixed(0) : (item.eatagain)}
                                             upvotes={item.upvotes}
                                             upvoteColor={restaurantColor}
+                                            overall={item.overall}
+                                            category = {item.category}
                                         />
                                     }
                                 />

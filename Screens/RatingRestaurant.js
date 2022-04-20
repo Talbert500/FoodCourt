@@ -49,8 +49,6 @@ function RatingRestaurant({ route, navigation }) {
     const [filtered, setFiltered] = useState([]);
     const [clickedFood, setClickedFood] = useState();
 
-    const tookPicture = useSelector(state => state.foodImage);
-    const restaurantColor = useSelector(state => state.restaurantColor)
     const searchedRestaurant = useSelector(state => state.searchedRestaurant)
     const foodItemId = useSelector(state => state.foodItemId)
     const food = useSelector(state => state.food)
@@ -153,7 +151,7 @@ function RatingRestaurant({ route, navigation }) {
                 setFoodItem("")
                 console.log("THE FOOD ARRAY", data)
                 Object.values(data).map((foodData) => {
-                    setFoodItem((oldArray) => [...oldArray, { id: foodData.food_id, value: foodData.food }]);
+                    setFoodItem((oldArray) => [...oldArray, { id: foodData.food_id, value: foodData.food, category: foodData.category}]);
                 })
             }
         })
@@ -239,6 +237,7 @@ function RatingRestaurant({ route, navigation }) {
 
                 return itemData.indexOf(textData) > -1;
             });
+            console.log(filtered)
             setFiltered(newData.sort((a, b) => b.upvotes - a.upvotes));
             onChangeText(text);
         } else {
@@ -258,7 +257,7 @@ function RatingRestaurant({ route, navigation }) {
 
         let pickerResult = await ImagePicker.launchImageLibraryAsync();
         // dispatch(setFoodItemImage(pickerResult.uri))
-        setImageUrl(pickerResult.uri)
+        setImage(pickerResult.uri)
 
         const metadata = {
             contentType: `${userId}`,
@@ -350,7 +349,7 @@ function RatingRestaurant({ route, navigation }) {
                             <TouchableOpacity onPress={() => { setClickedFood(item.id), setValue(item.value), onChangeText(item.value) }}>
                                 <View style={{ height: 50, backgroundColor: (item.id === clickedFood) ? '#ebebeb' : 'white' }}>
                                     <Text style={{ fontFamily: 'Bold', padding: 20 }}>
-                                        {item.value}
+                                        {item.value} | {item.category}
                                     </Text>
                                 </View>
                                 <Divider />
@@ -379,18 +378,18 @@ function RatingRestaurant({ route, navigation }) {
                     {Platform.OS === "web" ?
                         <View style={{ flexDirection: 'row', flex: 1, padding: 10 }}>
                             <Button buttonStyle={[styles.button, { alignItems: 'center', backgroundColor: '#F6AE2D' }]} titleStyle={styles.buttonTitle} title="Add Picture" onPress={openImagePickerAsync} />
-                            <Image source={{ uri: imageUrl }} style={{ marginBottom: 20, marginLeft: "auto", justifyContent: 'center', alignSelf: 'center', width: (windowWidth >= 500) ? 150 : 100, height: (windowWidth >= 500) ? 150 : 100, borderRadius: 5, backgroundColor: '#D3D3D3' }} /></View>
+                            <Image source={{ uri: image }} style={{ marginBottom: 20, marginLeft: "auto", justifyContent: 'center', alignSelf: 'center', width: (windowWidth >= 500) ? 150 : 100, height: (windowWidth >= 500) ? 150 : 100, borderRadius: 5, backgroundColor: '#D3D3D3' }} /></View>
                         :
                         <View style={{ flexDirection: 'row', flex: 1 }}>
                             <Button buttonStyle={[styles.button, { marginHorizontal: 40, backgroundColor: '#F6AE2D' }]} titleStyle={styles.buttonTitle} title="Add Picture" onPress={() => { navigation.navigate("Camera") }} />
-                            <Image source={{ uri: imageUrl }} style={{ marginLeft: "auto", justifyContent: 'center', alignSelf: 'center', width: 200, height: 200, borderRadius: 5, backgroundColor: '#D3D3D3' }} />
+                            <Image source={{ uri: image }} style={{ marginLeft: "auto", justifyContent: 'center', alignSelf: 'center', width: 200, height: 200, borderRadius: 5, backgroundColor: '#D3D3D3' }} />
                         </View>
                     }
                 </View>
 
                 <View style={[styles.shadowProp, { width: '100%', backgroundColor: 'white', alignSelf: 'center', padding: 15, margin: 20, borderRadius: 5, maxWidth: 650 }]}>
                     <Text style={{ fontSize: 21, fontFamily: 'Bold', marginBottom: 5 }}>Overall</Text>
-                    <Text style={{ fontSize: 14, fontWeight: '400', fontFamily: 'Primary' }}>Execution, Did yout food come out in a reasonable time? Did the food choice come together? initial feelings?</Text>
+                    <Text style={{ fontSize: 14, fontWeight: '400', fontFamily: 'Primary' }}> Did yout food come out in a reasonable time? Did the food choice come together? initial feelings?</Text>
                     <Text style={[styles.subHeaderText, { fontSize: 20 }]}>"{executionvalueText}"</Text>
                     <Slider
                         onValueChange={(value) => { setExecutionValue(value) }}

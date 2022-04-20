@@ -34,7 +34,7 @@ function RatingFood({ route, navigation }) {
         'Black': require('../assets/fonts/proxima_nova_black.otf')
     });
 
-    //const { restId, foodId, restName } = route.params;
+    const { restId, foodId, restName } = route.params;
     const dispatch = useDispatch();
 
     const [inputRating, setInputRating] = useState("");
@@ -44,15 +44,15 @@ function RatingFood({ route, navigation }) {
     const [userId, setUserId] = useState("")
     const [refreshing, setRefreshing] = useState(false);
     const [restaurantColor, setRestaurantColor] = useState("")
-    //const searchedRestaurant = useSelector(state => state.searchedRestaurant)
-    //const food = useSelector(state => state.food)
-    //const foodImage = useSelector(state => state.foodImage)
+    const searchedRestaurant = useSelector(state => state.searchedRestaurant)
+    const food = useSelector(state => state.food)
+    const foodImage = useSelector(state => state.foodImage)
 
-    const food = "Chicken Sandwhich"
-    const foodImage = "test"
-    const searchedRestaurant = "Canyon 49 Griill"
-    const restId = "2kkaW6jvTzWghR27IGuXckUUhul1"
-    const foodId = "56e6852e4a2"
+    // const food = "Chicken Sandwhich"
+    // const foodImage = "test"
+    // const searchedRestaurant = "Canyon 49 Griill"
+    // const restId = "2kkaW6jvTzWghR27IGuXckUUhul1"
+    // const foodId = "56e6852e4a2"
 
     const [toggle, setToggle] = useState(false)
     const [executionvalue, setExecutionValue] = useState()
@@ -112,6 +112,24 @@ function RatingFood({ route, navigation }) {
                                 imageUrl: rateurl
 
                             });
+                            set(ref(database, "user/" + userId + "/ratings"), {
+                                review_id: uuid,
+                                food_id: foodId,
+                                rest_id: restId,
+                                food_name: food,
+                                rating: inputRating,
+                                restaurant: searchedRestaurant,
+                                raters_name: name,
+                                rating_date: date,
+                                taste: tastevalue,
+                                appearance: appearancevalue,
+                                execution: executionvalue,
+                                personaleatagain: eatagain,
+                                user_Id: userId,
+                                likes: 0,
+                                dislikes: 0,
+                                imageUrl: null
+                            });
 
                         })
                     })
@@ -138,6 +156,24 @@ function RatingFood({ route, navigation }) {
                 dislikes: 0,
                 imageUrl: null
 
+            });
+            set(ref(database, "user/" + userId + "/ratings/" + foodId), {
+                review_id: uuid,
+                food_id: foodId,
+                food_name: food,
+                rest_id: restId,
+                rating: inputRating,
+                restaurant: searchedRestaurant,
+                raters_name: name,
+                rating_date: date,
+                taste: tastevalue,
+                appearance: appearancevalue,
+                execution: executionvalue,
+                personaleatagain: eatagain,
+                user_Id: userId,
+                likes: 0,
+                dislikes: 0,
+                imageUrl: null
             });
         }
         setInputRating("");
@@ -306,7 +342,7 @@ function RatingFood({ route, navigation }) {
 
         let pickerResult = await ImagePicker.launchImageLibraryAsync();
         // dispatch(setFoodItemImage(pickerResult.uri))
-        setImageUrl(pickerResult.uri)
+        setImage(pickerResult.uri)
 
         const metadata = {
             contentType: `${userId}`,
@@ -359,12 +395,12 @@ function RatingFood({ route, navigation }) {
                     {Platform.OS === "web" ?
                         <View style={{ flexDirection: 'row', flex: 1, padding: 10 }}>
                             <Button buttonStyle={[styles.button, { alignItems: 'center', backgroundColor: '#F6AE2D' }]} titleStyle={styles.buttonTitle} title="Add Picture" onPress={openImagePickerAsync} />
-                            <Image source={{ uri: imageUrl }} style={{ marginBottom: 20, marginLeft: "auto", justifyContent: 'center', alignSelf: 'center', width: (windowWidth >= 500) ? 150 : 100, height: (windowWidth >= 500) ? 150 : 100, borderRadius: 5, backgroundColor: '#D3D3D3' }} />
+                            <Image source={{ uri: image }} style={{ marginBottom: 20, marginLeft: "auto", justifyContent: 'center', alignSelf: 'center', width: (windowWidth >= 500) ? 150 : 100, height: (windowWidth >= 500) ? 150 : 100, borderRadius: 5, backgroundColor: '#D3D3D3' }} />
                         </View>
                         :
                         <View style={{ flexDirection: 'row', flex: 1, padding: 10 }}>
                             <Button buttonStyle={[styles.button, { marginHorizontal: 40, backgroundColor: '#F6AE2D' }]} titleStyle={styles.buttonTitle} title="Add Picture" onPress={() => { navigation.navigate("Camera") }} />
-                            <Image source={{ uri: imageUrl }} style={{ marginLeft: "auto", justifyContent: 'center', alignSelf: 'center', width: 200, height: 200, borderRadius: 5, backgroundColor: '#D3D3D3' }} />
+                            <Image source={{ uri: image }} style={{ marginLeft: "auto", justifyContent: 'center', alignSelf: 'center', width: 200, height: 200, borderRadius: 5, backgroundColor: '#D3D3D3' }} />
                         </View>
                     }
                 </View>
@@ -386,7 +422,7 @@ function RatingFood({ route, navigation }) {
 
                 <View style={[styles.shadowProp, { width: '100%', backgroundColor: 'white', alignSelf: 'center', padding: 15, margin: 20, borderRadius: 5, maxWidth: 650 }]}>
                     <Text style={{ fontSize: 21, fontFamily: 'Bold', marginBottom: 5 }}>Execution</Text>
-                    <Text style={{ fontSize: 17, margin: 5 }}>Execution, Did yout food come out in a reasonable time? Did the food choice come together? initial feelings?</Text>
+                    <Text style={{ fontSize: 17, margin: 5 }}>Did the food choice come together? initial feelings?</Text>
                     <Text style={[styles.subHeaderText, { fontSize: 20 }]}>"{executionvalueText}"</Text>
 
                     <Slider
@@ -405,7 +441,7 @@ function RatingFood({ route, navigation }) {
                 <Divider />
                 <View style={[styles.shadowProp, { width: '100%', backgroundColor: 'white', alignSelf: 'center', padding: 15, margin: 20, borderRadius: 5, maxWidth: 650 }]}>
                     <Text style={{ fontSize: 21, fontFamily: 'Bold', marginBottom: 5 }}>Appearance</Text>
-                    <Text style={{ fontSize: 17, margin: 5 }}>Appearance, Is it pleasing to the eye? Does it look appertizing? Did you want to take a big bite out of it?</Text>
+                    <Text style={{ fontSize: 17, margin: 5 }}>Does it look appertizing? Did you want to take a big bite out of it?</Text>
                     <Text style={[styles.subHeaderText, { fontSize: 20 }]}>"{appearanceValueText}"</Text>
                     <Slider
                         onValueChange={(value) => { setAppearanceValue(value) }}
@@ -423,7 +459,7 @@ function RatingFood({ route, navigation }) {
                 <Divider />
                 <View style={[styles.shadowProp, { width: '100%', backgroundColor: 'white', alignSelf: 'center', padding: 15, margin: 20, borderRadius: 5, maxWidth: 650 }]}>
                     <Text style={{ fontSize: 21, fontFamily: 'Bold', marginBottom: 5 }}>Taste</Text>
-                    <Text style={{ fontSize: 17, margin: 5 }}>Taste, Is it pleasing to the taste buds? Does it make you want more? Is there an appropriate balance of flavors?</Text>
+                    <Text style={{ fontSize: 17, margin: 5 }}>Does it make you want more? Is there an appropriate balance of flavors?</Text>
                     <Text style={[styles.subHeaderText, { fontSize: 20 }]}>"{tasteText}"</Text>
                     <Slider
                         onValueChange={(value) => { setTasetValue(value) }}
