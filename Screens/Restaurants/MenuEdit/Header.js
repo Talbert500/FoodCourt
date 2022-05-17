@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Image, Text } from 'react-native';
+
 import testImage from './../../../assets/guestphoto.jpg'
 import reviewOutline from './../../../assets/review_outline.png'
 

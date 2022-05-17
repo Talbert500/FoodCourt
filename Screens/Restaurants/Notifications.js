@@ -1,31 +1,23 @@
-import React from 'react';
-import { ActivityIndicator, ImageBackground, KeyboardAvoidingView, Dimensions, FlatList, ScrollView, View, TouchableOpacity, Image, StyleSheet, Text, Platform, Linking, Keyboard, BackHandler } from 'react-native';
-import { Button, Input } from 'react-native-elements'
-import { database } from '../../firebase-config'
-import { ref, onValue, remove, equalTo, query, limitToLast } from 'firebase/database'
-import { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { styles } from '../../styles'
-import { setFoodItemId, setSearchedRestaurantImage, setSearchedRestaurant, setUserProps, setNewRestaurant } from '../../redux/action'
-import { storage } from '../../firebase-config';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { uploadBytes, getDownloadURL, ref as tef } from 'firebase/storage';
-import ImagePicker from 'react-native-image-picker';
-import { Link } from '@react-navigation/native';
-import Card from '../../Components/Card'
-import { db, provider, auth } from '../../firebase-config'
-import { setDoc, getDoc, doc } from 'firebase/firestore'
-import { useLinkTo } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import React, { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { Button } from 'react-native-elements'
+import { Dimensions, FlatList, View, Image, Text, Platform } from 'react-native';
 import { Divider } from 'react-native-elements/dist/divider/Divider';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { database, db, provider, auth } from '../../firebase-config'
+import { ref, onValue } from 'firebase/database'
+import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "firebase/auth";
+import { storage } from '../../firebase-config';
+import { getDownloadURL, ref as tef } from 'firebase/storage';
+import { setDoc, getDoc, doc } from 'firebase/firestore'
 import { useFonts } from '@use-expo/font';
 import axios from 'axios';
-import { Icon } from 'react-native-elements'
-import LottieView from 'lottie-react-native';
+
 import Footer from '../../Components/Footer';
+
 import { QRapiKey } from '../../config.js'
-import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { styles } from '../../styles'
+import { setSearchedRestaurantImage, setSearchedRestaurant, setUserProps, setNewRestaurant } from '../../redux/action'
 
 
 const Notifications = ({ route, navigation }) => {

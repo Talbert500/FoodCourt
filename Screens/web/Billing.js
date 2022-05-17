@@ -1,29 +1,21 @@
-import React from 'react';
-import { ImageBackground, KeyboardAvoidingView, Dimensions, FlatList, ScrollView, View, TouchableOpacity, Image, StyleSheet, Text, Platform, Linking, Keyboard, BackHandler } from 'react-native';
-import { Button, Input } from 'react-native-elements'
-import { database } from '../../firebase-config'
-import { ref, onValue, remove, equalTo, query, limitToLast } from 'firebase/database'
-import { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { styles } from '../../styles'
-import { setFoodItemId, setSearchedRestaurantImage, setSearchedRestaurant, setUserProps, setNewRestaurant } from '../../redux/action'
-import { storage } from '../../firebase-config';
+import React, { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { Dimensions, View, TouchableOpacity, Text, Platform } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { uploadBytes, getDownloadURL, ref as tef } from 'firebase/storage';
-import ImagePicker from 'react-native-image-picker';
-import { Link } from '@react-navigation/native';
-import Card from '../../Components/Card'
-import { db, provider, auth } from '../../firebase-config'
+import { database } from '../../firebase-config';
+import { ref, onValue, remove } from 'firebase/database';
+import { storage } from '../../firebase-config';
+import { getDownloadURL, ref as tef } from 'firebase/storage';
+import { db, provider, auth } from '../../firebase-config';
 import { setDoc, getDoc, doc } from 'firebase/firestore'
-import { useLinkTo } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { Divider } from 'react-native-elements/dist/divider/Divider';
-import { useFonts } from '@use-expo/font';
-import { Icon } from 'react-native-elements'
-import LottieView from 'lottie-react-native';
-import Footer from '../../Components/Footer';
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { useFonts } from '@use-expo/font';
+
+import Footer from '../../Components/Footer';
+
+import { styles } from '../../styles';
+import { setSearchedRestaurantImage, setSearchedRestaurant, setUserProps, setNewRestaurant } from '../../redux/action';
 
 
 const Billing = ({ route, navigation }) => {

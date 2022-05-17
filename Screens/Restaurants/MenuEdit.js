@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
-import Header from './MenuEdit/Header';
 import { View, Text } from 'react-native';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { setSearchedRestaurantImage, setSearchedRestaurant } from '../../redux/action'
-import { db, auth, database, storage } from '../../firebase-config'
-import { ref, onValue} from 'firebase/database'
-import { QRapiKey } from '../../config.js'
-import { getDoc, doc } from 'firebase/firestore'
+import { onAuthStateChanged } from 'firebase/auth';
+import { db, auth, database, storage } from '../../firebase-config';
+import { ref, onValue} from 'firebase/database';
+import { getDoc, doc } from 'firebase/firestore';
 import { getDownloadURL, ref as tef } from 'firebase/storage';
-import Billing from './../web/Billing'
+
+import Header from './MenuEdit/Header';
+import Billing from './../web/Billing';
 import QRMenus from './../QRMenus';
 import Notifications from './../Restaurants/Notifications';
 import Settings from './../Restaurants/Settings';
+
+import { setSearchedRestaurantImage, setSearchedRestaurant } from '../../redux/action';
+import { QRapiKey } from '../../config.js';
 
 const MenuEdit = ({ route, navigation }) => {
 

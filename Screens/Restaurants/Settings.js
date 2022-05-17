@@ -1,29 +1,21 @@
-
-import { useRef } from 'react'
-import { Dimensions, Platform, TextInput, RefreshControl, ImageBackground, Animated, Image, ScrollView, Text, View, SafeAreaView, FlatList, TouchableOpacity } from 'react-native';
-import { useSelector, useDispatch } from 'react-redux';
-import { Button, Input } from 'react-native-elements'
-import { styles } from '../../styles'
-import { ref, onValue, orderByChild, query, update } from 'firebase/database'
-import { collection, getDoc, doc, setDoc, updateDoc } from 'firebase/firestore'
-import { storage } from '../../firebase-config';
 import { useEffect, useState } from 'react';
-import Card from '../../Components/Card'
-import { setFoodItemId } from '../../redux/action'
-import { uploadBytes, getDownloadURL, ref as tef, list } from 'firebase/storage';
-import { BlurView } from 'expo-blur';
-import { setSearchedRestaurantImage, setSearchedRestaurant, setNewRestaurant } from '../../redux/action'
-import { auth, database } from '../../firebase-config'
-import { db } from '../../firebase-config'
-import { Link } from '@react-navigation/native';
-import Footer from '../../Components/Footer';
-import { LinearGradient } from 'expo-linear-gradient';
-import { signOut, onAuthStateChanged,updateEmail } from 'firebase/auth'
+import { Dimensions, Platform, TextInput, Text, View } from 'react-native';
+import { useDispatch } from 'react-redux';
+import { Button } from 'react-native-elements';
+import { signOut, onAuthStateChanged,updateEmail } from 'firebase/auth';
+import { storage, auth, database, db } from '../../firebase-config';
+import { ref, onValue, update } from 'firebase/database';
+import { getDoc, doc, updateDoc } from 'firebase/firestore';
+import { uploadBytes, getDownloadURL, ref as tef } from 'firebase/storage';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Divider } from 'react-native-elements/dist/divider/Divider';
-import { Icon } from 'react-native-elements'
 import * as ImagePicker from 'expo-image-picker';
 import { useFonts } from '@use-expo/font';
+
+import Footer from '../../Components/Footer';
+
+import { styles } from '../../styles';
+import { setSearchedRestaurantImage, setSearchedRestaurant, setNewRestaurant } from '../../redux/action';
 
 function Settings({ navigation }) {
 

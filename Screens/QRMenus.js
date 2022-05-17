@@ -1,30 +1,27 @@
-import { useRef } from 'react'
-import { Linking, ImageBackground, Dimensions, Image, ScrollView, Text, View, Platform, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import { useSelector, useDispatch } from 'react-redux';
-import { Button } from 'react-native-elements'
-import { styles } from '../styles'
-import { collection, getDoc, doc } from 'firebase/firestore'
+import { useEffect, useState } from 'react';
+import { Linking, Dimensions, Image, ScrollView, Text, View, Platform } from 'react-native';
+import { useDispatch } from 'react-redux';
+import { Button } from 'react-native-elements';
+import { getDoc, doc } from 'firebase/firestore';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { storage } from '../firebase-config';
-import { useEffect, useState } from 'react';
-import { ref, set, update, push, onValue } from 'firebase/database'
-import { setFoodItemId } from '../redux/action'
-import { uploadBytes, getDownloadURL, ref as tef, list } from 'firebase/storage';
-import { BlurView } from 'expo-blur';
-import { setSearchedRestaurantImage, setSearchedRestaurant, setNewRestaurant } from '../redux/action'
-import { auth, database, db } from '../firebase-config'
-import { Link } from '@react-navigation/native';
-import { onAuthStateChanged, signOut } from 'firebase/auth'
-import { LinearGradient } from 'expo-linear-gradient';
+import { ref, update, onValue } from 'firebase/database';
+import { getDownloadURL, ref as tef } from 'firebase/storage';
+import { auth, database, db } from '../firebase-config';
+import { signOut } from 'firebase/auth';
 import { useFonts } from '@use-expo/font';
 import { Divider } from 'react-native-elements/dist/divider/Divider';
-import { Icon } from 'react-native-elements'
-import Footer from '../Components/Footer';
-import axios from 'axios';
-import { QRapiKey } from '../config.js'
+import { Icon } from 'react-native-elements';
 import { LineChart } from 'react-native-chart-kit';
 import DropDownPicker from 'react-native-dropdown-picker';
-import moment from 'moment'
+import axios from 'axios';
+import moment from 'moment';
+
+import Footer from '../Components/Footer';
+
+import { styles } from '../styles';
+import { setSearchedRestaurantImage, setSearchedRestaurant, setNewRestaurant } from '../redux/action';
+import { QRapiKey } from '../config.js';
 
 function RestaurantScreen({ route, navigation }) {
 
