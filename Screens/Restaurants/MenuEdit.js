@@ -247,7 +247,7 @@ const MenuEdit = ({ route, navigation }) => {
 
 
     return(
-        <View>
+        <View style={{ backgroundColor: "white" }}>
             <Header navigation={navigation} loginSession={loginSession} activeTab={activeTab} setActiveTab={setActiveTab} />
             {activeTab === "snapshot" && <Billing route={route} navigation={navigation}/>}
             {/* {activeTab === "qrmenu" && <QRMenus route={route} navigation={navigation}/>} */}
