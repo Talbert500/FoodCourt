@@ -1,14 +1,14 @@
 import React from 'react';
-import { ActivityIndicator, ImageBackground, KeyboardAvoidingView, Dimensions, FlatList, ScrollView, View, TouchableOpacity, Image, StyleSheet, Text, Platform, Linking, Keyboard, BackHandler } from 'react-native';
+import { View, Image, Text } from 'react-native';
 import testImage from './../../../assets/guestphoto.jpg'
 import reviewOutline from './../../../assets/review_outline.png'
 
-const Header = () => {
+const Header = ({ navigation, loginSession }) => {
 
     const rating = [0,1,2,3,4]
 
     const riview = rating.map(r => (
-        <Image style={{ 
+        <Image key={r} style={{ 
                 height: "20px", 
                 width: "20px",
                 marginRight: "5px",
@@ -101,10 +101,10 @@ const Header = () => {
                 justifyContent: "space-between"
             }}>
                 <Text style={{ fontSize: "18px", cursor: "pointer" }}>Home</Text>
-                <Text style={{ fontSize: "18px", cursor: "pointer" }}>Snapshot</Text>
-                <Text style={{ fontSize: "18px", cursor: "pointer" }}>QRMenu</Text>
-                <Text style={{ fontSize: "18px", cursor: "pointer" }}>Notifications</Text>
-                <Text style={{ fontSize: "18px", cursor: "pointer" }}>Settings</Text>
+                <Text style={{ fontSize: "18px", cursor: "pointer" }} onPress={() => navigation.navigate("Billing", { restId: loginSession })}>Snapshot</Text>
+                <Text style={{ fontSize: "18px", cursor: "pointer" }} onPress={() => navigation.navigate("QRMenus", { userId: loginSession })}>QRMenu</Text>
+                <Text style={{ fontSize: "18px", cursor: "pointer" }} onPress={() => navigation.navigate("Notifications", { restId: loginSession })}>Notifications</Text>
+                <Text style={{ fontSize: "18px", cursor: "pointer" }} onPress={() => navigation.navigate("Settings")}>Settings</Text>
             </View>
         </View>
     )
