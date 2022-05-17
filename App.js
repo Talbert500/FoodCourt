@@ -150,22 +150,22 @@ export default function App() {
 
             }}
           />
-        <Stack.Screen
+        {/* <Stack.Screen
             name="Billing"
             component={Billing}
             options={{
               headerShown: false,
 
             }}
-          />
-        <Stack.Screen
+          /> */}
+        {/* <Stack.Screen
             name="QRMenus"
             component={QRMenus}
             options={{
               headerShown: false,
 
             }}
-          />
+          /> */}
           <Stack.Screen
             name="AddMenus"
             component={AddMenus}

@@ -3,9 +3,11 @@ import { View, Image, Text } from 'react-native';
 import testImage from './../../../assets/guestphoto.jpg'
 import reviewOutline from './../../../assets/review_outline.png'
 
-const Header = ({ navigation, loginSession }) => {
+const Header = ({ navigation, loginSession, setActiveTab, activeTab }) => {
 
     const rating = [0,1,2,3,4]
+
+    const underline = { fontSize: "18px", cursor: "pointer", paddingBottom: "8px", borderBottom: "3px solid #F6AE2D" }
 
     const riview = rating.map(r => (
         <Image key={r} style={{ 
@@ -17,6 +19,10 @@ const Header = ({ navigation, loginSession }) => {
              source={reviewOutline}
         />
     ))
+
+    const openTab = (tabName) => {
+        setActiveTab(tabName)
+    }
 
     return(
         <View style={{
@@ -100,11 +106,11 @@ const Header = ({ navigation, loginSession }) => {
                 width: "645px",
                 justifyContent: "space-between"
             }}>
-                <Text style={{ fontSize: "18px", cursor: "pointer" }}>Home</Text>
-                <Text style={{ fontSize: "18px", cursor: "pointer" }} onPress={() => navigation.navigate("Billing", { restId: loginSession })}>Snapshot</Text>
-                <Text style={{ fontSize: "18px", cursor: "pointer" }} onPress={() => navigation.navigate("QRMenus", { userId: loginSession })}>QRMenu</Text>
-                <Text style={{ fontSize: "18px", cursor: "pointer" }} onPress={() => navigation.navigate("Notifications", { restId: loginSession })}>Notifications</Text>
-                <Text style={{ fontSize: "18px", cursor: "pointer" }} onPress={() => navigation.navigate("Settings")}>Settings</Text>
+                <Text style={activeTab === "home" ? underline : { fontSize: "18px", paddingBottom: "8px", cursor: "pointer" }} onPress={() => setActiveTab("home")}>Home</Text>
+                <Text style={activeTab === "snapshot" ? underline : { fontSize: "18px", cursor: "pointer" }} onPress={() => openTab("snapshot")}>Snapshot</Text>
+                <Text style={activeTab === "qrmenu" ? underline : { fontSize: "18px", cursor: "pointer" }} onPress={() => openTab("qrmenu")}>QRMenu</Text>
+                <Text style={activeTab === "notifications" ? underline : { fontSize: "18px", cursor: "pointer" }} onPress={() => openTab("notifications")}>Notifications</Text>
+                <Text style={activeTab === "settings" ? underline : { fontSize: "18px", cursor: "pointer" }} onPress={() => openTab("settings")}>Settings</Text>
             </View>
         </View>
     )

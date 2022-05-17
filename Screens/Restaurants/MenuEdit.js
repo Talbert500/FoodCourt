@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import Header from './MenuEdit/Header';
-import { View } from 'react-native';
+import { View, Text } from 'react-native';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { setSearchedRestaurantImage, setSearchedRestaurant } from '../../redux/action'
 import { db, auth, database, storage } from '../../firebase-config'
@@ -10,6 +10,10 @@ import { ref, onValue} from 'firebase/database'
 import { QRapiKey } from '../../config.js'
 import { getDoc, doc } from 'firebase/firestore'
 import { getDownloadURL, ref as tef } from 'firebase/storage';
+import Billing from './../web/Billing'
+import QRMenus from './../QRMenus';
+import Notifications from './../Restaurants/Notifications';
+import Settings from './../Restaurants/Settings';
 
 const MenuEdit = ({ route, navigation }) => {
 
@@ -50,6 +54,8 @@ const MenuEdit = ({ route, navigation }) => {
     const [loadingPic, setLoadingPic] = useState(true);
 
     const [totalLikes,setTotalLikes] = useState(0);
+
+    const [activeTab, setActiveTab] = useState("home");
 
     function QRMenuData(id, to, from) {
         console.log("QR DAYA", id)
@@ -237,9 +243,15 @@ const MenuEdit = ({ route, navigation }) => {
         getRestaurant();
     }, [])
 
+
     return(
         <View>
-            <Header navigation={navigation} loginSession={loginSession} />
+            <Header navigation={navigation} loginSession={loginSession} activeTab={activeTab} setActiveTab={setActiveTab} />
+            {activeTab === "snapshot" && <Billing route={route} navigation={navigation}/>}
+            {/* {activeTab === "qrmenu" && <QRMenus route={route} navigation={navigation}/>} */}
+            {activeTab === "qrmenu" && <Text>There will be QRMenu</Text>}
+            {activeTab === "notifications" && <Notifications route={route} navigation={navigation}/>}
+            {activeTab === "settings" && <Settings navigation={navigation}/>}
         </View>
     )
 }
