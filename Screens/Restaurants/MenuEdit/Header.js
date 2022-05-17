@@ -75,7 +75,7 @@ const Header = () => {
                                 marginRight: "28.8px",
                                 cursor: "pointer"
                         }}>
-                            <Text>Viewing as</Text>
+                            <Text style={{ fontWeight: "bold" }}>Viewing as</Text>
                         </View>
                         <View style={{
                                 paddingTop: "11.8px",
@@ -88,7 +88,7 @@ const Header = () => {
                                 alignItems: "center",
                                 cursor: "pointer"
                         }}>
-                            <Text>Share</Text>
+                            <Text style={{ fontWeight: "bold" }}>Share</Text>
                         </View>
                     </View>
                 </View>
