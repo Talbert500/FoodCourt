@@ -298,14 +298,19 @@ const MenuEdit = ({ route, navigation }) => {
 
     return(
         <View style={{ backgroundColor: "white" }}>
-            <Header navigation={navigation} loginSession={loginSession} activeTab={activeTab} setActiveTab={setActiveTab} />
+            <Header 
+                activeTab={activeTab} 
+                setActiveTab={setActiveTab}
+                restaurantImage={restaurantImage}
+                searchedRestaurant={searchedRestaurant}
+                restaurantDesc={restaurantDesc}
+            />
             {activeTab === "home" && (
                 <View style={{ display: "flex", flexDirection: "row" }}>
-                    <View style={{ backgroundColor: 'white' }}>
-
+                    <View style={{ backgroundColor: 'white', marginLeft: "136px", marginRight: "20px" }}>
                         <FlatList
                             showsHorizontalScrollIndicator={false}
-                            horizontal
+                            vertical
                             data={selectedMenus}
                             renderItem={renderMenus}
                             initialNumToRender={10}

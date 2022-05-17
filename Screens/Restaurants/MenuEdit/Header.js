@@ -4,7 +4,7 @@ import { View, Image, Text } from 'react-native';
 import testImage from './../../../assets/guestphoto.jpg'
 import reviewOutline from './../../../assets/review_outline.png'
 
-const Header = ({ navigation, loginSession, setActiveTab, activeTab }) => {
+const Header = ({ setActiveTab, activeTab, restaurantImage, searchedRestaurant, restaurantDesc }) => {
 
     const rating = [0,1,2,3,4]
 
@@ -45,14 +45,14 @@ const Header = ({ navigation, loginSession, setActiveTab, activeTab }) => {
                         marginRight: "32.5px",
                         resizeMode: "contain",
                     }}
-                    source={testImage} 
+                    source={restaurantImage}
                 />
                 <View>
                     <Text style={{ 
                         fontSize: "40px",
                         fontWeight: "bold"
                     }}>
-                        La Korita Taqueria
+                        {searchedRestaurant}
                     </Text>
 
                     <View style={{ 
@@ -64,7 +64,7 @@ const Header = ({ navigation, loginSession, setActiveTab, activeTab }) => {
                         <Text style={{ fontSize: "11px" }}>1337 reviews</Text>
                     </View>
 
-                    <Text style={{ marginTop: "19px" }}>Authentic Mexican Foods</Text>
+                    <Text style={{ marginTop: "19px" }}>{restaurantDesc}</Text>
 
                     <View style={{ 
                             display: "flex", 
