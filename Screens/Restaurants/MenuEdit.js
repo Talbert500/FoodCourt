@@ -17,15 +17,39 @@ const MenuEdit = ({ route, navigation }) => {
 
     const { restId } = route.params;
 
+    const [selectedCategory, setSelectedCategory] = useState([]);
+    const [restaurant_city, setrestaurant_city] = useState("");
+    const [restaurant_state, setrestaurant_state] = useState("");
+    const [restaurant_zip, setrestaurant_zip] = useState("");
     const [searchedRestaurant, setRestaurantName] = useState([])
     const [restaurantDesc, setRestaurantDesc] = useState([]);
     const [restaurantId, setRestaurantId] = useState([]);
+    const [restaurantImage, setRestaurantImage] = useState([]);
     const [restaurantColor, setRestaurantColor] = useState([]);
     const [restaurantPhone, setRestaurantPhone] = useState([]);
     const [restaurant_address, setRestaurantAddress] = useState("");
+    const [restaurant_website, setWebsite] = useState('')
+    const [rating, setRating] = useState([]);
     const [menuIndex, setMenuIndex] = useState(0);
 
     const [loginSession, setLoginSession] = useState('')
+    const [accessToken, setAccessToken] = useState('')
+    const [scanTotal, setScanTotal] = useState("")
+
+    const [menuData, setMenuItem] = useState([]);
+    const [filtered, setFiltered] = useState([]);
+    const [loggedin, setloggedin] = useState(false);
+    const [isRestaurant, setIsRestaurant] = useState(false)
+    const [userPhoto, setUserPhoto] = useState('')
+    const [foodItem, setFoodItem] = useState([])
+    const [selectedMenus, setSelectedMenus] = useState([]);
+    const [filterCatgory, setFilteredCategory] = useState('')
+    const [userName, setUserName] = useState('')
+
+    const [loadingbio, setLoadingBio] = useState(true);
+    const [loadingPic, setLoadingPic] = useState(true);
+
+    const [totalLikes,setTotalLikes] = useState(0);
 
     function QRMenuData(id, to, from) {
         console.log("QR DAYA", id)
@@ -90,6 +114,8 @@ const MenuEdit = ({ route, navigation }) => {
                     setMenuItem((oldArray) => [...oldArray, foodData]);
                     setTotalLikes(prevState => prevState + foodData.upvotes)
                 })
+                //setSetMenu("Breakfast")
+
             }
         })
 
@@ -107,6 +133,8 @@ const MenuEdit = ({ route, navigation }) => {
                 setFilteredCategory(data)
                 getFullMenu();
                 getQrId();
+
+
             }
 
         })
