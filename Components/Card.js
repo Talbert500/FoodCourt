@@ -1,5 +1,6 @@
 
-import { Image, StyleSheet, TextInput, Text, View, SafeAreaView, FlatList, TouchableOpacity, Button } from 'react-native';
+import { Image, StyleSheet, TextInput, Text, View, SafeAreaView, FlatList, TouchableOpacity } from 'react-native';
+import { Button } from 'react-native-elements'
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { styles } from '../styles'
@@ -74,6 +75,9 @@ function Card(props) {
                     {props.upvotes}
                 </Text>
             </View>
+
+            <Button onPress={() => deleteFood(item.food_id)} buttonStyle={{ backgroundColor: '#8A3333' }} buttonTitle={{ fontFamily: 'Bold', fontSize: "20" }} title="Delete" />
+            <Button onPress={() => props.navigation.navigate("FoodEdit", { restId: props.restaurantId, foodId: props.item.food_id, restName: props.searchedRestaurant })} buttonStyle={{ backgroundColor: 'orange' }} buttonTitle={{ fontFamily: 'Bold', fontSize: "20" }} title="Edit" />
 
         </TouchableOpacity>
     )

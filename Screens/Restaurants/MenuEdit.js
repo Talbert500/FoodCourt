@@ -1,21 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
-import { View, Text } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { onAuthStateChanged } from 'firebase/auth';
 import { db, auth, database, storage } from '../../firebase-config';
 import { ref, onValue} from 'firebase/database';
 import { getDoc, doc } from 'firebase/firestore';
 import { getDownloadURL, ref as tef } from 'firebase/storage';
+import { Button } from 'react-native-elements'
 
 import Header from './MenuEdit/Header';
 import Billing from './../web/Billing';
 import QRMenus from './../QRMenus';
 import Notifications from './../Restaurants/Notifications';
 import Settings from './../Restaurants/Settings';
+import Card from '../../Components/Card'
 
 import { setSearchedRestaurantImage, setSearchedRestaurant } from '../../redux/action';
 import { QRapiKey } from '../../config.js';
+import { styles } from '../../styles'
 
 const MenuEdit = ({ route, navigation }) => {
 
@@ -37,6 +40,7 @@ const MenuEdit = ({ route, navigation }) => {
     const [restaurant_website, setWebsite] = useState('')
     const [rating, setRating] = useState([]);
     const [menuIndex, setMenuIndex] = useState(0);
+    const [setMenu, setSetMenu] = useState('');
 
     const [loginSession, setLoginSession] = useState('')
     const [accessToken, setAccessToken] = useState('')
@@ -51,6 +55,7 @@ const MenuEdit = ({ route, navigation }) => {
     const [selectedMenus, setSelectedMenus] = useState([]);
     const [filterCatgory, setFilteredCategory] = useState('')
     const [userName, setUserName] = useState('')
+    const [menusDesc, setmenusDesc] = useState('')
 
     const [loadingbio, setLoadingBio] = useState(true);
     const [loadingPic, setLoadingPic] = useState(true);
@@ -245,10 +250,100 @@ const MenuEdit = ({ route, navigation }) => {
         getRestaurant();
     }, [])
 
+    function onMenuClick(index, clicked, description) {
+        setmenusDesc(description)
+        // setSetCate(clicked)
+        if (setMenu != clicked) {
+
+            //setting categories
+            setSelectedCategory(selectedMenus[index].categories)
+
+            // Object.values(foodItem.categories).map((food) => {
+            //     setSelectedMenus((food) => [...food, foodData]);
+            // })
+
+            //setting food
+            setSetMenu(clicked)
+            const newData = foodItem.filter((item) => {
+                const cateDate = item.menus ?
+                    item.menus.toUpperCase() : ''.toUpperCase()
+                const cate = clicked.toUpperCase();
+
+                return cateDate.indexOf(cate) > -1;
+            });
+            setFiltered(newData);
+        } else {
+            setSetMenu("")
+            setMenuItem(foodItem)
+            setmenusDesc("")
+            setFiltered(null)
+            setSelectedCategory(null)
+            setmenusDesc("")
+        }
+
+
+    }
+
+    const renderMenus = ({ item, index }) => {
+        return (
+            <TouchableOpacity onPress={() => (setMenuItem(foodItem), setFiltered(menuData), onMenuClick(index, item.desc, item.time), setMenuIndex(index))}>
+                <View style={[(item.desc !== setMenu) ? styles.shadowProp : styles.null, { paddingHorizontal: (item.desc !== setMenu) ? 20 : 60, borderTopLeftRadius: 0, borderTopRightRadius: 0, borderRadius: 5, marginHorizontal: 5, marginBottom: 5, backgroundColor: (item.desc === setMenu) ? restaurantColor : "white", borderColor: 'white' }]}>
+                    <Text style={{ padding: 10, fontWeight: 600, color: (item.desc === setMenu) ? "white" : "black" }}>{item.desc} </Text>
+                </View>
+            </TouchableOpacity >
+
+        )
+
+    }
 
     return(
         <View style={{ backgroundColor: "white" }}>
             <Header navigation={navigation} loginSession={loginSession} activeTab={activeTab} setActiveTab={setActiveTab} />
+            {activeTab === "home" && (
+                <View style={{ display: "flex", flexDirection: "row" }}>
+                    <View style={{ backgroundColor: 'white' }}>
+
+                        <FlatList
+                            showsHorizontalScrollIndicator={false}
+                            horizontal
+                            data={selectedMenus}
+                            renderItem={renderMenus}
+                            initialNumToRender={10}
+                        />
+                    </View>
+                    <View>
+                        <FlatList
+                            data={filtered}
+                            keyExtractor={(item, index) => index}
+                            renderItem={({ item, index }) =>
+                                <View>
+                                    <Card
+                                        restaurant={item.restaurant}
+                                        ranking={index + item.upvotes}
+                                        price={item.price}
+                                        food={item.food}
+                                        description={item.description}
+                                        percent={item.ratingCount > 0 ? (item.eatagain * 100 / item.ratingCount).toFixed(0) : (item.eatagain)}
+                                        upvotes={item.upvotes}
+                                        overall={item.overall}
+                                        upvoteColor={restaurantColor}
+                                        category = {item.category}
+                                        imageUrl = {item.imageUrl}
+                                        navigation={navigation}
+                                        restaurantId={restaurantId}
+                                        item={item}
+                                        searchedRestaurant={searchedRestaurant}
+                                    />
+                                    {/* <View style={{ flexDirection: 'row', marginBottom: 20 }}>
+                                        <Button onPress={() => deleteFood(item.food_id)} buttonStyle={{ backgroundColor: '#8A3333' }} buttonTitle={{ fontFamily: 'Bold', fontSize: "20" }} title="Delete" />
+                                        <Button onPress={() => navigation.navigate("FoodEdit", { restId: restaurantId, foodId: item.food_id, restName: searchedRestaurant })} buttonStyle={{ backgroundColor: 'orange' }} buttonTitle={{ fontFamily: 'Bold', fontSize: "20" }} title="Edit" />
+                                    </View> */}
+                                </View>
+                            }
+                        />
+                    </View>
+                </View>
+            )}
             {activeTab === "snapshot" && <Billing route={route} navigation={navigation}/>}
             {/* {activeTab === "qrmenu" && <QRMenus route={route} navigation={navigation}/>} */}
             {activeTab === "qrmenu" && <Text>There will be QRMenu</Text>}
