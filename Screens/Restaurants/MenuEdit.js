@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import Header from './MenuEdit/Header';
-import { ActivityIndicator, ImageBackground, KeyboardAvoidingView, Dimensions, FlatList, ScrollView, View, TouchableOpacity, Image, StyleSheet, Text, Platform, Linking, Keyboard, BackHandler } from 'react-native';
+import { View } from 'react-native';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { setFoodItemId, setSearchedRestaurantImage, setSearchedRestaurant, setUserProps, setNewRestaurant } from '../../redux/action'
-import { db, provider, auth, database, storage } from '../../firebase-config'
-import { ref, onValue, remove, equalTo, query, limitToLast } from 'firebase/database'
+import { setSearchedRestaurantImage, setSearchedRestaurant } from '../../redux/action'
+import { db, auth, database, storage } from '../../firebase-config'
+import { ref, onValue} from 'firebase/database'
 import { QRapiKey } from '../../config.js'
-import { setDoc, getDoc, doc } from 'firebase/firestore'
-import { uploadBytes, getDownloadURL, ref as tef } from 'firebase/storage';
+import { getDoc, doc } from 'firebase/firestore'
+import { getDownloadURL, ref as tef } from 'firebase/storage';
 
 const MenuEdit = ({ route, navigation }) => {
 
@@ -17,55 +17,15 @@ const MenuEdit = ({ route, navigation }) => {
 
     const { restId } = route.params;
 
-    const [selectedCategory, setSelectedCategory] = useState([]);
-    const [restaurant_city, setrestaurant_city] = useState("");
-    const [restaurant_state, setrestaurant_state] = useState("");
-    const [restaurant_zip, setrestaurant_zip] = useState("");
     const [searchedRestaurant, setRestaurantName] = useState([])
     const [restaurantDesc, setRestaurantDesc] = useState([]);
     const [restaurantId, setRestaurantId] = useState([]);
-    const [restaurantImage, setRestaurantImage] = useState([]);
     const [restaurantColor, setRestaurantColor] = useState([]);
     const [restaurantPhone, setRestaurantPhone] = useState([]);
     const [restaurant_address, setRestaurantAddress] = useState("");
-    const [restaurant_website, setWebsite] = useState('')
-    const [rating, setRating] = useState([]);
     const [menuIndex, setMenuIndex] = useState(0);
 
     const [loginSession, setLoginSession] = useState('')
-    const [accessToken, setAccessToken] = useState('')
-    const [scanTotal, setScanTotal] = useState("")
-
-    const [menuData, setMenuItem] = useState([]);
-    const [text, onChangeText] = useState("")
-    const [filtered, setFiltered] = useState([]);
-    const [catfilter, setCatFilter] = useState([]);
-    const [loggedin, setloggedin] = useState(false);
-    const [isRestaurant, setIsRestaurant] = useState(false)
-    const [userPhoto, setUserPhoto] = useState('')
-    const [setCate, setSetCate] = useState('');
-    const [setMenu, setSetMenu] = useState('');
-    const [overall, setOverall] = useState()
-    const [foodItem, setFoodItem] = useState([])
-    const [overallArray, setOverallArray] = useState('')
-    const [selectedMenus, setSelectedMenus] = useState([]);
-    const [menusDesc, setmenusDesc] = useState('')
-    const [filterCatgory, setFilteredCategory] = useState('')
-    const [userName, setUserName] = useState('')
-
-    const [hoverside, setHoverSide] = useState(false)
-    const [hoverside1, setHoverSide1] = useState(false)
-    const [hoverside2, setHoverSide2] = useState(false)
-    const [hoverside3, setHoverSide3] = useState(false)
-    const [hoverside4, setHoverSide4] = useState(false)
-    const [hoverside5, setHoverSide5] = useState(false)
-    const [hoverside6, setHoverSide6] = useState(false)
-    const [hoverside7, setHoverSide7] = useState(false)
-
-    const [loadingbio, setLoadingBio] = useState(true);
-    const [loadingPic, setLoadingPic] = useState(true);
-
-    const [totalLikes,setTotalLikes] = useState(0);
 
     function QRMenuData(id, to, from) {
         console.log("QR DAYA", id)
@@ -130,8 +90,6 @@ const MenuEdit = ({ route, navigation }) => {
                     setMenuItem((oldArray) => [...oldArray, foodData]);
                     setTotalLikes(prevState => prevState + foodData.upvotes)
                 })
-                //setSetMenu("Breakfast")
-
             }
         })
 
@@ -149,8 +107,6 @@ const MenuEdit = ({ route, navigation }) => {
                 setFilteredCategory(data)
                 getFullMenu();
                 getQrId();
-
-
             }
 
         })
