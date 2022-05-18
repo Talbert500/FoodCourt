@@ -470,7 +470,22 @@ const MenuEdit = ({ route, navigation }) => {
                                 </View>
                             }
                         />
-                        <View style={{ marginLeft: "32vw", marginTop: "10px", marginBottom: "10px", cursor: "pointer" }}>
+                        <View onClick={() => {
+                            navigation.navigate(
+                                "FoodAdd", 
+                                { userId: restaurantId }), 
+                                dispatch(
+                                    setSearchedRestaurant(
+                                        searchedRestaurant, 
+                                        restaurantDesc, 
+                                        restaurant_address, 
+                                        restaurantPhone, 
+                                        restaurantId, 
+                                        restaurantColor)
+                                    )
+                                }} 
+                            style={{ marginLeft: "32vw", marginTop: "10px", marginBottom: "10px", cursor: "pointer" }}
+                        >
                             <View style={{ marginLeft: "28px" }}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="36.559" height="36.559" viewBox="0 0 36.559 36.559">
                                     <g id="Icon_ionic-ios-add-circle-outline" data-name="Icon ionic-ios-add-circle-outline" transform="translate(-3.375 -3.375)">
