@@ -22,9 +22,9 @@ function Card(props) {
     const [defaultRating, setDefaultRating] = useState(props.overall);
 
     return (
-        <TouchableOpacity onPress={props.onPress} style={[styles.shadowProp, { justifyContent: 'space-between', margin: 5, padding: 10, backgroundColor: 'white', flexDirection: 'row' }]}>
+        <TouchableOpacity onPress={props.onPress} style={[styles.shadowProp, { justifyContent: 'space-between', margin: 5, padding: 10, backgroundColor: 'white', flexDirection: 'row', width: "70vw", height: "150px" }]}>
             <View style={{marginRight:20}}>
-                <Image style={{width:100,height:100,resizeMode:'cover'}}
+                <Image style={{width:130,height:130,resizeMode:'cover'}}
                     source={{uri: props.imageUrl}}
                     />
             </View>
