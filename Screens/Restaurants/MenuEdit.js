@@ -287,8 +287,8 @@ const MenuEdit = ({ route, navigation }) => {
     const renderMenus = ({ item, index }) => {
         return (
             <TouchableOpacity onPress={() => (setMenuItem(foodItem), setFiltered(menuData), onMenuClick(index, item.desc, item.time), setMenuIndex(index))}>
-                <View style={[(item.desc !== setMenu) ? styles.shadowProp : styles.null, { paddingHorizontal: (item.desc !== setMenu) ? 20 : 60, borderTopLeftRadius: 0, borderTopRightRadius: 0, borderRadius: 5, marginHorizontal: 5, marginBottom: 5, backgroundColor: (item.desc === setMenu) ? restaurantColor : "white", borderColor: 'white' }]}>
-                    <Text style={{ padding: 10, fontWeight: 600, color: (item.desc === setMenu) ? "white" : "black" }}>{item.desc} </Text>
+                <View>
+                    <Text style={{ marginBottom: "5px", fontWeight: 600, color: (item.desc === setMenu) ? "#F6AE2D" : "black" }}>{item.desc} </Text>
                 </View>
             </TouchableOpacity >
 
@@ -297,7 +297,7 @@ const MenuEdit = ({ route, navigation }) => {
     }
 
     return(
-        <View style={{ backgroundColor: "white" }}>
+        <View style={{ backgroundColor: "white", height: "100%" }}>
             <Header 
                 activeTab={activeTab} 
                 setActiveTab={setActiveTab}
@@ -307,7 +307,8 @@ const MenuEdit = ({ route, navigation }) => {
             />
             {activeTab === "home" && (
                 <View style={{ display: "flex", flexDirection: "row" }}>
-                    <View style={{ backgroundColor: 'white', marginLeft: "136px", marginRight: "20px" }}>
+                    <View style={{ marginLeft: "136px", marginRight: "20px", borderBottom: "1px solid #A7A7A7", width: "200px", paddingBottom: "10px", marginBottom: "100%" }}>
+                        <Text style={{ fontSize: "25px", fontWeight: "bold", marginBottom: "10px" }}>Menus</Text>
                         <FlatList
                             showsHorizontalScrollIndicator={false}
                             vertical
