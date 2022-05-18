@@ -56,6 +56,7 @@ const MenuEdit = ({ route, navigation }) => {
     const [filterCatgory, setFilteredCategory] = useState('')
     const [userName, setUserName] = useState('')
     const [menusDesc, setmenusDesc] = useState('')
+    const [setCate, setSetCate] = useState('');
 
     const [loadingbio, setLoadingBio] = useState(true);
     const [loadingPic, setLoadingPic] = useState(true);
@@ -284,6 +285,28 @@ const MenuEdit = ({ route, navigation }) => {
 
     }
 
+    function onCategoryClick(clicked) {
+        // setSetCate(clicked)
+        if (setCate != clicked) {
+
+            setSetCate(clicked)
+            const newData = menuData.filter((item) => {
+                const cateDate = item.category ?
+                    item.category.toUpperCase() : ''.toUpperCase()
+                const cate = clicked.toUpperCase();
+
+                return cateDate.indexOf(cate) > -1;
+            });
+            setFiltered(newData);
+
+        } else {
+            setSetCate("")
+            setFiltered(menuData)
+        }
+
+
+    }
+
     const renderMenus = ({ item, index }) => {
         return (
             <TouchableOpacity onPress={() => (setMenuItem(foodItem), setFiltered(menuData), onMenuClick(index, item.desc, item.time), setMenuIndex(index))}>
@@ -292,6 +315,18 @@ const MenuEdit = ({ route, navigation }) => {
                 </View>
             </TouchableOpacity >
 
+        )
+
+    }
+
+    const renderItem = ({ item, index }) => {
+        return (
+            <TouchableOpacity onPress={() => (setFiltered(menuData), onCategoryClick(item))}>
+                <View>
+                    <Text style={{ marginBottom: "5px", fontWeight: 600, color: (item === setCate) ? "#F6AE2D" : "black" }}>{item} </Text>
+                </View>
+
+            </TouchableOpacity>
         )
 
     }
@@ -307,15 +342,27 @@ const MenuEdit = ({ route, navigation }) => {
             />
             {activeTab === "home" && (
                 <View style={{ display: "flex", flexDirection: "row" }}>
-                    <View style={{ marginLeft: "136px", marginRight: "20px", borderBottom: "1px solid #A7A7A7", width: "200px", paddingBottom: "10px", marginBottom: "100%" }}>
-                        <Text style={{ fontSize: "25px", fontWeight: "bold", marginBottom: "10px" }}>Menus</Text>
-                        <FlatList
-                            showsHorizontalScrollIndicator={false}
-                            vertical
-                            data={selectedMenus}
-                            renderItem={renderMenus}
-                            initialNumToRender={10}
-                        />
+                    <View style={{ marginTop: "75px", marginBottom: "100%" }}>
+                        <View style={{ marginLeft: "136px", marginRight: "20px", borderBottom: "1px solid #A7A7A7", width: "200px", paddingBottom: "10px" }}>
+                            <Text style={{ fontSize: "25px", fontWeight: "bold", marginBottom: "10px" }}>Menus</Text>
+                            <FlatList
+                                showsHorizontalScrollIndicator={false}
+                                vertical
+                                data={selectedMenus}
+                                renderItem={renderMenus}
+                                initialNumToRender={10}
+                            />
+                        </View>
+                        <View style={{ marginLeft: "136px", marginRight: "20px", borderBottom: "1px solid #A7A7A7", width: "200px", paddingBottom: "10px" }}>
+                            <Text style={{ fontSize: "25px", fontWeight: "bold", marginBottom: "10px" }}>Categories</Text>
+                            <FlatList
+                                showsHorizontalScrollIndicator={false}
+                                vertical
+                                data={selectedCategory}
+                                renderItem={renderItem}
+                                initialNumToRender={10}
+                            />
+                        </View>
                     </View>
                     <View>
                         <FlatList
