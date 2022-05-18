@@ -386,7 +386,7 @@ const MenuEdit = ({ route, navigation }) => {
                             </View>
                         </View>
                     </View>
-                    <View>
+                    <View style={{ marginLeft: "10px" }}>
                         <FlatList
                             data={filtered}
                             keyExtractor={(item, index) => index}
