@@ -7,7 +7,8 @@ import { db, auth, database, storage } from '../../firebase-config';
 import { ref, onValue} from 'firebase/database';
 import { getDoc, doc } from 'firebase/firestore';
 import { getDownloadURL, ref as tef } from 'firebase/storage';
-import { Button } from 'react-native-elements'
+import { RadioButton } from 'react-native-paper';
+import RadioForm from 'react-native-simple-radio-button';
 
 import Header from './MenuEdit/Header';
 import Billing from './../web/Billing';
@@ -64,6 +65,8 @@ const MenuEdit = ({ route, navigation }) => {
     const [totalLikes,setTotalLikes] = useState(0);
 
     const [activeTab, setActiveTab] = useState("home");
+
+    const [checkedPrice, setCheckedPrice] = useState("any")
 
     function QRMenuData(id, to, from) {
         console.log("QR DAYA", id)
@@ -331,6 +334,15 @@ const MenuEdit = ({ route, navigation }) => {
 
     }
 
+    const options = [
+        { label: 'Any', value: 'any' },
+        { label: 'Under $5', value: 'underFive' },
+        { label: '$5 to $10', value: 'fiveToTen' },
+        { label: '20$ and over', value: 'twentyAndOver' },
+      ];
+
+    console.log(checkedPrice, 'checkedPrice')
+
     return(
         <View style={{ backgroundColor: "white", height: "100%" }}>
             <Header 
@@ -342,9 +354,9 @@ const MenuEdit = ({ route, navigation }) => {
             />
             {activeTab === "home" && (
                 <View style={{ display: "flex", flexDirection: "row" }}>
-                    <View style={{ marginTop: "75px", marginBottom: "100%" }}>
+                    <View style={{ marginTop: "75px" }}>
                         <View style={{ marginLeft: "136px", marginRight: "20px", borderBottom: "1px solid #A7A7A7", width: "200px", paddingBottom: "10px" }}>
-                            <Text style={{ fontSize: "25px", fontWeight: "bold", marginBottom: "10px" }}>Menus</Text>
+                            <Text style={{ fontSize: "25px", fontWeight: "bold", marginTop: "10px", marginBottom: "10px" }}>Menus</Text>
                             <FlatList
                                 showsHorizontalScrollIndicator={false}
                                 vertical
@@ -354,7 +366,7 @@ const MenuEdit = ({ route, navigation }) => {
                             />
                         </View>
                         <View style={{ marginLeft: "136px", marginRight: "20px", borderBottom: "1px solid #A7A7A7", width: "200px", paddingBottom: "10px" }}>
-                            <Text style={{ fontSize: "25px", fontWeight: "bold", marginBottom: "10px" }}>Categories</Text>
+                            <Text style={{ fontSize: "25px", fontWeight: "bold", marginTop: "10px", marginBottom: "10px" }}>Categories</Text>
                             <FlatList
                                 showsHorizontalScrollIndicator={false}
                                 vertical
@@ -363,6 +375,18 @@ const MenuEdit = ({ route, navigation }) => {
                                 initialNumToRender={10}
                             />
                         </View>
+                        <View style={{ marginLeft: "136px", marginRight: "20px", borderBottom: "1px solid #A7A7A7", width: "200px", paddingBottom: "10px" }}>
+                            <Text style={{ fontSize: "25px", fontWeight: "bold", marginTop: "10px", marginBottom: "10px" }}>Price range</Text>
+                            <View>
+                                <RadioForm
+                                    radio_props={options}
+                                    initial={0}
+                                    onPress={(checkedPrice) => {
+                                        setCheckedPrice(checkedPrice);
+                                    }} 
+                                />
+                            </View>
+                        </View>
                     </View>
                     <View>
                         <FlatList
@@ -370,6 +394,7 @@ const MenuEdit = ({ route, navigation }) => {
                             keyExtractor={(item, index) => index}
                             renderItem={({ item, index }) =>
                                 <View>
+                                    {checkedPrice === "any" && 
                                     <Card
                                         restaurant={item.restaurant}
                                         ranking={index + item.upvotes}
@@ -386,11 +411,64 @@ const MenuEdit = ({ route, navigation }) => {
                                         restaurantId={restaurantId}
                                         item={item}
                                         searchedRestaurant={searchedRestaurant}
-                                    />
-                                    {/* <View style={{ flexDirection: 'row', marginBottom: 20 }}>
-                                        <Button onPress={() => deleteFood(item.food_id)} buttonStyle={{ backgroundColor: '#8A3333' }} buttonTitle={{ fontFamily: 'Bold', fontSize: "20" }} title="Delete" />
-                                        <Button onPress={() => navigation.navigate("FoodEdit", { restId: restaurantId, foodId: item.food_id, restName: searchedRestaurant })} buttonStyle={{ backgroundColor: 'orange' }} buttonTitle={{ fontFamily: 'Bold', fontSize: "20" }} title="Edit" />
-                                    </View> */}
+                                    />}
+
+                                    {checkedPrice === "underFive" && item.price < 5 &&
+                                    <Card
+                                        restaurant={item.restaurant}
+                                        ranking={index + item.upvotes}
+                                        price={item.price}
+                                        food={item.food}
+                                        description={item.description}
+                                        percent={item.ratingCount > 0 ? (item.eatagain * 100 / item.ratingCount).toFixed(0) : (item.eatagain)}
+                                        upvotes={item.upvotes}
+                                        overall={item.overall}
+                                        upvoteColor={restaurantColor}
+                                        category = {item.category}
+                                        imageUrl = {item.imageUrl}
+                                        navigation={navigation}
+                                        restaurantId={restaurantId}
+                                        item={item}
+                                        searchedRestaurant={searchedRestaurant}
+                                    />}
+
+                                    {checkedPrice === "fiveToTen" && item.price >= 5 && item.price <= 10 &&
+                                    <Card
+                                        restaurant={item.restaurant}
+                                        ranking={index + item.upvotes}
+                                        price={item.price}
+                                        food={item.food}
+                                        description={item.description}
+                                        percent={item.ratingCount > 0 ? (item.eatagain * 100 / item.ratingCount).toFixed(0) : (item.eatagain)}
+                                        upvotes={item.upvotes}
+                                        overall={item.overall}
+                                        upvoteColor={restaurantColor}
+                                        category = {item.category}
+                                        imageUrl = {item.imageUrl}
+                                        navigation={navigation}
+                                        restaurantId={restaurantId}
+                                        item={item}
+                                        searchedRestaurant={searchedRestaurant}
+                                    />}
+
+                                    {checkedPrice === "twentyAndOver" && item.price >= 20 &&
+                                    <Card
+                                        restaurant={item.restaurant}
+                                        ranking={index + item.upvotes}
+                                        price={item.price}
+                                        food={item.food}
+                                        description={item.description}
+                                        percent={item.ratingCount > 0 ? (item.eatagain * 100 / item.ratingCount).toFixed(0) : (item.eatagain)}
+                                        upvotes={item.upvotes}
+                                        overall={item.overall}
+                                        upvoteColor={restaurantColor}
+                                        category = {item.category}
+                                        imageUrl = {item.imageUrl}
+                                        navigation={navigation}
+                                        restaurantId={restaurantId}
+                                        item={item}
+                                        searchedRestaurant={searchedRestaurant}
+                                    />}
                                 </View>
                             }
                         />
