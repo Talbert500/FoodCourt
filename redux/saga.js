@@ -1,4 +1,4 @@
-import { setFoodItem, setFiltered, setMenuItem } from './action';
+import { setFiltered, setMenuItem, setFoodItem } from './action';
 import { getDownloadURL, ref as tef } from 'firebase/storage';
 import { db, auth, database, storage } from '../firebase-config';
 import { ref, onValue} from 'firebase/database';
@@ -84,7 +84,7 @@ export async function getQrId( QRMenuData, restId, dispatch ) {
     }
 }
 
-export async function getFullMenu( restId, dispatch, setFoodItem ) {
+export async function getFullMenu( restId, dispatch ) {
     try {
         dispatch(setLoading(true))
 
@@ -94,7 +94,6 @@ export async function getFullMenu( restId, dispatch, setFoodItem ) {
             const data = snapshot.val();
             if (data !== null) {
                 console.log(data)
-                dispatch(setFoodItem(""))
                 dispatch(setFiltered(""))
                 dispatch(setMenuItem(""))
                 Object.values(data).map((foodData) => {

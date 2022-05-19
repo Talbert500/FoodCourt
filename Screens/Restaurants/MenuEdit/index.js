@@ -22,8 +22,6 @@ import { getMenuItem, getIsLoading, getFoodItem } from './../../../redux/selecto
 
 const MenuEdit = (props) => {
 
-    console.log(props.foodItem, 'foodItem')
-
     const dispatch = useDispatch();
 
     const { restId } = props.route.params;
@@ -47,12 +45,9 @@ const MenuEdit = (props) => {
     const [accessToken, setAccessToken] = useState('')
     const [scanTotal, setScanTotal] = useState("")
 
-    const [menuData, setMenuItem] = useState([]);
-    const [filtered, setFiltered] = useState([]);
     const [loggedin, setloggedin] = useState(false);
     const [isRestaurant, setIsRestaurant] = useState(false)
     const [userPhoto, setUserPhoto] = useState('')
-    // const [foodItem, setFoodItem] = useState([])
     const [selectedMenus, setSelectedMenus] = useState([]);
     const [filterCatgory, setFilteredCategory] = useState('')
     const [userName, setUserName] = useState('')
@@ -87,7 +82,7 @@ const MenuEdit = (props) => {
                 setSelectedCategory("")
                 setSelectedCategory(data)
                 setFilteredCategory(data)
-                getFullMenu(restId, dispatch, props.setFoodItem);
+                getFullMenu(restId, dispatch);
                 getQrId(QRMenuData, restId, dispatch)
             }
 
@@ -201,13 +196,13 @@ const MenuEdit = (props) => {
                         selectedMenus={selectedMenus}
                         setSelectedCategory={setSelectedCategory}
                         selectedCategory={selectedCategory}
-                        menuData={menuData}
+                        menuItem={props.menuItem}
                         setMenuIndex={setMenuIndex}
                         setCheckedPrice={setCheckedPrice}
                         foodItem={props.foodItem}
                     />
                     <FoodList
-                        filtered={filtered}
+                        filtered={props.filtered}
                         checkedPrice={checkedPrice}
                         restaurantColor={restaurantColor}
                         navigation={props.navigation}
@@ -237,10 +232,11 @@ const mapStateToProps = (state) => {
     return {
         isLoading: false,
         menuItem: state.menuItem,
-        foodItem: state.foodItem
+        foodItem: state.foodItem,
+        filtered: state.filtered
     }
 }
 
-const MenuEditContainer = connect(mapStateToProps, { setFoodItem })(MenuEdit)
+const MenuEditContainer = connect(mapStateToProps, null)(MenuEdit)
 
 export default MenuEditContainer

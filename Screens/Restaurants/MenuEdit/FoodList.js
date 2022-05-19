@@ -7,6 +7,9 @@ import AddFoodButton from './AddFoodButton';
 const FoodList = ({ filtered, checkedPrice, restaurantColor, navigation, restaurantId, searchedRestaurant,
                     restaurantDesc, restaurant_address, restaurantPhone }) => 
 {
+
+    console.log(filtered, 'filtered')
+
     return(
         <View style={{ marginLeft: "10px" }}>
             <FlatList

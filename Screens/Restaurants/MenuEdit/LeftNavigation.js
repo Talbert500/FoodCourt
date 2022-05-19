@@ -7,7 +7,7 @@ import { setFiltered, setMenuItem } from './../../../redux/action';
 
 const LeftNavigation = ({ selectedMenus, setSelectedCategory, 
                           selectedCategory, 
-                          menuData, setMenuIndex,
+                          setMenuIndex, menuItem,
                           setCheckedPrice, foodItem }) => 
 {
 
@@ -53,7 +53,7 @@ const LeftNavigation = ({ selectedMenus, setSelectedCategory,
         if (setCate != clicked) {
 
             setSetCate(clicked)
-            const newData = menuData.filter((item) => {
+            const newData = menuItem.filter((item) => {
                 const cateDate = item.category ?
                     item.category.toUpperCase() : ''.toUpperCase()
                 const cate = clicked.toUpperCase();
@@ -64,13 +64,13 @@ const LeftNavigation = ({ selectedMenus, setSelectedCategory,
 
         } else {
             setSetCate("")
-            dispatch(setFiltered(menuData));
+            dispatch(setFiltered(menuItem));
         }
     }
 
     const renderMenus = ({ item, index }) => {
         return (
-            <TouchableOpacity onPress={() => (dispatch(setMenuItem(foodItem)), setFiltered(menuData), onMenuClick(index, item.desc, item.time), setMenuIndex(index))}>
+            <TouchableOpacity onPress={() => (dispatch(setMenuItem(foodItem)), setFiltered(menuItem), onMenuClick(index, item.desc, item.time), setMenuIndex(index))}>
                 <View>
                     <Text style={{ marginBottom: "5px", fontWeight: 600, color: (item.desc === setMenu) ? "#F6AE2D" : "black" }}>{item.desc} </Text>
                 </View>
@@ -81,7 +81,7 @@ const LeftNavigation = ({ selectedMenus, setSelectedCategory,
 
     const renderItem = ({ item, index }) => {
         return (
-            <TouchableOpacity onPress={() => (setFiltered(menuData), onCategoryClick(item))}>
+            <TouchableOpacity onPress={() => (dispatch(setFiltered(menuItem)), onCategoryClick(item))}>
                 <View>
                     <Text style={{ marginBottom: "5px", fontWeight: 600, color: (item === setCate) ? "#F6AE2D" : "black" }}>{item} </Text>
                 </View>

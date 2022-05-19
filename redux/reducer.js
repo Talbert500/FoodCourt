@@ -35,7 +35,7 @@ const initialState = {
     eatagain: '',
     userCredential_id: "",
 
-    foodItem: null,
+    foodItem: [],
     filtered: null,
     menuItem: null,
 
@@ -108,9 +108,10 @@ const reducer = (state = initialState, action) => {
 
             }
         case SET_FOOD_ITEM:
+            const newFoodItem = action.payload
             return {
                 ...state,
-                foodItem: [...state.foodItem, action.payload]
+                foodItem: [...state.foodItem, newFoodItem]
             }
         case SET_FILTERED:
             return {
