@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector, connect } from 'react-redux';
 import { View, Text } from 'react-native';
 import { onAuthStateChanged } from 'firebase/auth';
 import { db, auth, database, storage } from '../../../firebase-config';
@@ -16,14 +16,17 @@ import Settings from '../Settings';
 import LeftNavigation from './LeftNavigation'
 import FoodList from './FoodList'
 
-import { setSearchedRestaurantImage, setSearchedRestaurant } from '../../../redux/action';
-import { QRapiKey } from '../../../config.js';
+import { setSearchedRestaurantImage, setSearchedRestaurant, setFoodItem } from '../../../redux/action';
+import { getRestaurantImage, getQRMenuData, getQrId, getFullMenu } from './../../../redux/saga';
+import { getMenuItem, getIsLoading, getFoodItem } from './../../../redux/selector';
 
-const MenuEdit = ({ route, navigation }) => {
+const MenuEdit = (props) => {
+
+    console.log(props.foodItem, 'foodItem')
 
     const dispatch = useDispatch();
 
-    const { restId } = route.params;
+    const { restId } = props.route.params;
 
     const [selectedCategory, setSelectedCategory] = useState([]);
     const [restaurant_city, setrestaurant_city] = useState("");
@@ -49,7 +52,7 @@ const MenuEdit = ({ route, navigation }) => {
     const [loggedin, setloggedin] = useState(false);
     const [isRestaurant, setIsRestaurant] = useState(false)
     const [userPhoto, setUserPhoto] = useState('')
-    const [foodItem, setFoodItem] = useState([])
+    // const [foodItem, setFoodItem] = useState([])
     const [selectedMenus, setSelectedMenus] = useState([]);
     const [filterCatgory, setFilteredCategory] = useState('')
     const [userName, setUserName] = useState('')
@@ -64,29 +67,7 @@ const MenuEdit = ({ route, navigation }) => {
     const [checkedPrice, setCheckedPrice] = useState("any")
 
     function QRMenuData(id, to, from) {
-        console.log("QR DAYA", id)
-        console.log("TO", to)
-        console.log("FROM", from)
-
-        const data = JSON.stringify({
-            "product_id": `${id}`,
-            "from": `${from}`,
-            "to": `${to}`,
-            "product_type": "qr",
-            "interval": "1d"
-        });
-
-        const config = {
-            method: 'post',
-            url: 'https://api.beaconstac.com/reporting/2.0/?organization=105513&method=Products.getVisitorDistribution',
-            headers: {
-                'Authorization': `Token ${QRapiKey}`,
-                'Content-Type': 'application/json'
-            },
-            data: data
-        };
-
-        axios.request(config)
+        getQRMenuData(id, to, from, dispatch)
             .then(function (response) {
                 console.log(response.data);
                 setScanTotal(JSON.stringify(response.data.points["0"]["0"]["1"]))
@@ -94,43 +75,6 @@ const MenuEdit = ({ route, navigation }) => {
             .catch(function (error) {
                 console.log(error);
             });
-
-    }
-
-    function getQrId() {
-        const getData = ref(database, 'restaurants/' + restId + '/data/')
-        onValue(getData, (snapshot) => {
-            const dataqr = snapshot.val();
-            if (dataqr !== null) {
-                console.log(dataqr.qrid)
-                QRMenuData(dataqr.qrid, new Date((new Date()).valueOf() - 1000 * 60 * 60 * 24).valueOf(), new Date().valueOf())
-
-
-            }
-        })
-
-    }
-
-    function getFullMenu() {
-        const getMenu = ref(database, 'restaurants/' + restId + '/foods/')
-        onValue(getMenu, (snapshot) => {
-
-            const data = snapshot.val();
-            if (data !== null) {
-                console.log(data)
-                setFoodItem("")
-                setFiltered("")
-                setMenuItem("")
-                Object.values(data).map((foodData) => {
-                    setFoodItem((oldArray) => [...oldArray, foodData]);
-                    setMenuItem((oldArray) => [...oldArray, foodData]);
-                    setTotalLikes(prevState => prevState + foodData.upvotes)
-                })
-                //setSetMenu("Breakfast")
-
-            }
-        })
-
     }
 
     const getCategories = async () => {
@@ -143,10 +87,8 @@ const MenuEdit = ({ route, navigation }) => {
                 setSelectedCategory("")
                 setSelectedCategory(data)
                 setFilteredCategory(data)
-                getFullMenu();
-                getQrId();
-
-
+                getFullMenu(restId, dispatch, props.setFoodItem);
+                getQrId(QRMenuData, restId, dispatch)
             }
 
         })
@@ -185,15 +127,6 @@ const MenuEdit = ({ route, navigation }) => {
         })
     };
 
-    const getImage = async () => {
-        const imageRef = tef(storage, 'imagesRestaurant/' + restId);
-        await getDownloadURL(imageRef).then((url) => {
-            dispatch(setSearchedRestaurantImage(url))
-            setRestaurantImage(url)
-            setLoadingPic(false);
-        })
-    }
-
     const getRestaurant = async () => {
         console.log("Getting Restaurant")
         const docRef = doc(db, "restaurants", restId);
@@ -213,7 +146,11 @@ const MenuEdit = ({ route, navigation }) => {
 
             dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurant_address, restaurantPhone, restaurantId, restaurantColor))
             getMenus();
-            getImage();
+            getRestaurantImage(restId, dispatch).then((url) => {
+                dispatch(setSearchedRestaurantImage(url))
+                setRestaurantImage(url)
+                setLoadingPic(false);
+            })
             setLoadingBio(false);
         } else {
             console.log("No souch document!")
@@ -251,31 +188,29 @@ const MenuEdit = ({ route, navigation }) => {
 
     return(
         <View style={{ backgroundColor: "white", height: "100%" }}>
-            <Header 
+            {!props.isLoading && <Header 
                 activeTab={activeTab} 
                 setActiveTab={setActiveTab}
                 restaurantImage={restaurantImage}
                 searchedRestaurant={searchedRestaurant}
                 restaurantDesc={restaurantDesc}
-            />
+            />}
             {activeTab === "home" && (
                 <View style={{ display: "flex", flexDirection: "row" }}>
                     <LeftNavigation
                         selectedMenus={selectedMenus}
                         setSelectedCategory={setSelectedCategory}
-                        setFiltered={setFiltered}
-                        setMenuItem={setMenuItem}
                         selectedCategory={selectedCategory}
-                        foodItem={foodItem}
                         menuData={menuData}
                         setMenuIndex={setMenuIndex}
                         setCheckedPrice={setCheckedPrice}
+                        foodItem={props.foodItem}
                     />
                     <FoodList
                         filtered={filtered}
                         checkedPrice={checkedPrice}
                         restaurantColor={restaurantColor}
-                        navigation={navigation}
+                        navigation={props.navigation}
                         restaurantId={restaurantId}
                         searchedRestaurant={searchedRestaurant}
                         restaurantDesc={restaurantDesc}
@@ -284,13 +219,28 @@ const MenuEdit = ({ route, navigation }) => {
                     />
                 </View>
             )}
-            {activeTab === "snapshot" && <Billing route={route} navigation={navigation}/>}
+            {activeTab === "snapshot" && <Billing route={route} navigation={props.navigation}/>}
             {/* {activeTab === "qrmenu" && <QRMenus route={route} navigation={navigation}/>} */}
             {activeTab === "qrmenu" && <Text>There will be QRMenu</Text>}
-            {activeTab === "notifications" && <Notifications route={route} navigation={navigation}/>}
-            {activeTab === "settings" && <Settings navigation={navigation}/>}
+            {activeTab === "notifications" && <Notifications route={route} navigation={props.navigation}/>}
+            {activeTab === "settings" && <Settings navigation={props.navigation}/>}
         </View>
     )
 }
 
-export default MenuEdit
+const mapStateToProps = (state) => {
+    if(state === undefined)
+        return {
+            isLoading: true
+        }
+
+    return {
+        isLoading: false,
+        menuItem: state.menuItem,
+        foodItem: state.foodItem
+    }
+}
+
+const MenuEditContainer = connect(mapStateToProps, { setFoodItem })(MenuEdit)
+
+export default MenuEditContainer

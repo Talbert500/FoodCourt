@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import RadioForm from 'react-native-simple-radio-button';
+import { useDispatch } from 'react-redux';
 
-const LeftNavigation = ({ selectedMenus, setSelectedCategory, setFiltered, 
-                          setMenuItem, selectedCategory, 
-                          foodItem, menuData, setMenuIndex,
-                          setCheckedPrice }) => 
+import { setFiltered, setMenuItem } from './../../../redux/action';
+
+const LeftNavigation = ({ selectedMenus, setSelectedCategory, 
+                          selectedCategory, 
+                          menuData, setMenuIndex,
+                          setCheckedPrice, foodItem }) => 
 {
+
+    const dispatch = useDispatch();
 
     const [setMenu, setSetMenu] = useState('');
     const [menusDesc, setmenusDesc] = useState('')
@@ -33,12 +38,12 @@ const LeftNavigation = ({ selectedMenus, setSelectedCategory, setFiltered,
 
                 return cateDate.indexOf(cate) > -1;
             });
-            setFiltered(newData);
+            dispatch(setFiltered(newData))
         } else {
             setSetMenu("")
-            setMenuItem(foodItem)
+            dispatch(setMenuItem(foodItem))
             setmenusDesc("")
-            setFiltered(null)
+            dispatch(setFiltered(null))
             setSelectedCategory(null)
             setmenusDesc("")
         }
@@ -55,17 +60,17 @@ const LeftNavigation = ({ selectedMenus, setSelectedCategory, setFiltered,
 
                 return cateDate.indexOf(cate) > -1;
             });
-            setFiltered(newData);
+            dispatch(setFiltered(newData));
 
         } else {
             setSetCate("")
-            setFiltered(menuData)
+            dispatch(setFiltered(menuData));
         }
     }
 
     const renderMenus = ({ item, index }) => {
         return (
-            <TouchableOpacity onPress={() => (setMenuItem(foodItem), setFiltered(menuData), onMenuClick(index, item.desc, item.time), setMenuIndex(index))}>
+            <TouchableOpacity onPress={() => (dispatch(setMenuItem(foodItem)), setFiltered(menuData), onMenuClick(index, item.desc, item.time), setMenuIndex(index))}>
                 <View>
                     <Text style={{ marginBottom: "5px", fontWeight: 600, color: (item.desc === setMenu) ? "#F6AE2D" : "black" }}>{item.desc} </Text>
                 </View>

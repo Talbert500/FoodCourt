@@ -2,14 +2,44 @@ import { SEARCHED_RESTAURANT } from "./reducer";
 import { CLICKED_FOOD_ITEM_ID } from './reducer';
 import { SEARCHED_RESTAURANT_IMAGE } from './reducer';
 import { SET_FOOD_IMAGE } from './reducer';
-import { NEW_RESTAURANT } from './reducer'
-import { RESTAURANT_INFO } from './reducer'
-import {SET_USER_PROPS} from './reducer'
+import { NEW_RESTAURANT } from './reducer';
+import { RESTAURANT_INFO } from './reducer';
+import {SET_USER_PROPS} from './reducer';
+import {SET_FOOD_ITEM} from './reducer';
+import {SET_FILTERED} from './reducer';
+import {SET_MENU_ITEM} from './reducer';
+import {SET_LOADING} from './reducer';
 
 
+export const setLoading = (value) => {
+    return {
+        type: SET_LOADING,
+        payload: value
+    }
+}
 
+export const setMenuItem = (value) => {
+    return {
+        type: SET_MENU_ITEM,
+        payload: value
+    }
+}
 
-export const setUserProps = (user_Id, userName,user_Photo)=>{
+export const setFiltered = (value) => {
+    return {
+        type: SET_FILTERED,
+        payload: value
+    }
+}
+
+export const setFoodItem = (value) => {
+    return {
+        type: SET_FOOD_ITEM,
+        payload: value
+    }
+}
+
+export const setUserProps = (user_Id, userName,user_Photo) => {
     return{
         type: SET_USER_PROPS,
         userId: user_Id,

@@ -5,6 +5,10 @@ export const SEARCHED_RESTAURANT_IMAGE = 'SEARCHED_RESTAURANT_IMAGE';
 export const NEW_RESTAURANT = 'NEW_RESTAURANT';
 export const RESTAURANT_INFO = 'RESTAURANT_INFO';
 export const SET_USER_PROPS = 'SET_USER_PROPS';
+export const SET_FOOD_ITEM = 'SET_FOOD_ITEM';
+export const SET_FILTERED = 'SET_FILTERED';
+export const SET_MENU_ITEM = 'SET_MENU_ITEM';
+export const SET_LOADING = 'SET_LOADING';
 
 const initialState = {
     firstName: '',
@@ -31,14 +35,18 @@ const initialState = {
     eatagain: '',
     userCredential_id: "",
 
+    foodItem: null,
+    filtered: null,
+    menuItem: null,
+
 
     adminEmail: "",
 
     userId:"",
     username: "",
-    userPhoto:null,
+    userPhoto: null,
 
-
+    isLoading: false,
 }
 
 const reducer = (state = initialState, action) => {
@@ -99,8 +107,28 @@ const reducer = (state = initialState, action) => {
                 restaurantImage: action.image
 
             }
+        case SET_FOOD_ITEM:
+            return {
+                ...state,
+                foodItem: [...state.foodItem, action.payload]
+            }
+        case SET_FILTERED:
+            return {
+                ...state,
+                filtered: action.payload
+            }
+        case SET_MENU_ITEM:
+            return {
+                ...state,
+                menuItem: action.payload
+            }
+        case SET_LOADING:
+            return {
+                ...state,
+                isLoading: action.payload
+            }
     }
 }
 
 
-export default (reducer)
+export default reducer;

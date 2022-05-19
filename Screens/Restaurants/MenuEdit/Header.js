@@ -1,8 +1,10 @@
 import React from 'react';
 import { View, Image, Text } from 'react-native';
+import { useSelector } from 'react-redux';
 
 import testImage from './../../../assets/guestphoto.jpg'
 import reviewOutline from './../../../assets/review_outline.png'
+import { getMenuItem } from '../../../redux/selector'
 
 const Header = ({ setActiveTab, activeTab, restaurantImage, searchedRestaurant, restaurantDesc }) => {
 
