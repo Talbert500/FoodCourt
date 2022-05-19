@@ -1,25 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList } from 'react-native';
 import { onAuthStateChanged } from 'firebase/auth';
-import { db, auth, database, storage } from '../../firebase-config';
+import { db, auth, database, storage } from '../../../firebase-config';
 import { ref, onValue} from 'firebase/database';
 import { getDoc, doc } from 'firebase/firestore';
 import { getDownloadURL, ref as tef } from 'firebase/storage';
-import { RadioButton } from 'react-native-paper';
-import RadioForm from 'react-native-simple-radio-button';
 
-import Header from './MenuEdit/Header';
-import Billing from './../web/Billing';
-import QRMenus from './../QRMenus';
-import Notifications from './../Restaurants/Notifications';
-import Settings from './../Restaurants/Settings';
-import Card from '../../Components/Card'
+import Header from './Header';
+import Billing from '../../web/Billing';
+import QRMenus from '../../QRMenus';
+import Notifications from '../Notifications';
+import Settings from '../Settings';
+import Card from '../../../Components/Card'
+import LeftNavigation from './LeftNavigation'
 
-import { setSearchedRestaurantImage, setSearchedRestaurant } from '../../redux/action';
-import { QRapiKey } from '../../config.js';
-import { styles } from '../../styles'
+import { setSearchedRestaurantImage, setSearchedRestaurant } from '../../../redux/action';
+import { QRapiKey } from '../../../config.js';
 
 const MenuEdit = ({ route, navigation }) => {
 
@@ -41,7 +39,6 @@ const MenuEdit = ({ route, navigation }) => {
     const [restaurant_website, setWebsite] = useState('')
     const [rating, setRating] = useState([]);
     const [menuIndex, setMenuIndex] = useState(0);
-    const [setMenu, setSetMenu] = useState('');
 
     const [loginSession, setLoginSession] = useState('')
     const [accessToken, setAccessToken] = useState('')
@@ -56,8 +53,6 @@ const MenuEdit = ({ route, navigation }) => {
     const [selectedMenus, setSelectedMenus] = useState([]);
     const [filterCatgory, setFilteredCategory] = useState('')
     const [userName, setUserName] = useState('')
-    const [menusDesc, setmenusDesc] = useState('')
-    const [setCate, setSetCate] = useState('');
 
     const [loadingbio, setLoadingBio] = useState(true);
     const [loadingPic, setLoadingPic] = useState(true);
@@ -254,86 +249,6 @@ const MenuEdit = ({ route, navigation }) => {
         getRestaurant();
     }, [])
 
-    function onMenuClick(index, clicked, description) {
-        setmenusDesc(description)
-        // setSetCate(clicked)
-        if (setMenu != clicked) {
-
-            //setting categories
-            setSelectedCategory(selectedMenus[index].categories)
-
-            // Object.values(foodItem.categories).map((food) => {
-            //     setSelectedMenus((food) => [...food, foodData]);
-            // })
-
-            //setting food
-            setSetMenu(clicked)
-            const newData = foodItem.filter((item) => {
-                const cateDate = item.menus ?
-                    item.menus.toUpperCase() : ''.toUpperCase()
-                const cate = clicked.toUpperCase();
-
-                return cateDate.indexOf(cate) > -1;
-            });
-            setFiltered(newData);
-        } else {
-            setSetMenu("")
-            setMenuItem(foodItem)
-            setmenusDesc("")
-            setFiltered(null)
-            setSelectedCategory(null)
-            setmenusDesc("")
-        }
-
-
-    }
-
-    function onCategoryClick(clicked) {
-        // setSetCate(clicked)
-        if (setCate != clicked) {
-
-            setSetCate(clicked)
-            const newData = menuData.filter((item) => {
-                const cateDate = item.category ?
-                    item.category.toUpperCase() : ''.toUpperCase()
-                const cate = clicked.toUpperCase();
-
-                return cateDate.indexOf(cate) > -1;
-            });
-            setFiltered(newData);
-
-        } else {
-            setSetCate("")
-            setFiltered(menuData)
-        }
-
-
-    }
-
-    const renderMenus = ({ item, index }) => {
-        return (
-            <TouchableOpacity onPress={() => (setMenuItem(foodItem), setFiltered(menuData), onMenuClick(index, item.desc, item.time), setMenuIndex(index))}>
-                <View>
-                    <Text style={{ marginBottom: "5px", fontWeight: 600, color: (item.desc === setMenu) ? "#F6AE2D" : "black" }}>{item.desc} </Text>
-                </View>
-            </TouchableOpacity >
-
-        )
-
-    }
-
-    const renderItem = ({ item, index }) => {
-        return (
-            <TouchableOpacity onPress={() => (setFiltered(menuData), onCategoryClick(item))}>
-                <View>
-                    <Text style={{ marginBottom: "5px", fontWeight: 600, color: (item === setCate) ? "#F6AE2D" : "black" }}>{item} </Text>
-                </View>
-
-            </TouchableOpacity>
-        )
-
-    }
-
     const options = [
         { label: 'Any', value: 'any' },
         { label: 'Under $5', value: 'underFive' },
@@ -352,40 +267,17 @@ const MenuEdit = ({ route, navigation }) => {
             />
             {activeTab === "home" && (
                 <View style={{ display: "flex", flexDirection: "row" }}>
-                    <View style={{ marginTop: "75px" }}>
-                        <View style={{ marginLeft: "136px", marginRight: "20px", borderBottom: "1px solid #A7A7A7", width: "200px", paddingBottom: "10px" }}>
-                            <Text style={{ fontSize: "25px", fontWeight: "bold", marginTop: "10px", marginBottom: "10px" }}>Menus</Text>
-                            <FlatList
-                                showsHorizontalScrollIndicator={false}
-                                vertical
-                                data={selectedMenus}
-                                renderItem={renderMenus}
-                                initialNumToRender={10}
-                            />
-                        </View>
-                        <View style={{ marginLeft: "136px", marginRight: "20px", borderBottom: "1px solid #A7A7A7", width: "200px", paddingBottom: "10px" }}>
-                            <Text style={{ fontSize: "25px", fontWeight: "bold", marginTop: "10px", marginBottom: "10px" }}>Categories</Text>
-                            <FlatList
-                                showsHorizontalScrollIndicator={false}
-                                vertical
-                                data={selectedCategory}
-                                renderItem={renderItem}
-                                initialNumToRender={10}
-                            />
-                        </View>
-                        <View style={{ marginLeft: "136px", marginRight: "20px", borderBottom: "1px solid #A7A7A7", width: "200px", paddingBottom: "10px" }}>
-                            <Text style={{ fontSize: "25px", fontWeight: "bold", marginTop: "10px", marginBottom: "10px" }}>Price range</Text>
-                            <View>
-                                <RadioForm
-                                    radio_props={options}
-                                    initial={0}
-                                    onPress={(checkedPrice) => {
-                                        setCheckedPrice(checkedPrice);
-                                    }} 
-                                />
-                            </View>
-                        </View>
-                    </View>
+                    <LeftNavigation
+                        selectedMenus={selectedMenus}
+                        setSelectedCategory={setSelectedCategory}
+                        setFiltered={setFiltered}
+                        setMenuItem={setMenuItem}
+                        selectedCategory={selectedCategory}
+                        foodItem={foodItem}
+                        menuData={menuData}
+                        setMenuIndex={setMenuIndex}
+                        setCheckedPrice={setCheckedPrice}
+                    />
                     <View style={{ marginLeft: "10px" }}>
                         <FlatList
                             data={filtered}
