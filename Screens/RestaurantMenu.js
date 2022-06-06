@@ -6,7 +6,7 @@ import { ref, onValue, orderByValue, equalTo, query, limitToLast } from 'firebas
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { styles } from '../styles'
-import { setFoodItemId, setSearchedRestaurantImage, setSearchedRestaurant, setUserProps } from '../redux/action'
+import { setSearchedRestaurantImage, setSearchedRestaurant, setUserProps } from '../redux/action'
 import { storage } from '../firebase-config';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { uploadBytes, getDownloadURL, ref as tef } from 'firebase/storage';
@@ -221,7 +221,7 @@ const RestaurantMenu = ({ route, navigation }) => {
       setrestaurant_state(snapshot.data().restaurant_state)
       setrestaurant_zip(snapshot.data().restaurant_zip)
 
-      dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurant_address, restaurantPhone, restaurantId, restaurantColor))
+      // dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurant_address, restaurantPhone, restaurantId, restaurantColor))
       getMenus();
       getImage();
     } else {
@@ -457,13 +457,13 @@ const RestaurantMenu = ({ route, navigation }) => {
 
 
               <Card
-                onPress={() => {
-                  dispatch(setFoodItemId(item.food_id, item.food, item.price, item.description, item.upvotes, item.restaurant)), navigation.navigate("Food", {
-                    restId: restId,
-                    foodId: item.food_id,
-                    restName: item.restaurant,
-                  })
-                }}
+                // onPress={() => {
+                //   dispatch(setFoodItemId(item.food_id, item.food, item.price, item.description, item.upvotes, item.restaurant)), navigation.navigate("Food", {
+                //     restId: restId,
+                //     foodId: item.food_id,
+                //     restName: item.restaurant,
+                //   })
+                // }}
                 restaurant={item.restaurant}
                 ranking={index + item.upvotes}
                 food={item.food}

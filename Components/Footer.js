@@ -15,12 +15,12 @@ function Footer() {
         <View style={{ backgroundColor: "#f6ae2d", maxHeight: 300, flex: 1, height: 200, padding: 20,justifyContent:'center' }}>
             <View style={{maxWidth:800,width:800, alignSelf:'center', alignItems:"center"}}>
                 <Text style={[styles.footerText, { fontWeight: "700", marginVertical: 20, marginRight:'auto', fontFamily:"Primary"}]}>
-                    2022 Feiri All rights reserved.
+                    2022 FoodCourt All rights reserved.
                 </Text>
                 <View style={{ flexDirection: 'row' }}>
                     <View style={{ margin: 10, marginHorizontal:10  }}>
                         <Text style={[styles.footerText, { fontWeight: "700", marginVertical: 5 , fontFamily:"Primary"}]}>Get to know us</Text>
-                        <Text style={styles.footerText}>About Feiri</Text>
+                        <Text style={styles.footerText}>About FoodCourt</Text>
                         <Text style={styles.footerText}>Investor relations</Text>
                     </View>
 

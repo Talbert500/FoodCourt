@@ -12,7 +12,7 @@ import { storage, provider, db, auth } from '../../firebase-config';
 //import Icon from 'react-native-vector-icons/Feather'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Link } from '@react-navigation/native';
-import { setSearchedRestaurant, setFoodItemId, setUserProps } from '../../redux/action'
+import { setSearchedRestaurant, setUserProps } from '../../redux/action'
 import { useLinkTo } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Divider } from 'react-native-elements/dist/divider/Divider';
@@ -132,9 +132,9 @@ function FoodEdit({ route, navigation }) {
         setPrice(data.price)
         setUpvotes(data.upvotes)
         setDescription(data.description)
-        dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurantAddress, restaurantPhone, restaurantId, restaurantColor))
+        // dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurantAddress, restaurantPhone, restaurantId, restaurantColor))
 
-        dispatch(setFoodItemId(foodId, data.food, data.price, data.description, data.upvotes, data.restaurant, data.eatagain))
+        // dispatch(setFoodItemId(foodId, data.food, data.price, data.description, data.upvotes, data.restaurant, data.eatagain))
       }
     })
   }
@@ -556,7 +556,7 @@ function FoodEdit({ route, navigation }) {
                   height: 70,
                   resizeMode: "contain",
                 }}
-                source={require('../../assets/logo_name_simple.png')} />
+                source={require('../../assets/splash.png')} />
             </TouchableOpacity>
 
             {/* <View style={{ flexDirection: "row", marginLeft: 'auto' }}>

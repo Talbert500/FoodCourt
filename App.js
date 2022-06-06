@@ -3,7 +3,6 @@ import { Platform, View, Text } from 'react-native'
 
 import { Provider } from 'react-redux';
 import store from './redux/store'
-import HomeScreen from './Screens/HomeScreen';
 import RestaurantScreen from './Screens/RestaurantScreen';
 import FoodAdd from './Screens/FoodAdd';
 import RestaurantMenu from './Screens/RestaurantMenu';
@@ -123,7 +122,6 @@ export default function App() {
 
   return (
     <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>
-      <View><Text style={{ color: 'red', fontSize: 10 }}> Unstable Alpha v5.1\\Notifications</Text></View>
       <Provider store={store}>
         <Stack.Navigator initialRouteName="Home">
         <Stack.Screen 
@@ -199,14 +197,6 @@ export default function App() {
             }}
           />
           <Stack.Screen
-            name="RestaurantHome"
-            component={RestaurantHome}
-            options={{
-              headerShown: false,
-
-            }}
-          />
-          <Stack.Screen
             name="Settings"
             component={Settings}
             options={{
@@ -267,7 +257,7 @@ export default function App() {
           />
           <Stack.Screen
             name="Home"
-            component={HomeScreen}
+            component={RestaurantHome}
             options={{
               headerShown: false
             }}

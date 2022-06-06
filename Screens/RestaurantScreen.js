@@ -8,10 +8,9 @@ import { collection, getDoc, doc } from 'firebase/firestore'
 import { storage } from '../firebase-config';
 import { useEffect, useState } from 'react';
 import Card from '../Components/Card'
-import { setFoodItemId } from '../redux/action'
 import { uploadBytes, getDownloadURL, ref as tef, list } from 'firebase/storage';
 import { BlurView } from 'expo-blur';
-import { setSearchedRestaurantImage, setSearchedRestaurant, setNewRestaurant } from '../redux/action'
+import { setSearchedRestaurantImage, setSearchedRestaurant } from '../redux/action'
 import { auth, database, db } from '../firebase-config'
 import { Link } from '@react-navigation/native';
 import { onAuthStateChanged, signOut } from 'firebase/auth'
@@ -56,7 +55,7 @@ function RestaurantScreen({ route, navigation }) {
         console.log(restaurantId)
         console.log(restaurantColor)
         console.log(searchedRestaurant)
-        dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurant_address, restaurantPhone, restaurantId, restaurantColor))
+        // dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurant_address, restaurantPhone, restaurantId, restaurantColor))
     }
 
     const setRestaurant = async () => {
@@ -104,7 +103,7 @@ function RestaurantScreen({ route, navigation }) {
         })
     }
     useEffect(() => {
-        dispatch(setSearchedRestaurant(null, null, null, null, null, null))
+        // dispatch(setSearchedRestaurant(null, null, null, null, null, null))
         setLoading(true);
         setRatingRefreshing(true);
         setRestaurant();
@@ -136,8 +135,8 @@ function RestaurantScreen({ route, navigation }) {
     }
     const userSignOut = () => {
         signOut(auth).then(() => {
-            dispatch(setSearchedRestaurant(null, null, null, null, null, null))
-            dispatch(setNewRestaurant(null, null, null, null, null))
+            // dispatch(setSearchedRestaurant(null, null, null, null, null, null))
+            // dispatch(setNewRestaurant(null, null, null, null, null))
             if (Platform.OS === 'web') {
                 navigation.navigate("RestaurantHome")
             } else {
@@ -189,7 +188,7 @@ function RestaurantScreen({ route, navigation }) {
                                 resizeMode: "contain",
                                 opacity: Platform.OS === 'web' ? 1 : 0
                             }}
-                            source={require('../assets/logo_name_simple.png')} />
+                            source={require('../assets/splash.png')} />
                     </TouchableOpacity>
                 </View>
             ) : (<></>)
@@ -291,7 +290,7 @@ function RestaurantScreen({ route, navigation }) {
                                         ranking={item.index}
                                         food={item.food}
                                         percent={item.upvotes > 0 ? (item.eatagain * 100 / item.upvotes) : (item.upvotes)}
-                                        onPress={() => { dispatch(setFoodItemId(item.food_id, item.food, item.price, item.description, item.upvotes, item.restaurant, item.eatagain)), navigation.navigate("Food") }}
+                                        // onPress={() => { dispatch(setFoodItemId(item.food_id, item.food, item.price, item.description, item.upvotes, item.restaurant, item.eatagain)), navigation.navigate("Food") }}
                                         upvotes={item.upvotes}
                                     />
                                 }

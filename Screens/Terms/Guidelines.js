@@ -6,7 +6,7 @@ import { ref, onValue, orderByValue, equalTo, push, update, set, off } from 'fir
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { styles } from '../../styles'
-import { setFoodItemId, setSearchedRestaurantImage, setSearchedRestaurant, setUserProps } from '../../redux/action'
+import { setSearchedRestaurantImage, setSearchedRestaurant, setUserProps } from '../../redux/action'
 import { storage } from '../../firebase-config';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { uploadBytes, getDownloadURL, ref as tef } from 'firebase/storage';
@@ -131,7 +131,7 @@ const MenuWeb = ({ route, navigation }) => {
     function rateHandler() {
         if (loginSession !== restaurantId) {
             if (loggedin) {
-                dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurant_address, restaurantPhone, restaurantId, restaurantColor))
+                // dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurant_address, restaurantPhone, restaurantId, restaurantColor))
                 navigation.navigate("RatingRestaurant", { restaurantId: restaurantId, userId: loginSession })
             } else {
                 //googleSignIn();

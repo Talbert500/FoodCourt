@@ -1,24 +1,21 @@
 
-import { ImageBackground, Alert, RefreshControl, ScrollView, Dimensions, TouchableWithoutFeedback, Keyboard, Platform, KeyboardAvoidingView, ActivityIndicator, Text, View, SafeAreaView, FlatList, TouchableOpacity, Image } from 'react-native';
+import { ImageBackground, Alert, RefreshControl, Dimensions, Platform, ActivityIndicator, Text, View, FlatList, TouchableOpacity, Image } from 'react-native';
 import { useState, useEffect } from 'react';
-import { Button, Input } from 'react-native-elements'
+import { Button } from 'react-native-elements'
 import { database } from '../firebase-config'
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { onAuthStateChanged } from 'firebase/auth';
 import { ref, update, onValue, get, push } from 'firebase/database'
 import { styles } from '../styles'
-import { ref as tef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref as tef, getDownloadURL } from 'firebase/storage';
 import { storage, provider, db, auth } from '../firebase-config';
 //import Icon from 'react-native-vector-icons/Feather'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { Link } from '@react-navigation/native';
 import { setSearchedRestaurant, setFoodItemId, setUserProps } from '../redux/action'
 import { useLinkTo } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Divider } from 'react-native-elements/dist/divider/Divider';
 import { Icon } from 'react-native-elements'
-import { setDoc, getDoc, doc } from 'firebase/firestore'
-import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { getDoc, doc } from 'firebase/firestore'
 import { useFonts } from "@use-expo/font";
 
 
@@ -198,8 +195,8 @@ function FoodScreen({ route, navigation }) {
         setCategory(data.category)
         setPrice(data.price)
         setDescription(data.description)
-        dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurantAddress, restaurantPhone, restaurantId, restaurantColor))
-        dispatch(setFoodItemId(foodId, data.food, data.price, data.description, data.upvotes, data.restaurant, data.eatagain))
+        // dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurantAddress, restaurantPhone, restaurantId, restaurantColor))
+        // dispatch(setFoodItemId(foodId, data.food, data.price, data.description, data.upvotes, data.restaurant, data.eatagain))
       }
     })
   }
@@ -548,17 +545,17 @@ function FoodScreen({ route, navigation }) {
                 {(loggedIn) ?
                   <View>
                     {(restId !== userId) ?
-                      <Button onPress={() => { navigation.navigate("RatingFood", { restId: restId, foodId: foodId, restName: restName }) }} buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 300 }]} titleStyle={styles.buttonTitle} title="Rate my Food" />
+                      <Button onPress={() => { navigation.navigate("RatingFood", { restId: restId, foodId: foodId, restName: restName }) }} buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 300 }]} titleStyle={styles.buttonTitle} title="FoodCourt" />
                       :
-                      <Button buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 300, opacity: 0.5 }]} titleStyle={styles.buttonTitle} title="Rate my Food" />
+                      <Button buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 300, opacity: 0.5 }]} titleStyle={styles.buttonTitle} title="FoodCourt" />
                     }
                   </View>
                   :
                   <View>
                     {(restId !== userId) ?
-                      <Button onPress={() => navigation.navigate("Login")} buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 300 }]} titleStyle={styles.buttonTitle} title="Rate my Food" />
+                      <Button onPress={() => navigation.navigate("Login")} buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 300 }]} titleStyle={styles.buttonTitle} title="FoodCourt" />
                       :
-                      <Button onPress={() => navigation.navigate("Login")} buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 300 }]} titleStyle={styles.buttonTitle} title="Rate my Food" />
+                      <Button onPress={() => navigation.navigate("Login")} buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 300 }]} titleStyle={styles.buttonTitle} title="FoodCourt" />
                     }
                   </View>
                 }
@@ -606,17 +603,17 @@ function FoodScreen({ route, navigation }) {
               {(loggedIn) ?
                 <View>
                   {(restId !== userId) ?
-                    <Button onPress={() => { navigation.navigate("RatingFood", { restId: restId, foodId: foodId, restName: restName }) }} buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 300 }]} titleStyle={styles.buttonTitle} title="Rate my Food" />
+                    <Button onPress={() => { navigation.navigate("RatingFood", { restId: restId, foodId: foodId, restName: restName }) }} buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 300 }]} titleStyle={styles.buttonTitle} title="FoodCourt" />
                     :
-                    <Button buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 300, opacity: 0.5 }]} titleStyle={styles.buttonTitle} title="Rate my Food" />
+                    <Button buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 300, opacity: 0.5 }]} titleStyle={styles.buttonTitle} title="FoodCourt" />
                   }
                 </View>
                 :
                 <View>
                   {(restId !== userId) ?
-                    <Button onPress={() => navigation.navigate("Login")} buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 300 }]} titleStyle={styles.buttonTitle} title="Rate my Food" />
+                    <Button onPress={() => navigation.navigate("Login")} buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 300 }]} titleStyle={styles.buttonTitle} title="FoodCourt" />
                     :
-                    <Button onPress={() => navigation.navigate("Login")} buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 300 }]} titleStyle={styles.buttonTitle} title="Rate my Food" />
+                    <Button onPress={() => navigation.navigate("Login")} buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 300 }]} titleStyle={styles.buttonTitle} title="FoodCourt" />
                   }
                 </View>
               }

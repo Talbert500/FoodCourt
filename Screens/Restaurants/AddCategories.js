@@ -132,7 +132,6 @@ function AddCategories({ navigation }) {
 
     const deleteItem =(category)=>{
         setCategories(categories.filter(item => item.category !== category))
-
     }
 
 
@@ -149,7 +148,7 @@ function AddCategories({ navigation }) {
                             height: 50,
                             resizeMode: "contain",
                         }}
-                        source={require('../../assets/logo_name_simple.png')} />
+                        source={require('../../assets/splash.png')} />
                 </TouchableOpacity>
                 <Text style={{ fontFamily: 'Primary', alignSelf: "center", fontSize: Platform.OS === 'web' ? 17 : 14, fontWeight: "600" }}>
                     for restaurants

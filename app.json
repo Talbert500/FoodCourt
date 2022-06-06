@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Rate My Food",
-    "slug": "Rate My Food",
+    "name": "FoodCourt",
+    "slug": "FoodCourt",
     "privacy": "public",
     "description": "Interactive Menu",
     "version": "1.0.0",

@@ -1,5 +1,6 @@
 
-import { Image, StyleSheet, TextInput, Text, View, SafeAreaView, FlatList, TouchableOpacity, Button } from 'react-native';
+import { Image, StyleSheet, TextInput, Text, View, SafeAreaView, FlatList, TouchableOpacity } from 'react-native';
+import { Button } from 'react-native-elements'
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { styles } from '../styles'
@@ -21,16 +22,24 @@ function Card(props) {
     const [defaultRating, setDefaultRating] = useState(props.overall);
 
     return (
-        <TouchableOpacity onPress={props.onPress} style={[styles.shadowProp, { justifyContent: 'space-between', margin: 5, padding: 10, backgroundColor: 'white', flexDirection: 'row' }]}>
+        <TouchableOpacity onPress={props.onPress} style={{ margin: 5, backgroundColor: 'white', flexDirection: 'row', width: "100%", height: "150px", borderBottom: "1px solid #A7A7A7" }}>
             <View style={{marginRight:20}}>
-                <Image style={{width:100,height:100,resizeMode:'cover'}}
+                <Image style={{width:130,height:130,resizeMode:'cover'}}
                     source={{uri: props.imageUrl}}
                     />
             </View>
-            <View style={{ flex: 1, maxWidth: "80%", alignContent: 'flex-start' }}>
-                <Text style={[styles.subHeaderText, { fontSize: 27,fontFamily:'Bold' }]} >
-                    {props.food}
+            <View style={{ flex: 1, maxWidth: "100%", alignContent: 'flex-start' }}>
+                <Text>
+                    {props.category} | {props.restaurant}
                 </Text>
+                <View style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                    <Text style={[styles.subHeaderText, { fontSize: 27,fontFamily:'Bold' }]} >
+                        {props.food}
+                    </Text>
+                    <Text style={{ fontWeight: "bold", marginLeft: "30px" }}>
+                        {props.price}
+                    </Text>
+                </View>
                 <View style={{flexDirection:'row',alignItems:'center'}}> 
                     <View style={{ justifyContent: 'left', flexDirection: 'row' }}>
                         {maxRating.map((item, key) => {
@@ -53,28 +62,16 @@ function Card(props) {
                             );
                         })}
                     </View>
-                    <Text style={{fontFamily:'Primary'}}> {props.ratingCount} Reviews</Text>
+                    <Text style={{fontFamily:'Primary'}}> {props.ratingCount ? props.ratingCount : "0"} Reviews</Text>
                 </View>
-                <Text>${props.price} | {props.category}</Text>
-
-                <Text style={[styles.subHeaderText, {marginTop:5, fontSize: 14, maxWidth: 400,fontWeight:'400',fontFamily:'Primary' }]} numberOfLines={2}>{props.description}</Text>
-                
-                <Text style={[styles.subHeaderText, {fontFamily:'Primary', fontSize: 13, alignSelf: 'flex-end' }]}>
-                    click for more
-                </Text>
-            </View>
-
-            <View style={{ marginLeft: "auto" }}>
-                <View style={[styles.shadowProp,{backgroundColor:'white',borderRadius:50,padding:7}]}>
-                {/* <TouchableOpacity style={{alignSelf:'center'}} onPress={() => console.log(`upvoted ${props.food} by ${props.restaurant}`)}> */}
-                <Icon style={{ alignSelf: 'center',justifyContent:'center' }} size={25} type="ant-design" color={props.upvoteColor} name="hearto" />
-                {/* </TouchableOpacity> */}
+                <View style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                    <Text style={[styles.subHeaderText, {marginTop:5, fontSize: 14, maxWidth: 400,fontWeight:'400',fontFamily:'Primary' }]} numberOfLines={2}>{props.description}</Text>
+                    <View style={{ display: "flex", flexDirection: "row", alignItems: "center", marginRight: "5px"}}>
+                        <Button buttonStyle={{ backgroundColor: '#F6AE2D', borderRadius: "100px", width: "120px", height: "40px", marginRight: "15px" }} buttonTitle={{ fontFamily: 'Bold', fontSize: "20" }} title="Edit" />
+                        <Button onPress={() => deleteFood(item.food_id)} buttonStyle={{ backgroundColor: '#F6482D', borderRadius: "100px", width: "40px", height: "40px" }} buttonTitle={{ fontFamily: 'Bold', fontSize: "20" }} title="X" />
+                    </View>
                 </View>
-                <Text style={[styles.subHeaderText, { fontSize: 10, alignSelf: 'center',marginTop:5 }]}>
-                    {props.upvotes}
-                </Text>
             </View>
-
         </TouchableOpacity>
     )
 

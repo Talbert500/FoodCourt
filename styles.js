@@ -14,13 +14,29 @@ export default function Fonts() {
 
 }
 
-export const styles = StyleSheet.create(
-
-  {
-containerColor: {
+export const styles = StyleSheet.create({
+  selectedTextStyle: {
+      fontSize: 16
+  },
+  placeholderStyle: {
+    fontSize: 16,
+    color: "#7A7A7A"
+  },
+  dropdown: {
+      width: "180px",
+      height: "40px",
+      borderColor: '#C3C3C3',
+      backgroundColor: "white",
+      borderRadius: "5px",
+      paddingLeft: "10px",
+      paddingRight: "10px",
+      marginTop: "5px",
+      borderWidth: 1,
+  },
+  containerColor: {
       backgroundColor: 'white'
     },
-categories: {
+  categories: {
       flex: 1,
       alignItems: "center",
       backgroundColor: 'white',
@@ -61,7 +77,7 @@ categories: {
     },
     subHeaderText: {
       fontWeight: "bold",
-      fontSize: 30,
+      fontSize: 40,
     },
     bottomContainer: {
 
@@ -114,9 +130,7 @@ categories: {
       borderRadius: 10,
       borderBottomWidth: 0,
       marginBottom: -20
-
     },
-
     search: {
       margin: -10,
       maxHeight: 150,
@@ -124,10 +138,8 @@ categories: {
       alignItems: 'center'
 
     },
-    inputContainer: {
+    oldInputContainer: {
       borderRadius: 10,
-      borderWidth: 1,
-      borderColor: "white",
       width: '100%',
       backgroundColor: "white",
       shadowRadius: 2,
@@ -136,7 +148,13 @@ categories: {
       elevation: 2,
       marginVertical: 15,
       justifyContent: 'center'
-
+    },
+    inputContainer: {
+      backgroundColor: '#F0F0F0',
+      paddingHorizontal: 15,
+      paddingVertical: 10,
+      borderRadius: 5,
+      marginTop: 5,
     },
     input: {
       borderBottomWidth: 0,
@@ -154,16 +172,18 @@ categories: {
       marginTop: 40,
     },
     button: {
-      backgroundColor: "#f6ae2d",
+      backgroundColor: "#F6AE2D",
       shadowColor: '#171717',
       shadowOffset: { width: 1, height: 2 },
       shadowOpacity: 0.2,
       shadowRadius: 3,
-      borderRadius: 5,
+      borderRadius: "10px",
+      height: "40px",
+      width: "200px",
       margin: 10,
-      padding: 12,
-      justifyContent:'center'
-    },
+      padding: 5,
+      textAlign: "center",
+  },
     buttonOutline: {
       backgroundColor: 'white',
       borderColor: '#f6ae2d',

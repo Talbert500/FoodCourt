@@ -489,7 +489,7 @@ function RatingFood({ route, navigation }) {
                     />
                 </View>
                 <View style={{ width: '100%', backgroundColor: 'white', alignSelf: 'center', padding: 15, margin: 20, borderRadius: 5, maxWidth: 650 }}>
-                    <Text style={{ fontSize: 14, margin: 5, textAlign: "center", fontWeight: 'Primary' }}>By clicking the "Submit" button, I acknowledge that I have read and agreed to the Feiri Site Guidelines, Terms of Use, and Privacy Policy. Submitted data becomes the property of feiri.app. IP addresses are logged.</Text>
+                    <Text style={{ fontSize: 14, margin: 5, textAlign: "center", fontWeight: 'Primary' }}>By clicking the "Submit" button, I acknowledge that I have read and agreed to the FoodCourt Site Guidelines, Terms of Use, and Privacy Policy. Submitted data becomes the property of FoodCourt.app. IP addresses are logged.</Text>
                     <Button onPress={AddFoodRating} buttonStyle={[styles.button, { marginHorizontal: 40, backgroundColor: '#F6AE2D', maxWidth: 200, alignSelf: 'center', width: 200 }]} titleStyle={styles.buttonTitle} title="Finish" />
                 </View >
             </View >

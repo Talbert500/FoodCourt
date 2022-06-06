@@ -6,7 +6,7 @@ import { ref, onValue, orderByValue, equalTo, push, update, set, get } from 'fir
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { styles } from '../../styles'
-import { setFoodItemId, setSearchedRestaurantImage, setSearchedRestaurant, setUserProps } from '../../redux/action'
+import { setSearchedRestaurantImage, setSearchedRestaurant, setUserProps } from '../../redux/action'
 import { storage } from '../../firebase-config';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { uploadBytes, getDownloadURL, ref as tef } from 'firebase/storage';
@@ -35,7 +35,8 @@ const MenuWeb = ({ route, navigation }) => {
         'Black': require('../../assets/fonts/proxima_nova_black.otf')
     });
 
-    const { restId } = route.params;
+     const { restId } = route.params;
+    //const restId = "2kkaW6jvTzWghR27IGuXckUUhul1"
 
     const [selectedCategory, setSelectedCategory] = useState([]);
     const [restaurant_city, setrestaurant_city] = useState("");
@@ -234,7 +235,7 @@ const MenuWeb = ({ route, navigation }) => {
             setrestaurant_city(snapshot.data().restaurant_city)
             setrestaurant_state(snapshot.data().restaurant_state)
             setrestaurant_zip(snapshot.data().restaurant_zip)
-            dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurant_address, restaurantPhone, restaurantId, restaurantColor))
+            // dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurant_address, restaurantPhone, restaurantId, restaurantColor))
             getMenus();
             getImage();
         } else {
@@ -411,7 +412,7 @@ const MenuWeb = ({ route, navigation }) => {
     function rateHandler() {
         if (loginSession !== restaurantId) {
             if (loggedin) {
-                dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurant_address, restaurantPhone, restaurantId, restaurantColor))
+                // dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurant_address, restaurantPhone, restaurantId, restaurantColor))
                 navigation.navigate("RatingRestaurant", { restaurantId: restaurantId, userId: loginSession })
             } else {
                 //googleSignIn();
@@ -650,8 +651,8 @@ const MenuWeb = ({ route, navigation }) => {
                                                             <Button title="Rate Us" buttonStyle={[styles.button, { backgroundColor: restaurantColor, maxWidth: 140, width: 140, height: 30 }]}
                                                                 titleStyle={styles.buttonTitle}
                                                                 onPress={() => {
-                                                                    navigation.navigate("RatingRestaurant", { restaurantId: restaurantId, userId: loginSession }),
-                                                                        dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurant_address, restaurantPhone, restaurantId, restaurantColor))
+                                                                    navigation.navigate("RatingRestaurant", { restaurantId: restaurantId, userId: loginSession })
+                                                                        // dispatch(setSearchedRestaurant(searchedRestaurant, restaurantDesc, restaurant_address, restaurantPhone, restaurantId, restaurantColor))
                                                                 }}
                                                             />
 
@@ -773,13 +774,13 @@ const MenuWeb = ({ route, navigation }) => {
                                     renderItem={({ item, index }) =>
                         
                                         <Card
-                                            onPress={() => {
-                                                dispatch(setFoodItemId(item.food_id, item.food, item.price, item.description, item.upvotes, item.restaurant)), navigation.navigate("Food", {
-                                                    restId: restId,
-                                                    foodId: item.food_id,
-                                                    restName: item.restaurant,
-                                                })
-                                            }}
+                                            // onPress={() => {
+                                            //     dispatch(setFoodItemId(item.food_id, item.food, item.price, item.description, item.upvotes, item.restaurant)), navigation.navigate("Food", {
+                                            //         restId: restId,
+                                            //         foodId: item.food_id,
+                                            //         restName: item.restaurant,
+                                            //     })
+                                            // }}
 
                                             ranking={index + item.upvotes}
                                             description={item.description}
@@ -817,7 +818,7 @@ const MenuWeb = ({ route, navigation }) => {
                                     resizeMode: "contain",
                                 }}
                                 source={require('../../assets/splash.png')} />
-                            <Text style={{ alignSelf: 'center' }}>Powered by Feiri</Text>
+                            <Text style={{ alignSelf: 'center' }}>Powered by FoodCourt</Text>
 
                             <Text style={[styles.subHeaderText, { alignSelf: 'center', fontSize: 25 }]}>Food that can talk ?</Text>
 
@@ -848,15 +849,15 @@ const MenuWeb = ({ route, navigation }) => {
                                     keyExtractor={(item, index) => index}
                                     renderItem={({ item, index }) =>
                                         <Card
-                                            onPress={() => {
-                                                dispatch(setFoodItemId(item.food_id, item.food, item.price, item.description, item.upvotes, item.restaurant)), setNewUser(false), navigation.navigate("Food", {
-                                                    restId: restId,
-                                                    foodId: item.food_id,
-                                                    restName: item.restaurant,
-                                                })
+                                            // onPress={() => {
+                                            //     dispatch(setFoodItemId(item.food_id, item.food, item.price, item.description, item.upvotes, item.restaurant)), setNewUser(false), navigation.navigate("Food", {
+                                            //         restId: restId,
+                                            //         foodId: item.food_id,
+                                            //         restName: item.restaurant,
+                                            //     })
 
 
-                                            }}
+                                            // }}
                                             description={item.description}
                                             price={item.price}
                                             food={item.food}
